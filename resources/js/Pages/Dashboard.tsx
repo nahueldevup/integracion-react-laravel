@@ -9,6 +9,8 @@ import {
     Shield,
     Settings,
     AlertTriangle,
+    Users,
+    Wallet,
 } from "lucide-react";
 import { router, Head } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
@@ -110,14 +112,14 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             <DashboardCard
                                 title="Realizar una venta"
-                                description="Hacer una venta al contado o un apartado"
+                                description="Hacer una venta al contado o a transferencia "
                                 icon={ShoppingBag}
                                 iconColor="text-warning"
                                 onClick={() => router.visit("/vender")}
                             />
 
                             <DashboardCard
-                                title="Ver inventario"
+                                title="Productos"
                                 description="Registrar, eliminar o actualizar detalles productos"
                                 icon={Package}
                                 iconColor="text-primary"
@@ -125,19 +127,19 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
                             />
 
                             <DashboardCard
-                                title="Escritorio"
-                                description="Resumen de todos los movimientos de su tienda"
-                                icon={LayoutGrid}
-                                iconColor="text-info"
-                                onClick={() => router.visit("/escritorio")}
+                                title="Clientes"
+                                description="Registrar, eliminar o actualizar detalles clientes"
+                                icon={Users}
+                                iconColor="text-primary"
+                                onClick={() => router.visit("/clientes")}
                             />
 
                             <DashboardCard
-                                title="Gráficas"
-                                description="Compare ventas, vea los productos más vendidos y mucho más"
-                                icon={BarChart3}
+                                title="Caja"
+                                description="Abrir, cerrar o actualizar detalles caja"
+                                icon={Wallet}
                                 iconColor="text-primary"
-                                onClick={() => router.visit("/graficas")}
+                                onClick={() => router.visit("/caja")}
                             />
 
                             <DashboardCard

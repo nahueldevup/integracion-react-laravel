@@ -14,9 +14,8 @@ import {
     User,
     CreditCard,
     Banknote,
-    Phone,
-    Save,
     UserPlus,
+    Check
 } from "lucide-react";
 
 // --- Interfaces ---
@@ -34,12 +33,14 @@ interface CartItem extends Product {
 }
 
 interface Customer {
+    id?: number; // El ID es opcional solo porque al crear uno nuevo en el front no lo tiene aún
     name: string;
     phone?: string;
 }
 
 interface Props {
     allProducts: Product[];
+    clients: Customer[]; // <--- Recibimos los clientes del controlador
 }
 
 // --- Componentes Auxiliares ---
@@ -137,24 +138,24 @@ function PaymentMethodButton({ icon: Icon, label, isSelected, onClick }: any) {
 }
 
 // --- Componente Principal ---
-export default function Vender({ allProducts }: Props) {
+export default function Vender({ allProducts, clients }: Props) { // <--- Destructuramos clients
     const { toast } = useToast();
 
     const [searchQuery, setSearchQuery] = useState("");
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
     const [showCheckout, setShowCheckout] = useState(false);
-    const [paymentMethod, setPaymentMethod] = useState("efectivo"); // ✅ CORREGIDO: usar "efectivo" en lugar de "cash"
+    const [paymentMethod, setPaymentMethod] = useState("efectivo");
     const [amountReceived, setAmountReceived] = useState("");
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     // Estados para clientes
-    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
-        null
-    );
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
     const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
+    const [customerSearch, setCustomerSearch] = useState(""); // Texto del input de búsqueda de clientes
 
+    // --- Lógica de Filtros ---
     const filteredProducts = allProducts.filter(
         (product) =>
             product.description
@@ -162,6 +163,11 @@ export default function Vender({ allProducts }: Props) {
                 .includes(searchQuery.toLowerCase()) ||
             (product.barcode && product.barcode.includes(searchQuery))
     );
+
+    // Filtrar clientes para el buscador
+    const filteredClients = customerSearch.trim() === "" 
+        ? [] 
+        : clients.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()));
 
     const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
     const total = subtotal;
@@ -183,6 +189,7 @@ export default function Vender({ allProducts }: Props) {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [cartItems.length, showCheckout]);
 
+    // --- Funciones del Carrito ---
     const addToCart = (product: Product) => {
         const existingItem = cartItems.find((item) => item.id === product.id);
         const price = Number(product.sale_price);
@@ -237,72 +244,71 @@ export default function Vender({ allProducts }: Props) {
         }
     };
 
+    // --- Funciones de Clientes ---
+    const handleSelectClient = (client: Customer) => {
+        setSelectedCustomer(client);
+        setCustomerSearch(""); // Limpiar búsqueda
+    };
+
+    const handleRemoveClient = () => {
+        setSelectedCustomer(null);
+    };
+
     const handleCreateCustomer = () => {
         if (!newCustomerName.trim()) return;
-        setSelectedCustomer({ name: newCustomerName, phone: newCustomerPhone });
+        // Creamos un objeto temporal, el ID se generará en el backend al guardar la venta
+        const tempClient = { name: newCustomerName, phone: newCustomerPhone };
+        setSelectedCustomer(tempClient);
         setIsCreatingCustomer(false);
         setNewCustomerName("");
         setNewCustomerPhone("");
     };
 
-    // ✅ CORREGIDO: Lógica de procesar venta
+    // --- Procesar Venta ---
     const completeSale = () => {
-        // Validar carrito no vacío
         if (cartItems.length === 0) {
-            toast({
-                title: "Error",
-                description: "El carrito está vacío",
-                variant: "destructive",
-            });
+            toast({ title: "Error", description: "El carrito está vacío", variant: "destructive" });
             return;
         }
 
-        // Validar monto si es efectivo
         if (paymentMethod === "efectivo" && payment < total) {
-            toast({
-                title: "Error",
-                description: "Monto insuficiente",
-                variant: "destructive",
-            });
+            toast({ title: "Error", description: "Monto insuficiente", variant: "destructive" });
             return;
         }
 
-        // ✅ CORREGIDO: Estructura de datos correcta
         const saleData = {
             items: cartItems.map((item) => ({
                 id: item.id,
                 quantity: item.quantity,
-                salePrice: Number(item.sale_price), // Asegurar que sea número
+                salePrice: Number(item.sale_price),
             })),
-            payment_method: paymentMethod, // Enviar "efectivo", "tarjeta" o "transferencia"
-            amount_received: paymentMethod === "efectivo" ? payment : total, // Solo si es efectivo
-            client_name: selectedCustomer?.name || null,
-            client_phone: selectedCustomer?.phone || null,
+            payment_method: paymentMethod,
+            amount_received: paymentMethod === "efectivo" ? payment : total,
+            // Enviamos ID si existe (cliente de BD) o nombre/teléfono si es nuevo
+            client_id: selectedCustomer?.id || null, 
+            client_name: selectedCustomer?.id ? null : selectedCustomer?.name,
+            client_phone: selectedCustomer?.id ? null : selectedCustomer?.phone,
         };
-
-        console.log("Enviando datos de venta:", saleData); // Para debug
 
         router.post("/vender", saleData, {
             onSuccess: () => {
                 toast({
                     title: "¡Venta Exitosa!",
-                    description:
-                        paymentMethod === "efectivo"
-                            ? `Cambio: $${change.toFixed(2)}`
-                            : "Venta procesada correctamente",
+                    description: paymentMethod === "efectivo" ? `Cambio: $${change.toFixed(2)}` : "Venta procesada correctamente",
                     className: "bg-green-500 text-white",
                 });
                 setCartItems([]);
                 setShowCheckout(false);
                 setAmountReceived("");
                 setSelectedCustomer(null);
+                setCustomerSearch("");
                 setPaymentMethod("efectivo");
             },
             onError: (errors) => {
                 console.error("Error en venta:", errors);
                 toast({
                     title: "Error",
-                    description: errors.error || "No se pudo procesar la venta",
+                    description: "No se pudo procesar la venta. Verifique los datos.",
                     variant: "destructive",
                 });
             },
@@ -326,26 +332,18 @@ export default function Vender({ allProducts }: Props) {
                                     type="text"
                                     placeholder="Buscar producto por nombre o código..."
                                     value={searchQuery}
-                                    onChange={(e) =>
-                                        setSearchQuery(e.target.value)
-                                    }
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none"
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all"
                                 />
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
                             {filteredProducts.length === 0 ? (
-                                <p className="text-center text-gray-400 mt-10">
-                                    No se encontraron productos
-                                </p>
+                                <p className="text-center text-gray-400 mt-10">No se encontraron productos</p>
                             ) : (
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                                     {filteredProducts.map((product) => (
-                                        <ProductCard
-                                            key={product.id}
-                                            product={product}
-                                            onAdd={addToCart}
-                                        />
+                                        <ProductCard key={product.id} product={product} onAdd={addToCart} />
                                     ))}
                                 </div>
                             )}
@@ -358,9 +356,7 @@ export default function Vender({ allProducts }: Props) {
                             <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2">
                                     <ShoppingCart className="w-5 h-5" />
-                                    <h2 className="font-bold text-lg">
-                                        Carrito
-                                    </h2>
+                                    <h2 className="font-bold text-lg">Carrito</h2>
                                 </div>
                                 <span className="bg-white/20 px-3 py-0.5 rounded-full text-sm font-medium">
                                     {cartItems.length} items
@@ -370,20 +366,14 @@ export default function Vender({ allProducts }: Props) {
 
                         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30">
                             {cartItems.length === 0 ? (
-                                <p className="text-center text-gray-400 mt-10">
-                                    Carrito vacío
-                                </p>
+                                <p className="text-center text-gray-400 mt-10">Carrito vacío</p>
                             ) : (
                                 cartItems.map((item) => (
                                     <CartItemRow
                                         key={item.id}
                                         item={item}
-                                        onIncrease={() =>
-                                            updateQuantity(item.id, 1)
-                                        }
-                                        onDecrease={() =>
-                                            updateQuantity(item.id, -1)
-                                        }
+                                        onIncrease={() => updateQuantity(item.id, 1)}
+                                        onDecrease={() => updateQuantity(item.id, -1)}
                                         onRemove={removeFromCart}
                                     />
                                 ))
@@ -393,12 +383,8 @@ export default function Vender({ allProducts }: Props) {
                         {cartItems.length > 0 && (
                             <div className="bg-white p-4 border-t border-gray-100">
                                 <div className="flex justify-between items-baseline mb-4">
-                                    <span className="text-xl font-bold text-gray-800">
-                                        Total
-                                    </span>
-                                    <span className="text-3xl font-extrabold text-blue-600">
-                                        ${total.toFixed(2)}
-                                    </span>
+                                    <span className="text-xl font-bold text-gray-800">Total</span>
+                                    <span className="text-3xl font-extrabold text-blue-600">${total.toFixed(2)}</span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
@@ -424,9 +410,7 @@ export default function Vender({ allProducts }: Props) {
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-6">
                             <div className="flex justify-between items-center border-b pb-4">
-                                <h2 className="text-xl font-bold">
-                                    Procesar Pago
-                                </h2>
+                                <h2 className="text-xl font-bold">Procesar Pago</h2>
                                 <button onClick={() => setShowCheckout(false)}>
                                     <X className="w-5 h-5" />
                                 </button>
@@ -434,101 +418,98 @@ export default function Vender({ allProducts }: Props) {
 
                             {/* Método de Pago */}
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-3">
-                                    Método de Pago
-                                </label>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-3">Método de Pago</label>
                                 <div className="grid grid-cols-3 gap-3">
-                                    <PaymentMethodButton
-                                        icon={Banknote}
-                                        label="Efectivo"
-                                        isSelected={
-                                            paymentMethod === "efectivo"
-                                        }
-                                        onClick={() =>
-                                            setPaymentMethod("efectivo")
-                                        }
-                                    />
-                                    <PaymentMethodButton
-                                        icon={CreditCard}
-                                        label="Tarjeta"
-                                        isSelected={paymentMethod === "tarjeta"}
-                                        onClick={() =>
-                                            setPaymentMethod("tarjeta")
-                                        }
-                                    />
-                                    <PaymentMethodButton
-                                        icon={DollarSign}
-                                        label="Transferencia"
-                                        isSelected={
-                                            paymentMethod === "transferencia"
-                                        }
-                                        onClick={() =>
-                                            setPaymentMethod("transferencia")
-                                        }
-                                    />
+                                    <PaymentMethodButton icon={Banknote} label="Efectivo" isSelected={paymentMethod === "efectivo"} onClick={() => setPaymentMethod("efectivo")} />
+                                    <PaymentMethodButton icon={CreditCard} label="Tarjeta" isSelected={paymentMethod === "tarjeta"} onClick={() => setPaymentMethod("tarjeta")} />
+                                    <PaymentMethodButton icon={DollarSign} label="Transferencia" isSelected={paymentMethod === "transferencia"} onClick={() => setPaymentMethod("transferencia")} />
                                 </div>
                             </div>
 
                             {/* Cliente */}
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
-                                    Cliente (Opcional)
-                                </label>
-                                {!isCreatingCustomer ? (
-                                    <div className="flex gap-2">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Cliente (Opcional)</label>
+                                
+                                {isCreatingCustomer ? (
+                                    // Modo: Crear Nuevo
+                                    <div className="space-y-2 border p-3 rounded bg-gray-50 animate-in fade-in zoom-in-95 duration-200">
+                                        <div className="flex justify-between items-center mb-2">
+                                            <span className="text-sm font-semibold text-blue-600">Nuevo Cliente</span>
+                                            <button onClick={() => setIsCreatingCustomer(false)} className="text-gray-400 hover:text-red-500"><X className="w-4 h-4"/></button>
+                                        </div>
                                         <input
-                                            className="flex-1 border p-2 rounded"
-                                            placeholder="Sin cliente"
-                                            value={selectedCustomer?.name || ""}
-                                            readOnly
+                                            className="w-full border p-2 rounded text-sm"
+                                            placeholder="Nombre completo *"
+                                            value={newCustomerName}
+                                            onChange={(e) => setNewCustomerName(e.target.value)}
+                                            autoFocus
                                         />
-                                        <button
-                                            onClick={() =>
-                                                setIsCreatingCustomer(true)
-                                            }
-                                            className="bg-blue-100 p-2 rounded text-blue-600 hover:bg-blue-200"
-                                        >
-                                            <UserPlus className="w-5 h-5" />
+                                        <input
+                                            className="w-full border p-2 rounded text-sm"
+                                            placeholder="Teléfono (opcional)"
+                                            value={newCustomerPhone}
+                                            onChange={(e) => setNewCustomerPhone(e.target.value)}
+                                        />
+                                        <button onClick={handleCreateCustomer} className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 text-sm font-medium">
+                                            Usar este cliente
                                         </button>
                                     </div>
                                 ) : (
-                                    <div className="space-y-2 border p-3 rounded bg-gray-50">
-                                        <input
-                                            className="w-full border p-2 rounded"
-                                            placeholder="Nombre del cliente"
-                                            value={newCustomerName}
-                                            onChange={(e) =>
-                                                setNewCustomerName(
-                                                    e.target.value
-                                                )
-                                            }
-                                        />
-                                        <input
-                                            className="w-full border p-2 rounded"
-                                            placeholder="Teléfono (opcional)"
-                                            value={newCustomerPhone}
-                                            onChange={(e) =>
-                                                setNewCustomerPhone(
-                                                    e.target.value
-                                                )
-                                            }
-                                        />
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={handleCreateCustomer}
-                                                className="flex-1 bg-blue-600 text-white p-2 rounded hover:bg-blue-700"
-                                            >
-                                                Guardar
-                                            </button>
-                                            <button
-                                                onClick={() =>
-                                                    setIsCreatingCustomer(false)
-                                                }
-                                                className="px-4 bg-gray-200 text-gray-700 p-2 rounded hover:bg-gray-300"
-                                            >
-                                                Cancelar
-                                            </button>
-                                        </div>
+                                    // Modo: Buscar o Seleccionado
+                                    <div className="relative">
+                                        {selectedCustomer ? (
+                                            // Cliente Seleccionado
+                                            <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                                <div className="flex items-center gap-2">
+                                                    <div className="bg-blue-100 p-1.5 rounded-full"><User className="w-4 h-4 text-blue-600" /></div>
+                                                    <div>
+                                                        <p className="font-semibold text-sm text-gray-800">{selectedCustomer.name}</p>
+                                                        {selectedCustomer.phone && <p className="text-xs text-gray-500">{selectedCustomer.phone}</p>}
+                                                    </div>
+                                                </div>
+                                                <button onClick={handleRemoveClient} className="text-gray-400 hover:text-red-500"><X className="w-4 h-4"/></button>
+                                            </div>
+                                        ) : (
+                                            // Input de Búsqueda
+                                            <div className="flex gap-2">
+                                                <div className="relative flex-1">
+                                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                    <input
+                                                        className="w-full pl-9 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                                        placeholder="Buscar cliente..."
+                                                        value={customerSearch}
+                                                        onChange={(e) => setCustomerSearch(e.target.value)}
+                                                    />
+                                                    
+                                                    {/* Resultados de búsqueda (Dropdown) */}
+                                                    {customerSearch && (
+                                                        <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
+                                                            {filteredClients.length > 0 ? (
+                                                                filteredClients.map(client => (
+                                                                    <div 
+                                                                        key={client.id} 
+                                                                        onClick={() => handleSelectClient(client)}
+                                                                        className="p-2 hover:bg-gray-100 cursor-pointer text-sm border-b last:border-0 flex justify-between items-center"
+                                                                    >
+                                                                        <span>{client.name}</span>
+                                                                        {client.phone && <span className="text-xs text-gray-400">{client.phone}</span>}
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <div className="p-3 text-sm text-gray-500 text-center">No encontrado</div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <button
+                                                    onClick={() => setIsCreatingCustomer(true)}
+                                                    className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-gray-600 border border-gray-200"
+                                                    title="Crear nuevo cliente"
+                                                >
+                                                    <UserPlus className="w-5 h-5" />
+                                                </button>
+                                            </div>
+                                        )}
                                     </div>
                                 )}
                             </div>
@@ -537,44 +518,27 @@ export default function Vender({ allProducts }: Props) {
                             <div className="bg-blue-50 p-4 rounded-xl space-y-3">
                                 <div className="flex justify-between text-xl font-bold">
                                     <span>Total:</span>
-                                    <span className="text-blue-600">
-                                        ${total.toFixed(2)}
-                                    </span>
+                                    <span className="text-blue-600">${total.toFixed(2)}</span>
                                 </div>
 
                                 {paymentMethod === "efectivo" && (
                                     <div className="space-y-2">
                                         <div className="flex items-center gap-3">
-                                            <label className="font-semibold">
-                                                Recibido:
-                                            </label>
+                                            <label className="font-semibold">Recibido:</label>
                                             <input
                                                 type="number"
                                                 step="0.01"
                                                 autoFocus
                                                 className="flex-1 border rounded p-2 font-bold text-lg"
                                                 value={amountReceived}
-                                                onChange={(e) =>
-                                                    setAmountReceived(
-                                                        e.target.value
-                                                    )
-                                                }
-                                                onKeyDown={(e) =>
-                                                    e.key === "Enter" &&
-                                                    completeSale()
-                                                }
+                                                onChange={(e) => setAmountReceived(e.target.value)}
+                                                onKeyDown={(e) => e.key === "Enter" && completeSale()}
                                                 placeholder="0.00"
                                             />
                                         </div>
                                         <div className="flex justify-between text-lg">
                                             <span>Cambio:</span>
-                                            <span
-                                                className={`font-bold ${
-                                                    change < 0
-                                                        ? "text-red-500"
-                                                        : "text-green-600"
-                                                }`}
-                                            >
+                                            <span className={`font-bold ${change < 0 ? "text-red-500" : "text-green-600"}`}>
                                                 ${change.toFixed(2)}
                                             </span>
                                         </div>
@@ -584,7 +548,7 @@ export default function Vender({ allProducts }: Props) {
 
                             <button
                                 onClick={completeSale}
-                                className="w-full py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition-colors"
+                                className="w-full py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition-colors shadow-lg"
                             >
                                 Confirmar Venta
                             </button>
