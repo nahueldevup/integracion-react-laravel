@@ -12,13 +12,9 @@ import {
     Package,
     TrendingUp,
     Printer,
+    Loader2,
 } from "lucide-react";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/Components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import {
     Table,
     TableBody,
@@ -27,6 +23,15 @@ import {
     TableHeader,
     TableRow,
 } from "@/Components/ui/table";
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+} from "@/Components/ui/dialog";
+import { Ticket, TicketData } from "@/Components/Ticket";
+import { useState, useRef } from "react";
+import { useReactToPrint } from "react-to-print";
 
 interface Detalle {
     producto: string;
@@ -63,12 +68,52 @@ interface Props {
 }
 
 export default function VentaDetalle({ venta }: Props) {
+    const [isTicketOpen, setIsTicketOpen] = useState(false);
+    const ticketRef = useRef<HTMLDivElement>(null);
+
+    // Convertir los datos de la venta al formato TicketData
+    const ticketData: TicketData = {
+        folio: venta.folio,
+        fecha: venta.fecha,
+        cliente: venta.cliente?.nombre || "Público General",
+        cajero: venta.usuario,
+        items: venta.detalles.map((detalle) => ({
+            descripcion: detalle.producto,
+            cantidad: detalle.cantidad,
+            precio: detalle.precio_unitario,
+            total: detalle.total,
+        })),
+        subtotal: venta.subtotal,
+        total: venta.total,
+        pago: venta.monto_pagado,
+        cambio: venta.cambio,
+        metodo_pago: venta.metodo_pago,
+    };
+
     const handleBack = () => {
         window.history.back();
     };
 
-    const handlePrint = () => {
-        window.print();
+    // Configurar el hook de impresión
+    const handlePrint = useReactToPrint({
+        contentRef: ticketRef,
+        documentTitle: `Ticket-${venta.folio}`,
+        onAfterPrint: () => console.log("Impresión finalizada"),
+        onPrintError: (error) => console.error("Error al imprimir:", error),
+    });
+
+    // Función para abrir el modal y preparar la impresión
+    const openPrintModal = () => {
+        setIsTicketOpen(true);
+    };
+
+    // Función para ejecutar la impresión
+    const triggerPrint = () => {
+        if (!ticketRef.current) {
+            console.error("El contenido del ticket no está disponible");
+            return;
+        }
+        handlePrint();
     };
 
     const getPaymentMethodBadge = (method: string) => {
@@ -114,11 +159,11 @@ export default function VentaDetalle({ venta }: Props) {
                             </Button>
                             <Button
                                 variant="outline"
-                                onClick={handlePrint}
+                                onClick={openPrintModal}
                                 className="flex items-center gap-2"
                             >
                                 <Printer className="w-4 h-4" />
-                                Imprimir
+                                Imprimir Ticket
                             </Button>
                         </div>
 
@@ -132,7 +177,9 @@ export default function VentaDetalle({ venta }: Props) {
                                             <p className="text-sm text-muted-foreground font-normal">
                                                 Folio de Venta
                                             </p>
-                                            <p className="font-mono">{venta.folio}</p>
+                                            <p className="font-mono">
+                                                {venta.folio}
+                                            </p>
                                         </div>
                                     </div>
                                     <div
@@ -140,7 +187,9 @@ export default function VentaDetalle({ venta }: Props) {
                                             venta.metodo_pago
                                         )}`}
                                     >
-                                        {getPaymentMethodLabel(venta.metodo_pago)}
+                                        {getPaymentMethodLabel(
+                                            venta.metodo_pago
+                                        )}
                                     </div>
                                 </CardTitle>
                             </CardHeader>
@@ -169,7 +218,8 @@ export default function VentaDetalle({ venta }: Props) {
                                                 Cliente
                                             </p>
                                             <p className="font-semibold text-sm">
-                                                {venta.cliente?.nombre || "Público General"}
+                                                {venta.cliente?.nombre ||
+                                                    "Público General"}
                                             </p>
                                             {venta.cliente?.telefono && (
                                                 <p className="text-xs text-muted-foreground">
@@ -244,28 +294,43 @@ export default function VentaDetalle({ venta }: Props) {
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
-                                            {venta.detalles.map((detalle, index) => (
-                                                <TableRow key={index} className="hover:bg-muted/50">
-                                                    <TableCell className="font-medium">
-                                                        {detalle.producto}
-                                                    </TableCell>
-                                                    <TableCell className="font-mono text-sm text-muted-foreground">
-                                                        {detalle.codigo || "S/C"}
-                                                    </TableCell>
-                                                    <TableCell className="text-center font-semibold">
-                                                        {detalle.cantidad}
-                                                    </TableCell>
-                                                    <TableCell className="text-right">
-                                                        ${Number(detalle.precio_unitario).toFixed(2)}
-                                                    </TableCell>
-                                                    <TableCell className="text-right font-semibold">
-                                                        ${Number(detalle.total).toFixed(2)}
-                                                    </TableCell>
-                                                    <TableCell className="text-right font-semibold text-green-600">
-                                                        ${Number(detalle.utilidad).toFixed(2)}
-                                                    </TableCell>
-                                                </TableRow>
-                                            ))}
+                                            {venta.detalles.map(
+                                                (detalle, index) => (
+                                                    <TableRow
+                                                        key={index}
+                                                        className="hover:bg-muted/50"
+                                                    >
+                                                        <TableCell className="font-medium">
+                                                            {detalle.producto}
+                                                        </TableCell>
+                                                        <TableCell className="font-mono text-sm text-muted-foreground">
+                                                            {detalle.codigo ||
+                                                                "S/C"}
+                                                        </TableCell>
+                                                        <TableCell className="text-center font-semibold">
+                                                            {detalle.cantidad}
+                                                        </TableCell>
+                                                        <TableCell className="text-right">
+                                                            $
+                                                            {Number(
+                                                                detalle.precio_unitario
+                                                            ).toFixed(2)}
+                                                        </TableCell>
+                                                        <TableCell className="text-right font-semibold">
+                                                            $
+                                                            {Number(
+                                                                detalle.total
+                                                            ).toFixed(2)}
+                                                        </TableCell>
+                                                        <TableCell className="text-right font-semibold text-green-600">
+                                                            $
+                                                            {Number(
+                                                                detalle.utilidad
+                                                            ).toFixed(2)}
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )
+                                            )}
                                         </TableBody>
                                     </Table>
                                 </div>
@@ -296,7 +361,10 @@ export default function VentaDetalle({ venta }: Props) {
                                                 Impuestos:
                                             </span>
                                             <span className="font-semibold">
-                                                ${Number(venta.impuestos).toFixed(2)}
+                                                $
+                                                {Number(
+                                                    venta.impuestos
+                                                ).toFixed(2)}
                                             </span>
                                         </div>
                                     )}
@@ -313,7 +381,10 @@ export default function VentaDetalle({ venta }: Props) {
                                                     Monto Recibido:
                                                 </span>
                                                 <span className="font-semibold">
-                                                    ${Number(venta.monto_pagado).toFixed(2)}
+                                                    $
+                                                    {Number(
+                                                        venta.monto_pagado
+                                                    ).toFixed(2)}
                                                 </span>
                                             </div>
                                             <div className="flex justify-between text-lg">
@@ -321,7 +392,10 @@ export default function VentaDetalle({ venta }: Props) {
                                                     Cambio:
                                                 </span>
                                                 <span className="font-semibold text-blue-600">
-                                                    ${Number(venta.cambio).toFixed(2)}
+                                                    $
+                                                    {Number(
+                                                        venta.cambio
+                                                    ).toFixed(2)}
                                                 </span>
                                             </div>
                                         </>
@@ -372,7 +446,8 @@ export default function VentaDetalle({ venta }: Props) {
                                         <span>Margen:</span>
                                         <span className="font-semibold">
                                             {(
-                                                (totalUtilidad / Number(venta.total)) *
+                                                (totalUtilidad /
+                                                    Number(venta.total)) *
                                                 100
                                             ).toFixed(1)}
                                             %
@@ -384,6 +459,31 @@ export default function VentaDetalle({ venta }: Props) {
                     </div>
                 </main>
             </div>
+
+            {/* MODAL DE TICKET */}
+            <Dialog open={isTicketOpen} onOpenChange={setIsTicketOpen}>
+                <DialogContent className="max-w-sm">
+                    <DialogHeader>
+                        <DialogTitle>Imprimir Ticket</DialogTitle>
+                    </DialogHeader>
+
+                    <div className="bg-gray-100 p-4 rounded-md flex justify-center max-h-[60vh] overflow-y-auto">
+                        <Ticket ref={ticketRef} data={ticketData} />
+                    </div>
+
+                    <div className="flex justify-end gap-2 mt-4">
+                        <Button
+                            variant="outline"
+                            onClick={() => setIsTicketOpen(false)}
+                        >
+                            Cerrar
+                        </Button>
+                        <Button onClick={triggerPrint}>
+                            <Printer className="w-4 h-4 mr-2" /> Imprimir
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </MainLayout>
     );
 }

@@ -208,7 +208,30 @@ class SaleController extends Controller
             ]
         ]);
     }
- 
+    public function getTicket($id)
+    {
+        $sale = Sale::with(['user', 'client', 'details'])->findOrFail($id);
+        
+        return response()->json([
+            'folio' => $sale->sale_number,
+            'fecha' => $sale->created_at->format('d/m/Y H:i'),
+            'cliente' => $sale->client->name ?? 'Público General',
+            'cajero' => $sale->user->name,
+            'items' => $sale->details->map(function($d) {
+                return [
+                    'descripcion' => $d->product_name,
+                    'cantidad' => $d->quantity,
+                    'precio' => (float)$d->unit_price,
+                    'total' => (float)$d->line_total
+                ];
+            }),
+            'subtotal' => (float)$sale->subtotal,
+            'total' => (float)$sale->total,
+            'pago' => (float)$sale->amount_paid,
+            'cambio' => (float)$sale->change_amount,
+            'metodo_pago' => $sale->payment_method
+        ]);
+    }
 
     /**
      * Anular una venta (soft delete)

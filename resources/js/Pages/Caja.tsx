@@ -1,13 +1,28 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Header } from "@/Components/Header";
 import { Button } from "@/Components/ui/button";
-import { 
-    ArrowUpCircle, ArrowDownCircle, Wallet, Landmark, Calculator, 
-    TrendingUp, Save, Printer, History, Trash2, CalendarClock, CreditCard, 
-    Eye
+import {
+    ArrowUpCircle,
+    ArrowDownCircle,
+    Wallet,
+    Landmark,
+    Calculator,
+    TrendingUp,
+    Save,
+    Printer,
+    History,
+    Trash2,
+    CalendarClock,
+    CreditCard,
+    Eye,
 } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogFooter,
+    DialogDescription,
 } from "@/Components/ui/dialog";
 import { Label } from "@/Components/ui/label";
 import { Input } from "@/Components/ui/input";
@@ -17,7 +32,16 @@ import { Badge } from "@/Components/ui/badge";
 import MainLayout from "@/Layouts/MainLayout";
 import { router } from "@inertiajs/react";
 import { useToast } from "@/Hooks/use-toast";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/Components/ui/table";
+import { ReporteCaja, ReporteCajaData } from "@/Components/ReporteCaja";
+import { useReactToPrint } from "react-to-print";
 import axios from "axios";
 
 // --- Interfaces ---
@@ -25,7 +49,7 @@ interface Movement {
     id: number;
     amount: number;
     description: string;
-    type: 'ingreso' | 'egreso';
+    type: "ingreso" | "egreso";
     created_at: string;
     user: { name: string };
 }
@@ -60,11 +84,21 @@ function StatCard({ title, value, icon: Icon, colorClass, subtext }: any) {
     return (
         <div className="bg-white p-6 rounded-xl border shadow-sm flex items-start justify-between transition-all hover:shadow-md">
             <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
-                <h3 className={`text-2xl font-bold ${colorClass}`}>$ {Number(value).toFixed(2)}</h3>
-                {subtext && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
+                <p className="text-sm font-medium text-gray-500 mb-1">
+                    {title}
+                </p>
+                <h3 className={`text-2xl font-bold ${colorClass}`}>
+                    $ {Number(value).toFixed(2)}
+                </h3>
+                {subtext && (
+                    <p className="text-xs text-gray-400 mt-1">{subtext}</p>
+                )}
             </div>
-            <div className={`p-3 rounded-lg ${colorClass.replace('text-', 'bg-').replace('600', '100')}`}>
+            <div
+                className={`p-3 rounded-lg ${colorClass
+                    .replace("text-", "bg-")
+                    .replace("600", "100")}`}
+            >
                 <Icon className={`w-6 h-6 ${colorClass}`} />
             </div>
         </div>
@@ -72,298 +106,713 @@ function StatCard({ title, value, icon: Icon, colorClass, subtext }: any) {
 }
 
 export default function Caja({ movements, summary, history }: Props) {
-  const { toast } = useToast();
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isCierreOpen, setIsCierreOpen] = useState(false);
-  const [movementType, setMovementType] = useState<'ingreso' | 'egreso'>('ingreso');
-  
-  const [formData, setFormData] = useState({ amount: "", description: "" });
-  const [arqueoData, setArqueoData] = useState({ counted_cash: "", notes: "" });
-  
-  const [liveSummary, setLiveSummary] = useState<Summary>(summary || {
-      sales_cash: 0, sales_digital: 0, manual_incomes: 0, manual_expenses: 0, expected_cash: 0, total_sales_day: 0
-  });
+    const { toast } = useToast();
+    const [isDialogOpen, setIsDialogOpen] = useState(false);
+    const [isCierreOpen, setIsCierreOpen] = useState(false);
+    const [isReporteOpen, setIsReporteOpen] = useState(false);
+    const [movementType, setMovementType] = useState<"ingreso" | "egreso">(
+        "ingreso"
+    );
 
-  const handleSaveMovement = () => {
-      if (!formData.amount || !formData.description) return;
-      router.post('/caja', { ...formData, type: movementType }, {
-          onSuccess: () => {
-              toast({ 
-                  title: movementType === 'ingreso' ? "Ingreso registrado" : "Egreso registrado",
-                  className: movementType === 'ingreso' ? "bg-green-500 text-white" : "bg-red-500 text-white"
-              });
-              setIsDialogOpen(false);
-              setFormData({ amount: "", description: "" });
-          }
-      });
-  };
+    const [formData, setFormData] = useState({ amount: "", description: "" });
+    const [arqueoData, setArqueoData] = useState({
+        counted_cash: "",
+        notes: "",
+    });
 
-  const handleSaveCierre = () => {
-      if (!arqueoData.counted_cash) {
-          toast({ title: "Ingrese el monto contado", variant: "destructive" });
-          return;
-      }
-      
-      router.post('/caja/cierre', arqueoData, {
-          onSuccess: () => {
-              toast({ title: "Cierre guardado correctamente", className: "bg-blue-600 text-white" });
-              setIsCierreOpen(false);
-              setArqueoData({ counted_cash: "", notes: "" });
-          }
-      });
-  };
+    const [liveSummary, setLiveSummary] = useState<Summary>(
+        summary || {
+            sales_cash: 0,
+            sales_digital: 0,
+            manual_incomes: 0,
+            manual_expenses: 0,
+            expected_cash: 0,
+            total_sales_day: 0,
+        }
+    );
 
-  const handleDelete = (id: number) => {
-      if(confirm("¿Eliminar este movimiento?")) {
-          router.delete(`/caja/${id}`, { onSuccess: () => toast({ title: "Movimiento eliminado" }) });
-      }
-  };
+    const reporteRef = useRef<HTMLDivElement>(null);
 
-  const handleOpenCierre = async () => {
-      try {
-          const response = await axios.get('/caja/cierre');
-          if (response.data && typeof response.data === 'object') {
-              setLiveSummary(response.data);
-              setIsCierreOpen(true);
-          }
-      } catch (error) {
-          toast({ title: "Error al actualizar datos", variant: "destructive" });
-          setIsCierreOpen(true);
-      }
-  };
+    const handleSaveMovement = () => {
+        if (!formData.amount || !formData.description) return;
+        router.post(
+            "/caja",
+            { ...formData, type: movementType },
+            {
+                onSuccess: () => {
+                    toast({
+                        title:
+                            movementType === "ingreso"
+                                ? "Ingreso registrado"
+                                : "Egreso registrado",
+                        className:
+                            movementType === "ingreso"
+                                ? "bg-green-500 text-white"
+                                : "bg-red-500 text-white",
+                    });
+                    setIsDialogOpen(false);
+                    setFormData({ amount: "", description: "" });
+                },
+            }
+        );
+    };
 
-  const difference = Number(arqueoData.counted_cash || 0) - liveSummary.expected_cash;
+    const handleSaveCierre = () => {
+        if (!arqueoData.counted_cash) {
+            toast({
+                title: "Ingrese el monto contado",
+                variant: "destructive",
+            });
+            return;
+        }
 
-  return (
-    <MainLayout>
-    <div className="flex-1 flex flex-col h-full bg-gray-50/50">
-      <Header title="Gestión de Caja" subtitle="Control de efectivo y cierres" />
-      
-      <main className="flex-1 p-6 overflow-y-auto">
-        <div className="max-w-7xl mx-auto space-y-8">
-          
-          {/* TARJETAS SUPERIORES */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <StatCard title="En Cajón (Efectivo)" value={liveSummary.expected_cash} icon={Wallet} colorClass="text-emerald-600" subtext="Ventas Efec. + Ingresos - Egresos" />
-            <StatCard title="Bancos (Digital)" value={liveSummary.sales_digital} icon={Landmark} colorClass="text-blue-600" subtext="Transferencias y Tarjetas" />
-            <StatCard title="Venta Total del Día" value={liveSummary.total_sales_day} icon={TrendingUp} colorClass="text-indigo-600" subtext="Suma de todos los métodos" />
-            <StatCard title="Gastos / Retiros" value={liveSummary.manual_expenses} icon={ArrowDownCircle} colorClass="text-rose-600" subtext="Salidas manuales de caja" />
-          </div>
+        router.post("/caja/cierre", arqueoData, {
+            onSuccess: () => {
+                toast({
+                    title: "Cierre guardado correctamente",
+                    className: "bg-blue-600 text-white",
+                });
+                setIsCierreOpen(false);
+                setArqueoData({ counted_cash: "", notes: "" });
+            },
+        });
+    };
 
-          {/* BOTONERA */}
-          <div className="flex flex-wrap gap-4">
-            <Button onClick={() => { setMovementType('ingreso'); setIsDialogOpen(true); }} className="bg-emerald-600 hover:bg-emerald-700 shadow-md text-white px-6 py-6 h-auto text-base flex gap-2">
-                <ArrowUpCircle className="w-5 h-5" /> Registrar Ingreso
-            </Button>
-            <Button onClick={() => { setMovementType('egreso'); setIsDialogOpen(true); }} className="bg-rose-600 hover:bg-rose-700 shadow-md text-white px-6 py-6 h-auto text-base flex gap-2">
-                <ArrowDownCircle className="w-5 h-5" /> Registrar Gasto/Retiro
-            </Button>
-            <Button onClick={handleOpenCierre} variant="outline" className="ml-auto border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm px-6 py-6 h-auto text-base flex gap-2">
-                <Calculator className="w-5 h-5" /> Realizar Arqueo (Cierre)
-            </Button>
-          </div>
+    const handleDelete = (id: number) => {
+        if (confirm("¿Eliminar este movimiento?")) {
+            router.delete(`/caja/${id}`, {
+                onSuccess: () => toast({ title: "Movimiento eliminado" }),
+            });
+        }
+    };
 
-          {/* PESTAÑAS */}
-          <Tabs defaultValue="movimientos" className="w-full">
-            <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
-              <TabsTrigger value="movimientos">Movimientos del Día</TabsTrigger>
-              <TabsTrigger value="historial">Historial de Cierres</TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="movimientos">
-              <div className="bg-white rounded-xl border shadow-sm overflow-hidden mt-4">
-                  <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                          <History className="w-5 h-5 text-gray-500" />
-                          <h3 className="font-bold text-gray-700">Movimientos Manuales (Hoy)</h3>
-                      </div>
-                  </div>
-                  <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Hora</TableHead>
-                            <TableHead>Tipo</TableHead>
-                            <TableHead>Descripción</TableHead>
-                            <TableHead className="text-right">Monto</TableHead>
-                            <TableHead className="text-center">Acción</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {movements.length === 0 ? (
-                            <TableRow><TableCell colSpan={5} className="text-center py-10 text-gray-400">Sin movimientos hoy</TableCell></TableRow>
-                        ) : movements.map((mov) => (
-                            <TableRow key={mov.id}>
-                                <TableCell>{new Date(mov.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</TableCell>
-                                <TableCell>
-                                    <Badge variant={mov.type === 'ingreso' ? "default" : "destructive"} className={mov.type === 'ingreso' ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100" : "bg-rose-100 text-rose-800 hover:bg-rose-100"}>
-                                        {mov.type.toUpperCase()}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell>{mov.description}</TableCell>
-                                <TableCell className={`text-right font-bold ${mov.type === 'ingreso' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                    {mov.type === 'ingreso' ? '+' : '-'} $ {Number(mov.amount).toFixed(2)}
-                                </TableCell>
-                                <TableCell className="text-center">
-                                    <Button variant="ghost" size="sm" onClick={() => handleDelete(mov.id)}><Trash2 className="w-4 h-4 text-gray-400 hover:text-red-500" /></Button>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-              </div>
-            </TabsContent>
+    const handleOpenCierre = async () => {
+        try {
+            const response = await axios.get("/caja/cierre");
+            if (response.data && typeof response.data === "object") {
+                setLiveSummary(response.data);
+                setIsCierreOpen(true);
+            }
+        } catch (error) {
+            toast({
+                title: "Error al actualizar datos",
+                variant: "destructive",
+            });
+            setIsCierreOpen(true);
+        }
+    };
 
-            <TabsContent value="historial">
-              <div className="bg-white rounded-xl border shadow-sm overflow-hidden mt-4">
-                  <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
-                      <div className="flex items-center gap-2">
-                          <CalendarClock className="w-5 h-5 text-gray-500" />
-                          <h3 className="font-bold text-gray-700">Reportes Guardados</h3>
-                      </div>
-                  </div>
-                  <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Fecha</TableHead>
-                            <TableHead>Usuario</TableHead>
-                            <TableHead>Esperado</TableHead>
-                            <TableHead>Contado</TableHead>
-                            <TableHead>Diferencia</TableHead>
-                            <TableHead>Notas</TableHead>
-                            <TableHead className="text-center">Ver</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {!history || history.length === 0 ? (
-                            <TableRow><TableCell colSpan={6} className="text-center py-10 text-gray-400">No hay cierres guardados</TableCell></TableRow>
-                        ) : history.map((cierre) => (
-                            <TableRow key={cierre.id}>
-                                <TableCell>{new Date(cierre.created_at).toLocaleDateString()} {new Date(cierre.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</TableCell>
-                                <TableCell>{cierre.user?.name}</TableCell>
-                                <TableCell>$ {Number(cierre.expected_cash).toFixed(2)}</TableCell>
-                                <TableCell className="font-bold">$ {Number(cierre.counted_cash).toFixed(2)}</TableCell>
-                                <TableCell>
-                                    <Badge variant="outline" className={`${Number(cierre.difference) === 0 ? 'text-green-600 border-green-200 bg-green-50' : Number(cierre.difference) > 0 ? 'text-blue-600 border-blue-200 bg-blue-50' : 'text-red-600 border-red-200 bg-red-50'}`}>
-                                        $ {Number(cierre.difference).toFixed(2)}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="text-gray-500 italic text-sm truncate max-w-[200px]">{cierre.notes || '-'}</TableCell>
-                                <TableCell className="text-center">
-        <Button variant="ghost" size="sm" asChild>
-            {/* Usamos asChild para que el botón se comporte como Link de Inertia */}
-            <a href={`/caja/historial/${cierre.id}`}>
-                <Eye className="w-4 h-4 text-blue-600" />
-            </a>
-        </Button>
-    </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                  </Table>
-              </div>
-            </TabsContent>
-          </Tabs>
+    const difference =
+        Number(arqueoData.counted_cash || 0) - liveSummary.expected_cash;
 
-        </div>
-      </main>
+    // Preparar datos para el reporte
+    const reporteData: ReporteCajaData = {
+        fecha: new Date().toLocaleString("es-ES", {
+            weekday: "long",
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+        }),
+        usuario: "Usuario Actual", // Esto debería venir de auth
+        sales_cash: liveSummary.sales_cash,
+        sales_digital: liveSummary.sales_digital,
+        manual_incomes: liveSummary.manual_incomes,
+        manual_expenses: liveSummary.manual_expenses,
+        expected_cash: liveSummary.expected_cash,
+        counted_cash: Number(arqueoData.counted_cash || 0),
+        difference: difference,
+        notes: arqueoData.notes,
+        movements: movements,
+    };
 
-      {/* --- MODALES --- */}
+    // Configurar el hook de impresión
+    const handlePrint = useReactToPrint({
+        contentRef: reporteRef,
+        documentTitle: `Reporte-Caja-${new Date().toLocaleDateString()}`,
+        onAfterPrint: () => console.log("Impresión finalizada"),
+        onPrintError: (error) => console.error("Error al imprimir:", error),
+    });
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        {/* ... Modal Ingreso/Egreso (Sin cambios) ... */}
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{movementType === 'ingreso' ? 'Registrar Entrada' : 'Registrar Salida'}</DialogTitle>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label>Monto</Label>
-              <Input type="number" className="pl-4 text-lg font-bold" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} autoFocus />
+    // Función para ejecutar la impresión
+    const triggerPrint = () => {
+        if (!reporteRef.current) {
+            console.error("El contenido del reporte no está disponible");
+            toast({
+                title: "Error",
+                description: "El reporte no está listo para imprimir",
+                variant: "destructive",
+            });
+            return;
+        }
+        handlePrint();
+    };
+
+    return (
+        <MainLayout>
+            <div className="flex-1 flex flex-col h-full bg-gray-50/50">
+                <Header
+                    title="Gestión de Caja"
+                    subtitle="Control de efectivo y cierres"
+                />
+
+                <main className="flex-1 p-6 overflow-y-auto">
+                    <div className="max-w-7xl mx-auto space-y-8">
+                        {/* TARJETAS SUPERIORES */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                            <StatCard
+                                title="En Cajón (Efectivo)"
+                                value={liveSummary.expected_cash}
+                                icon={Wallet}
+                                colorClass="text-emerald-600"
+                                subtext="Ventas Efec. + Ingresos - Egresos"
+                            />
+                            <StatCard
+                                title="Bancos (Digital)"
+                                value={liveSummary.sales_digital}
+                                icon={Landmark}
+                                colorClass="text-blue-600"
+                                subtext="Transferencias y Tarjetas"
+                            />
+                            <StatCard
+                                title="Venta Total del Día"
+                                value={liveSummary.total_sales_day}
+                                icon={TrendingUp}
+                                colorClass="text-indigo-600"
+                                subtext="Suma de todos los métodos"
+                            />
+                            <StatCard
+                                title="Gastos / Retiros"
+                                value={liveSummary.manual_expenses}
+                                icon={ArrowDownCircle}
+                                colorClass="text-rose-600"
+                                subtext="Salidas manuales de caja"
+                            />
+                        </div>
+
+                        {/* BOTONERA */}
+                        <div className="flex flex-wrap gap-4">
+                            <Button
+                                onClick={() => {
+                                    setMovementType("ingreso");
+                                    setIsDialogOpen(true);
+                                }}
+                                className="bg-emerald-600 hover:bg-emerald-700 shadow-md text-white px-6 py-6 h-auto text-base flex gap-2"
+                            >
+                                <ArrowUpCircle className="w-5 h-5" /> Registrar
+                                Ingreso
+                            </Button>
+                            <Button
+                                onClick={() => {
+                                    setMovementType("egreso");
+                                    setIsDialogOpen(true);
+                                }}
+                                className="bg-rose-600 hover:bg-rose-700 shadow-md text-white px-6 py-6 h-auto text-base flex gap-2"
+                            >
+                                <ArrowDownCircle className="w-5 h-5" />{" "}
+                                Registrar Gasto/Retiro
+                            </Button>
+                            <Button
+                                onClick={handleOpenCierre}
+                                variant="outline"
+                                className="ml-auto border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm px-6 py-6 h-auto text-base flex gap-2"
+                            >
+                                <Calculator className="w-5 h-5" /> Realizar
+                                Arqueo (Cierre)
+                            </Button>
+                        </div>
+
+                        {/* PESTAÑAS */}
+                        <Tabs defaultValue="movimientos" className="w-full">
+                            <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+                                <TabsTrigger value="movimientos">
+                                    Movimientos del Día
+                                </TabsTrigger>
+                                <TabsTrigger value="historial">
+                                    Historial de Cierres
+                                </TabsTrigger>
+                            </TabsList>
+
+                            <TabsContent value="movimientos">
+                                <div className="bg-white rounded-xl border shadow-sm overflow-hidden mt-4">
+                                    <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <History className="w-5 h-5 text-gray-500" />
+                                            <h3 className="font-bold text-gray-700">
+                                                Movimientos Manuales (Hoy)
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Hora</TableHead>
+                                                <TableHead>Tipo</TableHead>
+                                                <TableHead>
+                                                    Descripción
+                                                </TableHead>
+                                                <TableHead className="text-right">
+                                                    Monto
+                                                </TableHead>
+                                                <TableHead className="text-center">
+                                                    Acción
+                                                </TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {movements.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell
+                                                        colSpan={5}
+                                                        className="text-center py-10 text-gray-400"
+                                                    >
+                                                        Sin movimientos hoy
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
+                                                movements.map((mov) => (
+                                                    <TableRow key={mov.id}>
+                                                        <TableCell>
+                                                            {new Date(
+                                                                mov.created_at
+                                                            ).toLocaleTimeString(
+                                                                [],
+                                                                {
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                }
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge
+                                                                variant={
+                                                                    mov.type ===
+                                                                    "ingreso"
+                                                                        ? "default"
+                                                                        : "destructive"
+                                                                }
+                                                                className={
+                                                                    mov.type ===
+                                                                    "ingreso"
+                                                                        ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100"
+                                                                        : "bg-rose-100 text-rose-800 hover:bg-rose-100"
+                                                                }
+                                                            >
+                                                                {mov.type.toUpperCase()}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {mov.description}
+                                                        </TableCell>
+                                                        <TableCell
+                                                            className={`text-right font-bold ${
+                                                                mov.type ===
+                                                                "ingreso"
+                                                                    ? "text-emerald-600"
+                                                                    : "text-rose-600"
+                                                            }`}
+                                                        >
+                                                            {mov.type ===
+                                                            "ingreso"
+                                                                ? "+"
+                                                                : "-"}{" "}
+                                                            ${" "}
+                                                            {Number(
+                                                                mov.amount
+                                                            ).toFixed(2)}
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() =>
+                                                                    handleDelete(
+                                                                        mov.id
+                                                                    )
+                                                                }
+                                                            >
+                                                                <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-500" />
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </TabsContent>
+
+                            <TabsContent value="historial">
+                                <div className="bg-white rounded-xl border shadow-sm overflow-hidden mt-4">
+                                    <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                                        <div className="flex items-center gap-2">
+                                            <CalendarClock className="w-5 h-5 text-gray-500" />
+                                            <h3 className="font-bold text-gray-700">
+                                                Reportes Guardados
+                                            </h3>
+                                        </div>
+                                    </div>
+                                    <Table>
+                                        <TableHeader>
+                                            <TableRow>
+                                                <TableHead>Fecha</TableHead>
+                                                <TableHead>Usuario</TableHead>
+                                                <TableHead>Esperado</TableHead>
+                                                <TableHead>Contado</TableHead>
+                                                <TableHead>
+                                                    Diferencia
+                                                </TableHead>
+                                                <TableHead>Notas</TableHead>
+                                                <TableHead className="text-center">
+                                                    Ver
+                                                </TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {!history ||
+                                            history.length === 0 ? (
+                                                <TableRow>
+                                                    <TableCell
+                                                        colSpan={6}
+                                                        className="text-center py-10 text-gray-400"
+                                                    >
+                                                        No hay cierres guardados
+                                                    </TableCell>
+                                                </TableRow>
+                                            ) : (
+                                                history.map((cierre) => (
+                                                    <TableRow key={cierre.id}>
+                                                        <TableCell>
+                                                            {new Date(
+                                                                cierre.created_at
+                                                            ).toLocaleDateString()}{" "}
+                                                            {new Date(
+                                                                cierre.created_at
+                                                            ).toLocaleTimeString(
+                                                                [],
+                                                                {
+                                                                    hour: "2-digit",
+                                                                    minute: "2-digit",
+                                                                }
+                                                            )}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            {cierre.user?.name}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            ${" "}
+                                                            {Number(
+                                                                cierre.expected_cash
+                                                            ).toFixed(2)}
+                                                        </TableCell>
+                                                        <TableCell className="font-bold">
+                                                            ${" "}
+                                                            {Number(
+                                                                cierre.counted_cash
+                                                            ).toFixed(2)}
+                                                        </TableCell>
+                                                        <TableCell>
+                                                            <Badge
+                                                                variant="outline"
+                                                                className={`${
+                                                                    Number(
+                                                                        cierre.difference
+                                                                    ) === 0
+                                                                        ? "text-green-600 border-green-200 bg-green-50"
+                                                                        : Number(
+                                                                              cierre.difference
+                                                                          ) > 0
+                                                                        ? "text-blue-600 border-blue-200 bg-blue-50"
+                                                                        : "text-red-600 border-red-200 bg-red-50"
+                                                                }`}
+                                                            >
+                                                                ${" "}
+                                                                {Number(
+                                                                    cierre.difference
+                                                                ).toFixed(2)}
+                                                            </Badge>
+                                                        </TableCell>
+                                                        <TableCell className="text-gray-500 italic text-sm truncate max-w-[200px]">
+                                                            {cierre.notes ||
+                                                                "-"}
+                                                        </TableCell>
+                                                        <TableCell className="text-center">
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                asChild
+                                                            >
+                                                                {/* Usamos asChild para que el botón se comporte como Link de Inertia */}
+                                                                <a
+                                                                    href={`/caja/historial/${cierre.id}`}
+                                                                >
+                                                                    <Eye className="w-4 h-4 text-blue-600" />
+                                                                </a>
+                                                            </Button>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                ))
+                                            )}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+                </main>
+
+                {/* --- MODALES --- */}
+
+                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                    {/* ... Modal Ingreso/Egreso (Sin cambios) ... */}
+                    <DialogContent className="sm:max-w-[425px]">
+                        <DialogHeader>
+                            <DialogTitle>
+                                {movementType === "ingreso"
+                                    ? "Registrar Entrada"
+                                    : "Registrar Salida"}
+                            </DialogTitle>
+                        </DialogHeader>
+                        <div className="grid gap-4 py-4">
+                            <div className="grid gap-2">
+                                <Label>Monto</Label>
+                                <Input
+                                    type="number"
+                                    className="pl-4 text-lg font-bold"
+                                    value={formData.amount}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            amount: e.target.value,
+                                        })
+                                    }
+                                    autoFocus
+                                />
+                            </div>
+                            <div className="grid gap-2">
+                                <Label>Descripción</Label>
+                                <Textarea
+                                    value={formData.description}
+                                    onChange={(e) =>
+                                        setFormData({
+                                            ...formData,
+                                            description: e.target.value,
+                                        })
+                                    }
+                                />
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsDialogOpen(false)}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                onClick={handleSaveMovement}
+                                className={
+                                    movementType === "ingreso"
+                                        ? "bg-emerald-600"
+                                        : "bg-rose-600"
+                                }
+                            >
+                                Guardar
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* 2. Modal de Cierre/Arqueo (CORREGIDO) */}
+                <Dialog open={isCierreOpen} onOpenChange={setIsCierreOpen}>
+                    <DialogContent className="max-w-3xl">
+                        <DialogHeader>
+                            <DialogTitle>Arqueo y Cierre de Caja</DialogTitle>
+                            <DialogDescription>
+                                Verifique los montos antes de guardar.
+                            </DialogDescription>
+                        </DialogHeader>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                            {/* LADO IZQUIERDO: SISTEMA */}
+                            <div className="space-y-4">
+                                {/* --- AQUI ESTA LO QUE FALTABA: BLOQUE DIGITAL --- */}
+                                <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
+                                    <h4 className="font-bold text-gray-700 flex items-center gap-2">
+                                        <CreditCard className="w-4 h-4" />{" "}
+                                        Digital (Banco)
+                                    </h4>
+                                    <div className="flex justify-between text-sm">
+                                        <span>Transferencias/Tarjetas:</span>
+                                        <span className="font-bold text-blue-600">
+                                            ${" "}
+                                            {liveSummary.sales_digital.toFixed(
+                                                2
+                                            )}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-gray-400 italic">
+                                        Este dinero debe estar en tu cuenta
+                                        bancaria.
+                                    </p>
+                                </div>
+                                {/* ----------------------------------------------- */}
+
+                                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100 space-y-3">
+                                    <h4 className="font-bold text-emerald-800 flex items-center gap-2">
+                                        <Wallet className="w-4 h-4" /> Efectivo
+                                        Esperado
+                                    </h4>
+                                    <div className="flex justify-between text-sm">
+                                        <span>Ventas Efectivo:</span>
+                                        <span>
+                                            ${" "}
+                                            {liveSummary.sales_cash.toFixed(2)}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between text-sm text-green-600">
+                                        <span>+ Ingresos:</span>
+                                        <span>
+                                            ${" "}
+                                            {liveSummary.manual_incomes.toFixed(
+                                                2
+                                            )}
+                                        </span>
+                                    </div>
+                                    <div className="flex justify-between text-sm text-red-600">
+                                        <span>- Egresos:</span>
+                                        <span>
+                                            ${" "}
+                                            {liveSummary.manual_expenses.toFixed(
+                                                2
+                                            )}
+                                        </span>
+                                    </div>
+                                    <div className="pt-2 border-t border-emerald-200 flex justify-between font-bold text-lg text-emerald-900">
+                                        <span>Total en Cajón:</span>
+                                        <span>
+                                            ${" "}
+                                            {liveSummary.expected_cash.toFixed(
+                                                2
+                                            )}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* LADO DERECHO: USUARIO */}
+                            <div className="space-y-4 border-l pl-6 border-dashed">
+                                <h4 className="font-bold text-gray-800">
+                                    Conteo Físico
+                                </h4>
+                                <div className="space-y-2">
+                                    <Label>¿Cuánto efectivo hay?</Label>
+                                    <Input
+                                        type="number"
+                                        className="pl-4 text-xl font-bold bg-yellow-50 border-yellow-200"
+                                        placeholder="0.00"
+                                        value={arqueoData.counted_cash}
+                                        onChange={(e) =>
+                                            setArqueoData({
+                                                ...arqueoData,
+                                                counted_cash: e.target.value,
+                                            })
+                                        }
+                                        autoFocus
+                                    />
+                                </div>
+                                {arqueoData.counted_cash && (
+                                    <div
+                                        className={`p-4 rounded-lg text-center border-2 ${
+                                            difference === 0
+                                                ? "bg-green-50 border-green-200 text-green-700"
+                                                : difference > 0
+                                                ? "bg-blue-50 border-blue-200 text-blue-700"
+                                                : "bg-red-50 border-red-200 text-red-700"
+                                        }`}
+                                    >
+                                        <p className="text-sm font-semibold uppercase tracking-wider mb-1">
+                                            {difference === 0
+                                                ? "Cuadre Perfecto"
+                                                : difference > 0
+                                                ? "Sobrante"
+                                                : "Faltante"}
+                                        </p>
+                                        <p className="text-2xl font-bold">
+                                            $ {Math.abs(difference).toFixed(2)}
+                                        </p>
+                                    </div>
+                                )}
+                                <div className="space-y-2">
+                                    <Label>Notas</Label>
+                                    <Textarea
+                                        placeholder="Observaciones..."
+                                        value={arqueoData.notes}
+                                        onChange={(e) =>
+                                            setArqueoData({
+                                                ...arqueoData,
+                                                notes: e.target.value,
+                                            })
+                                        }
+                                        rows={2}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <DialogFooter className="flex justify-between sm:justify-between w-full">
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsCierreOpen(false)}
+                            >
+                                Cancelar
+                            </Button>
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    onClick={() => setIsReporteOpen(true)}
+                                    className="gap-2"
+                                >
+                                    <Printer className="w-4 h-4" /> Vista Previa
+                                </Button>
+                                {/* BOTÓN GUARDAR */}
+                                <Button
+                                    onClick={handleSaveCierre}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-md"
+                                >
+                                    <Save className="w-4 h-4" /> Guardar Cierre
+                                </Button>
+                            </div>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
+
+                {/* MODAL DE REPORTE */}
+                <Dialog open={isReporteOpen} onOpenChange={setIsReporteOpen}>
+                    <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                        <DialogHeader>
+                            <DialogTitle>Vista Previa del Reporte</DialogTitle>
+                        </DialogHeader>
+
+                        <div className="bg-gray-100 p-4 rounded-md flex justify-center">
+                            <ReporteCaja ref={reporteRef} data={reporteData} />
+                        </div>
+
+                        <div className="flex justify-end gap-2 mt-4">
+                            <Button
+                                variant="outline"
+                                onClick={() => setIsReporteOpen(false)}
+                            >
+                                Cerrar
+                            </Button>
+                            <Button onClick={triggerPrint}>
+                                <Printer className="w-4 h-4 mr-2" /> Imprimir
+                            </Button>
+                        </div>
+                    </DialogContent>
+                </Dialog>
             </div>
-            <div className="grid gap-2">
-              <Label>Descripción</Label>
-              <Textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSaveMovement} className={movementType === 'ingreso' ? 'bg-emerald-600' : 'bg-rose-600'}>Guardar</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* 2. Modal de Cierre/Arqueo (CORREGIDO) */}
-      <Dialog open={isCierreOpen} onOpenChange={setIsCierreOpen}>
-        <DialogContent className="max-w-3xl">
-          <DialogHeader>
-            <DialogTitle>Arqueo y Cierre de Caja</DialogTitle>
-            <DialogDescription>Verifique los montos antes de guardar.</DialogDescription>
-          </DialogHeader>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-              
-              {/* LADO IZQUIERDO: SISTEMA */}
-              <div className="space-y-4">
-                  {/* --- AQUI ESTA LO QUE FALTABA: BLOQUE DIGITAL --- */}
-                  <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
-                      <h4 className="font-bold text-gray-700 flex items-center gap-2">
-                          <CreditCard className="w-4 h-4"/> Digital (Banco)
-                      </h4>
-                      <div className="flex justify-between text-sm">
-                          <span>Transferencias/Tarjetas:</span>
-                          <span className="font-bold text-blue-600">$ {liveSummary.sales_digital.toFixed(2)}</span>
-                      </div>
-                      <p className="text-xs text-gray-400 italic">Este dinero debe estar en tu cuenta bancaria.</p>
-                  </div>
-                  {/* ----------------------------------------------- */}
-
-                  <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100 space-y-3">
-                      <h4 className="font-bold text-emerald-800 flex items-center gap-2">
-                          <Wallet className="w-4 h-4"/> Efectivo Esperado
-                      </h4>
-                      <div className="flex justify-between text-sm"><span>Ventas Efectivo:</span><span>$ {liveSummary.sales_cash.toFixed(2)}</span></div>
-                      <div className="flex justify-between text-sm text-green-600"><span>+ Ingresos:</span><span>$ {liveSummary.manual_incomes.toFixed(2)}</span></div>
-                      <div className="flex justify-between text-sm text-red-600"><span>- Egresos:</span><span>$ {liveSummary.manual_expenses.toFixed(2)}</span></div>
-                      <div className="pt-2 border-t border-emerald-200 flex justify-between font-bold text-lg text-emerald-900">
-                          <span>Total en Cajón:</span><span>$ {liveSummary.expected_cash.toFixed(2)}</span>
-                      </div>
-                  </div>
-              </div>
-
-              {/* LADO DERECHO: USUARIO */}
-              <div className="space-y-4 border-l pl-6 border-dashed">
-                  <h4 className="font-bold text-gray-800">Conteo Físico</h4>
-                  <div className="space-y-2">
-                      <Label>¿Cuánto efectivo hay?</Label>
-                      <Input type="number" className="pl-4 text-xl font-bold bg-yellow-50 border-yellow-200" placeholder="0.00" value={arqueoData.counted_cash} onChange={e => setArqueoData({...arqueoData, counted_cash: e.target.value})} autoFocus />
-                  </div>
-                  {arqueoData.counted_cash && (
-                      <div className={`p-4 rounded-lg text-center border-2 ${difference === 0 ? 'bg-green-50 border-green-200 text-green-700' : difference > 0 ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
-                          <p className="text-sm font-semibold uppercase tracking-wider mb-1">{difference === 0 ? "Cuadre Perfecto" : difference > 0 ? "Sobrante" : "Faltante"}</p>
-                          <p className="text-2xl font-bold">$ {Math.abs(difference).toFixed(2)}</p>
-                      </div>
-                  )}
-                  <div className="space-y-2">
-                      <Label>Notas</Label>
-                      <Textarea placeholder="Observaciones..." value={arqueoData.notes} onChange={e => setArqueoData({...arqueoData, notes: e.target.value})} rows={2} />
-                  </div>
-              </div>
-          </div>
-
-          <DialogFooter className="flex justify-between sm:justify-between w-full">
-            <Button variant="ghost" onClick={() => setIsCierreOpen(false)}>Cancelar</Button>
-            <div className="flex gap-2">
-                <Button variant="outline" onClick={() => window.print()} className="gap-2"><Printer className="w-4 h-4"/> Imprimir</Button>
-                {/* BOTÓN GUARDAR */}
-                <Button onClick={handleSaveCierre} className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-md">
-                    <Save className="w-4 h-4"/> Guardar Cierre
-                </Button>
-            </div>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-    </div>
-    </MainLayout>
-  );
+        </MainLayout>
+    );
 }
