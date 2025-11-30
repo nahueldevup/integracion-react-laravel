@@ -8,6 +8,7 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\CashController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\CashCountController;
 use App\Http\Controllers\ReportController;
 
 
@@ -53,8 +54,12 @@ Route::middleware(['web'])->group(function () {
     // Caja
     Route::get('/caja', [CashController::class, 'index'])->name('cash.index');
     Route::post('/caja', [CashController::class, 'store'])->name('cash.store');
+    // IMPORTANTE: Esta ruta debe existir para que el botón de arqueo funcione
+    Route::get('/caja/cierre', [CashController::class, 'cierreCaja'])->name('cash.cierre'); 
     Route::delete('/caja/{id}', [CashController::class, 'destroy'])->name('cash.destroy');
-    Route::get('/caja/cierre', [CashController::class, 'cierreCaja'])->name('cash.cierre');
+    Route::post('/caja/cierre', [CashController::class, 'storeCierre'])->name('cash.save_cierre');
+    Route::get('/caja/historial/{id}', [CashController::class, 'show'])->name('cash.show');
+
 
     // Configuraciones
     Route::get('/configuracion', [SettingController::class, 'index'])->name('settings.index');

@@ -1,381 +1,369 @@
 import { useState } from "react";
-import { Head, router } from "@inertiajs/react";
-import MainLayout from "@/Layouts/MainLayout";
 import { Header } from "@/Components/Header";
 import { Button } from "@/Components/ui/button";
-import { Input } from "@/Components/ui/input";
-import { Label } from "@/Components/ui/label";
-import { useToast } from "@/Hooks/use-toast";
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from "@/Components/ui/dialog";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/Components/ui/table";
-import {
-    Plus,
-    Minus,
-    DollarSign,
-    TrendingUp,
-    TrendingDown,
-    Wallet,
+import { 
+    ArrowUpCircle, ArrowDownCircle, Wallet, Landmark, Calculator, 
+    TrendingUp, Save, Printer, History, Trash2, CalendarClock, CreditCard, 
+    Eye
 } from "lucide-react";
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription,
+} from "@/Components/ui/dialog";
+import { Label } from "@/Components/ui/label";
+import { Input } from "@/Components/ui/input";
+import { Textarea } from "@/Components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
+import { Badge } from "@/Components/ui/badge";
+import MainLayout from "@/Layouts/MainLayout";
+import { router } from "@inertiajs/react";
+import { useToast } from "@/Hooks/use-toast";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/Components/ui/table";
+import axios from "axios";
 
-interface User {
+// --- Interfaces ---
+interface Movement {
     id: number;
-    name: string;
-}
-
-interface CashMovement {
-    id: number;
-    type: string;
     amount: number;
     description: string;
-    user_id: number;
-    user?: User;
+    type: 'ingreso' | 'egreso';
     created_at: string;
+    user: { name: string };
 }
 
-interface Resumen {
-    total_ingresos: number;
-    total_egresos: number;
-    ventas_efectivo: number;
-    ventas_tarjeta: number;
-    ventas_transferencia: number;
-    total_ventas: number;
-    saldo_caja: number;
+interface CashCount {
+    id: number;
+    expected_cash: number;
+    counted_cash: number;
+    difference: number;
+    created_at: string;
+    user: { name: string };
+    notes?: string;
+}
+
+interface Summary {
+    sales_cash: number;
+    sales_digital: number;
+    manual_incomes: number;
+    manual_expenses: number;
+    expected_cash: number;
+    total_sales_day: number;
 }
 
 interface Props {
-    movimientos: {
-        ingresos: CashMovement[];
-        egresos: CashMovement[];
-    };
-    resumen: Resumen;
+    movements: Movement[];
+    summary: Summary;
+    history: CashCount[];
 }
 
-export default function Caja({ movimientos, resumen }: Props) {
-    const { toast } = useToast();
-
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [movementType, setMovementType] = useState<"income" | "expense">(
-        "income"
-    );
-    const [amount, setAmount] = useState("");
-    const [description, setDescription] = useState("");
-
-    const handleSubmit = () => {
-        if (!amount || !description) {
-            toast({
-                title: "Error",
-                description: "Completa todos los campos",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        router.post(
-            "/caja",
-            {
-                type: movementType,
-                amount: parseFloat(amount),
-                description: description,
-            },
-            {
-                onSuccess: () => {
-                    setIsDialogOpen(false);
-                    setAmount("");
-                    setDescription("");
-                    toast({
-                        title: "Movimiento registrado",
-                        description: "Se ha guardado correctamente",
-                    });
-                },
-                onError: () => {
-                    toast({
-                        title: "Error",
-                        description: "No se pudo registrar el movimiento",
-                        variant: "destructive",
-                    });
-                },
-            }
-        );
-    };
-
+// --- Componente Tarjeta ---
+function StatCard({ title, value, icon: Icon, colorClass, subtext }: any) {
     return (
-        <MainLayout>
-            <Head title="Caja" />
-            <div className="flex-1 flex flex-col">
-                <Header title="Caja" subtitle="Gestión de Efectivo" />
-
-                <main className="flex-1 p-6 bg-background">
-                    <div className="max-w-7xl mx-auto space-y-6">
-                        {/* Resumen Cards */}
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                            <div className="bg-card p-4 rounded-lg border border-border shadow-sm">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">
-                                            Saldo en Caja
-                                        </p>
-                                        <p className="text-2xl font-bold text-green-600">
-                                            ${resumen.saldo_caja.toFixed(2)}
-                                        </p>
-                                    </div>
-                                    <Wallet className="w-8 h-8 text-green-500" />
-                                </div>
-                            </div>
-
-                            <div className="bg-card p-4 rounded-lg border border-border shadow-sm">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">
-                                            Ingresos
-                                        </p>
-                                        <p className="text-2xl font-bold text-blue-600">
-                                            ${resumen.total_ingresos.toFixed(2)}
-                                        </p>
-                                    </div>
-                                    <TrendingUp className="w-8 h-8 text-blue-500" />
-                                </div>
-                            </div>
-
-                            <div className="bg-card p-4 rounded-lg border border-border shadow-sm">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">
-                                            Egresos
-                                        </p>
-                                        <p className="text-2xl font-bold text-red-600">
-                                            ${resumen.total_egresos.toFixed(2)}
-                                        </p>
-                                    </div>
-                                    <TrendingDown className="w-8 h-8 text-red-500" />
-                                </div>
-                            </div>
-
-                            <div className="bg-card p-4 rounded-lg border border-border shadow-sm">
-                                <div className="flex items-center justify-between">
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">
-                                            Ventas Total
-                                        </p>
-                                        <p className="text-2xl font-bold text-purple-600">
-                                            ${resumen.total_ventas.toFixed(2)}
-                                        </p>
-                                    </div>
-                                    <DollarSign className="w-8 h-8 text-purple-500" />
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* Botones de acción */}
-                        <div className="flex gap-3">
-                            <Button
-                                onClick={() => {
-                                    setMovementType("income");
-                                    setIsDialogOpen(true);
-                                }}
-                                className="bg-green-600 hover:bg-green-700"
-                            >
-                                <Plus className="w-4 h-4 mr-2" />
-                                Registrar Ingreso
-                            </Button>
-                            <Button
-                                onClick={() => {
-                                    setMovementType("expense");
-                                    setIsDialogOpen(true);
-                                }}
-                                className="bg-red-600 hover:bg-red-700"
-                            >
-                                <Minus className="w-4 h-4 mr-2" />
-                                Registrar Egreso
-                            </Button>
-                        </div>
-
-                        {/* Tablas de Movimientos */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            {/* Ingresos */}
-                            <div className="bg-card rounded-lg border border-border">
-                                <div className="p-4 border-b border-border">
-                                    <h3 className="font-bold text-lg text-green-600">
-                                        Ingresos
-                                    </h3>
-                                </div>
-                                <div className="max-h-[400px] overflow-y-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>
-                                                    Descripción
-                                                </TableHead>
-                                                <TableHead>Monto</TableHead>
-                                                <TableHead>Usuario</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {movimientos.ingresos.length ===
-                                            0 ? (
-                                                <TableRow>
-                                                    <TableCell
-                                                        colSpan={3}
-                                                        className="text-center text-muted-foreground"
-                                                    >
-                                                        Sin ingresos registrados
-                                                    </TableCell>
-                                                </TableRow>
-                                            ) : (
-                                                movimientos.ingresos.map(
-                                                    (mov) => (
-                                                        <TableRow key={mov.id}>
-                                                            <TableCell>
-                                                                {
-                                                                    mov.description
-                                                                }
-                                                            </TableCell>
-                                                            <TableCell className="text-green-600 font-semibold">
-                                                                $
-                                                                {Number(
-                                                                    mov.amount
-                                                                ).toFixed(2)}
-                                                            </TableCell>
-                                                            <TableCell className="text-sm text-muted-foreground">
-                                                                {mov.user
-                                                                    ?.name ||
-                                                                    "Sistema"}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    )
-                                                )
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </div>
-
-                            {/* Egresos */}
-                            <div className="bg-card rounded-lg border border-border">
-                                <div className="p-4 border-b border-border">
-                                    <h3 className="font-bold text-lg text-red-600">
-                                        Egresos
-                                    </h3>
-                                </div>
-                                <div className="max-h-[400px] overflow-y-auto">
-                                    <Table>
-                                        <TableHeader>
-                                            <TableRow>
-                                                <TableHead>
-                                                    Descripción
-                                                </TableHead>
-                                                <TableHead>Monto</TableHead>
-                                                <TableHead>Usuario</TableHead>
-                                            </TableRow>
-                                        </TableHeader>
-                                        <TableBody>
-                                            {movimientos.egresos.length ===
-                                            0 ? (
-                                                <TableRow>
-                                                    <TableCell
-                                                        colSpan={3}
-                                                        className="text-center text-muted-foreground"
-                                                    >
-                                                        Sin egresos registrados
-                                                    </TableCell>
-                                                </TableRow>
-                                            ) : (
-                                                movimientos.egresos.map(
-                                                    (mov) => (
-                                                        <TableRow key={mov.id}>
-                                                            <TableCell>
-                                                                {
-                                                                    mov.description
-                                                                }
-                                                            </TableCell>
-                                                            <TableCell className="text-red-600 font-semibold">
-                                                                $
-                                                                {Number(
-                                                                    mov.amount
-                                                                ).toFixed(2)}
-                                                            </TableCell>
-                                                            <TableCell className="text-sm text-muted-foreground">
-                                                                {mov.user
-                                                                    ?.name ||
-                                                                    "Sistema"}
-                                                            </TableCell>
-                                                        </TableRow>
-                                                    )
-                                                )
-                                            )}
-                                        </TableBody>
-                                    </Table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </main>
-
-                {/* Dialog para agregar movimiento */}
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>
-                                {movementType === "income"
-                                    ? "Registrar Ingreso"
-                                    : "Registrar Egreso"}
-                            </DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4 py-4">
-                            <div className="space-y-2">
-                                <Label>Monto</Label>
-                                <Input
-                                    type="number"
-                                    step="0.01"
-                                    placeholder="0.00"
-                                    value={amount}
-                                    onChange={(e) => setAmount(e.target.value)}
-                                />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Descripción</Label>
-                                <Input
-                                    placeholder="Describe el movimiento"
-                                    value={description}
-                                    onChange={(e) =>
-                                        setDescription(e.target.value)
-                                    }
-                                />
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button
-                                variant="ghost"
-                                onClick={() => setIsDialogOpen(false)}
-                            >
-                                Cancelar
-                            </Button>
-                            <Button
-                                onClick={handleSubmit}
-                                className={
-                                    movementType === "income"
-                                        ? "bg-green-600 hover:bg-green-700"
-                                        : "bg-red-600 hover:bg-red-700"
-                                }
-                            >
-                                Guardar
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
+        <div className="bg-white p-6 rounded-xl border shadow-sm flex items-start justify-between transition-all hover:shadow-md">
+            <div>
+                <p className="text-sm font-medium text-gray-500 mb-1">{title}</p>
+                <h3 className={`text-2xl font-bold ${colorClass}`}>$ {Number(value).toFixed(2)}</h3>
+                {subtext && <p className="text-xs text-gray-400 mt-1">{subtext}</p>}
             </div>
-        </MainLayout>
+            <div className={`p-3 rounded-lg ${colorClass.replace('text-', 'bg-').replace('600', '100')}`}>
+                <Icon className={`w-6 h-6 ${colorClass}`} />
+            </div>
+        </div>
     );
+}
+
+export default function Caja({ movements, summary, history }: Props) {
+  const { toast } = useToast();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isCierreOpen, setIsCierreOpen] = useState(false);
+  const [movementType, setMovementType] = useState<'ingreso' | 'egreso'>('ingreso');
+  
+  const [formData, setFormData] = useState({ amount: "", description: "" });
+  const [arqueoData, setArqueoData] = useState({ counted_cash: "", notes: "" });
+  
+  const [liveSummary, setLiveSummary] = useState<Summary>(summary || {
+      sales_cash: 0, sales_digital: 0, manual_incomes: 0, manual_expenses: 0, expected_cash: 0, total_sales_day: 0
+  });
+
+  const handleSaveMovement = () => {
+      if (!formData.amount || !formData.description) return;
+      router.post('/caja', { ...formData, type: movementType }, {
+          onSuccess: () => {
+              toast({ 
+                  title: movementType === 'ingreso' ? "Ingreso registrado" : "Egreso registrado",
+                  className: movementType === 'ingreso' ? "bg-green-500 text-white" : "bg-red-500 text-white"
+              });
+              setIsDialogOpen(false);
+              setFormData({ amount: "", description: "" });
+          }
+      });
+  };
+
+  const handleSaveCierre = () => {
+      if (!arqueoData.counted_cash) {
+          toast({ title: "Ingrese el monto contado", variant: "destructive" });
+          return;
+      }
+      
+      router.post('/caja/cierre', arqueoData, {
+          onSuccess: () => {
+              toast({ title: "Cierre guardado correctamente", className: "bg-blue-600 text-white" });
+              setIsCierreOpen(false);
+              setArqueoData({ counted_cash: "", notes: "" });
+          }
+      });
+  };
+
+  const handleDelete = (id: number) => {
+      if(confirm("¿Eliminar este movimiento?")) {
+          router.delete(`/caja/${id}`, { onSuccess: () => toast({ title: "Movimiento eliminado" }) });
+      }
+  };
+
+  const handleOpenCierre = async () => {
+      try {
+          const response = await axios.get('/caja/cierre');
+          if (response.data && typeof response.data === 'object') {
+              setLiveSummary(response.data);
+              setIsCierreOpen(true);
+          }
+      } catch (error) {
+          toast({ title: "Error al actualizar datos", variant: "destructive" });
+          setIsCierreOpen(true);
+      }
+  };
+
+  const difference = Number(arqueoData.counted_cash || 0) - liveSummary.expected_cash;
+
+  return (
+    <MainLayout>
+    <div className="flex-1 flex flex-col h-full bg-gray-50/50">
+      <Header title="Gestión de Caja" subtitle="Control de efectivo y cierres" />
+      
+      <main className="flex-1 p-6 overflow-y-auto">
+        <div className="max-w-7xl mx-auto space-y-8">
+          
+          {/* TARJETAS SUPERIORES */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <StatCard title="En Cajón (Efectivo)" value={liveSummary.expected_cash} icon={Wallet} colorClass="text-emerald-600" subtext="Ventas Efec. + Ingresos - Egresos" />
+            <StatCard title="Bancos (Digital)" value={liveSummary.sales_digital} icon={Landmark} colorClass="text-blue-600" subtext="Transferencias y Tarjetas" />
+            <StatCard title="Venta Total del Día" value={liveSummary.total_sales_day} icon={TrendingUp} colorClass="text-indigo-600" subtext="Suma de todos los métodos" />
+            <StatCard title="Gastos / Retiros" value={liveSummary.manual_expenses} icon={ArrowDownCircle} colorClass="text-rose-600" subtext="Salidas manuales de caja" />
+          </div>
+
+          {/* BOTONERA */}
+          <div className="flex flex-wrap gap-4">
+            <Button onClick={() => { setMovementType('ingreso'); setIsDialogOpen(true); }} className="bg-emerald-600 hover:bg-emerald-700 shadow-md text-white px-6 py-6 h-auto text-base flex gap-2">
+                <ArrowUpCircle className="w-5 h-5" /> Registrar Ingreso
+            </Button>
+            <Button onClick={() => { setMovementType('egreso'); setIsDialogOpen(true); }} className="bg-rose-600 hover:bg-rose-700 shadow-md text-white px-6 py-6 h-auto text-base flex gap-2">
+                <ArrowDownCircle className="w-5 h-5" /> Registrar Gasto/Retiro
+            </Button>
+            <Button onClick={handleOpenCierre} variant="outline" className="ml-auto border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm px-6 py-6 h-auto text-base flex gap-2">
+                <Calculator className="w-5 h-5" /> Realizar Arqueo (Cierre)
+            </Button>
+          </div>
+
+          {/* PESTAÑAS */}
+          <Tabs defaultValue="movimientos" className="w-full">
+            <TabsList className="grid w-full grid-cols-2 max-w-[400px]">
+              <TabsTrigger value="movimientos">Movimientos del Día</TabsTrigger>
+              <TabsTrigger value="historial">Historial de Cierres</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="movimientos">
+              <div className="bg-white rounded-xl border shadow-sm overflow-hidden mt-4">
+                  <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                          <History className="w-5 h-5 text-gray-500" />
+                          <h3 className="font-bold text-gray-700">Movimientos Manuales (Hoy)</h3>
+                      </div>
+                  </div>
+                  <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Hora</TableHead>
+                            <TableHead>Tipo</TableHead>
+                            <TableHead>Descripción</TableHead>
+                            <TableHead className="text-right">Monto</TableHead>
+                            <TableHead className="text-center">Acción</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {movements.length === 0 ? (
+                            <TableRow><TableCell colSpan={5} className="text-center py-10 text-gray-400">Sin movimientos hoy</TableCell></TableRow>
+                        ) : movements.map((mov) => (
+                            <TableRow key={mov.id}>
+                                <TableCell>{new Date(mov.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</TableCell>
+                                <TableCell>
+                                    <Badge variant={mov.type === 'ingreso' ? "default" : "destructive"} className={mov.type === 'ingreso' ? "bg-emerald-100 text-emerald-800 hover:bg-emerald-100" : "bg-rose-100 text-rose-800 hover:bg-rose-100"}>
+                                        {mov.type.toUpperCase()}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>{mov.description}</TableCell>
+                                <TableCell className={`text-right font-bold ${mov.type === 'ingreso' ? 'text-emerald-600' : 'text-rose-600'}`}>
+                                    {mov.type === 'ingreso' ? '+' : '-'} $ {Number(mov.amount).toFixed(2)}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    <Button variant="ghost" size="sm" onClick={() => handleDelete(mov.id)}><Trash2 className="w-4 h-4 text-gray-400 hover:text-red-500" /></Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="historial">
+              <div className="bg-white rounded-xl border shadow-sm overflow-hidden mt-4">
+                  <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                          <CalendarClock className="w-5 h-5 text-gray-500" />
+                          <h3 className="font-bold text-gray-700">Reportes Guardados</h3>
+                      </div>
+                  </div>
+                  <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead>Fecha</TableHead>
+                            <TableHead>Usuario</TableHead>
+                            <TableHead>Esperado</TableHead>
+                            <TableHead>Contado</TableHead>
+                            <TableHead>Diferencia</TableHead>
+                            <TableHead>Notas</TableHead>
+                            <TableHead className="text-center">Ver</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                        {!history || history.length === 0 ? (
+                            <TableRow><TableCell colSpan={6} className="text-center py-10 text-gray-400">No hay cierres guardados</TableCell></TableRow>
+                        ) : history.map((cierre) => (
+                            <TableRow key={cierre.id}>
+                                <TableCell>{new Date(cierre.created_at).toLocaleDateString()} {new Date(cierre.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</TableCell>
+                                <TableCell>{cierre.user?.name}</TableCell>
+                                <TableCell>$ {Number(cierre.expected_cash).toFixed(2)}</TableCell>
+                                <TableCell className="font-bold">$ {Number(cierre.counted_cash).toFixed(2)}</TableCell>
+                                <TableCell>
+                                    <Badge variant="outline" className={`${Number(cierre.difference) === 0 ? 'text-green-600 border-green-200 bg-green-50' : Number(cierre.difference) > 0 ? 'text-blue-600 border-blue-200 bg-blue-50' : 'text-red-600 border-red-200 bg-red-50'}`}>
+                                        $ {Number(cierre.difference).toFixed(2)}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell className="text-gray-500 italic text-sm truncate max-w-[200px]">{cierre.notes || '-'}</TableCell>
+                                <TableCell className="text-center">
+        <Button variant="ghost" size="sm" asChild>
+            {/* Usamos asChild para que el botón se comporte como Link de Inertia */}
+            <a href={`/caja/historial/${cierre.id}`}>
+                <Eye className="w-4 h-4 text-blue-600" />
+            </a>
+        </Button>
+    </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                  </Table>
+              </div>
+            </TabsContent>
+          </Tabs>
+
+        </div>
+      </main>
+
+      {/* --- MODALES --- */}
+
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        {/* ... Modal Ingreso/Egreso (Sin cambios) ... */}
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>{movementType === 'ingreso' ? 'Registrar Entrada' : 'Registrar Salida'}</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>Monto</Label>
+              <Input type="number" className="pl-4 text-lg font-bold" value={formData.amount} onChange={(e) => setFormData({...formData, amount: e.target.value})} autoFocus />
+            </div>
+            <div className="grid gap-2">
+              <Label>Descripción</Label>
+              <Textarea value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSaveMovement} className={movementType === 'ingreso' ? 'bg-emerald-600' : 'bg-rose-600'}>Guardar</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 2. Modal de Cierre/Arqueo (CORREGIDO) */}
+      <Dialog open={isCierreOpen} onOpenChange={setIsCierreOpen}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle>Arqueo y Cierre de Caja</DialogTitle>
+            <DialogDescription>Verifique los montos antes de guardar.</DialogDescription>
+          </DialogHeader>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+              
+              {/* LADO IZQUIERDO: SISTEMA */}
+              <div className="space-y-4">
+                  {/* --- AQUI ESTA LO QUE FALTABA: BLOQUE DIGITAL --- */}
+                  <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
+                      <h4 className="font-bold text-gray-700 flex items-center gap-2">
+                          <CreditCard className="w-4 h-4"/> Digital (Banco)
+                      </h4>
+                      <div className="flex justify-between text-sm">
+                          <span>Transferencias/Tarjetas:</span>
+                          <span className="font-bold text-blue-600">$ {liveSummary.sales_digital.toFixed(2)}</span>
+                      </div>
+                      <p className="text-xs text-gray-400 italic">Este dinero debe estar en tu cuenta bancaria.</p>
+                  </div>
+                  {/* ----------------------------------------------- */}
+
+                  <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100 space-y-3">
+                      <h4 className="font-bold text-emerald-800 flex items-center gap-2">
+                          <Wallet className="w-4 h-4"/> Efectivo Esperado
+                      </h4>
+                      <div className="flex justify-between text-sm"><span>Ventas Efectivo:</span><span>$ {liveSummary.sales_cash.toFixed(2)}</span></div>
+                      <div className="flex justify-between text-sm text-green-600"><span>+ Ingresos:</span><span>$ {liveSummary.manual_incomes.toFixed(2)}</span></div>
+                      <div className="flex justify-between text-sm text-red-600"><span>- Egresos:</span><span>$ {liveSummary.manual_expenses.toFixed(2)}</span></div>
+                      <div className="pt-2 border-t border-emerald-200 flex justify-between font-bold text-lg text-emerald-900">
+                          <span>Total en Cajón:</span><span>$ {liveSummary.expected_cash.toFixed(2)}</span>
+                      </div>
+                  </div>
+              </div>
+
+              {/* LADO DERECHO: USUARIO */}
+              <div className="space-y-4 border-l pl-6 border-dashed">
+                  <h4 className="font-bold text-gray-800">Conteo Físico</h4>
+                  <div className="space-y-2">
+                      <Label>¿Cuánto efectivo hay?</Label>
+                      <Input type="number" className="pl-4 text-xl font-bold bg-yellow-50 border-yellow-200" placeholder="0.00" value={arqueoData.counted_cash} onChange={e => setArqueoData({...arqueoData, counted_cash: e.target.value})} autoFocus />
+                  </div>
+                  {arqueoData.counted_cash && (
+                      <div className={`p-4 rounded-lg text-center border-2 ${difference === 0 ? 'bg-green-50 border-green-200 text-green-700' : difference > 0 ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-red-50 border-red-200 text-red-700'}`}>
+                          <p className="text-sm font-semibold uppercase tracking-wider mb-1">{difference === 0 ? "Cuadre Perfecto" : difference > 0 ? "Sobrante" : "Faltante"}</p>
+                          <p className="text-2xl font-bold">$ {Math.abs(difference).toFixed(2)}</p>
+                      </div>
+                  )}
+                  <div className="space-y-2">
+                      <Label>Notas</Label>
+                      <Textarea placeholder="Observaciones..." value={arqueoData.notes} onChange={e => setArqueoData({...arqueoData, notes: e.target.value})} rows={2} />
+                  </div>
+              </div>
+          </div>
+
+          <DialogFooter className="flex justify-between sm:justify-between w-full">
+            <Button variant="ghost" onClick={() => setIsCierreOpen(false)}>Cancelar</Button>
+            <div className="flex gap-2">
+                <Button variant="outline" onClick={() => window.print()} className="gap-2"><Printer className="w-4 h-4"/> Imprimir</Button>
+                {/* BOTÓN GUARDAR */}
+                <Button onClick={handleSaveCierre} className="bg-blue-600 hover:bg-blue-700 text-white gap-2 shadow-md">
+                    <Save className="w-4 h-4"/> Guardar Cierre
+                </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+    </div>
+    </MainLayout>
+  );
 }

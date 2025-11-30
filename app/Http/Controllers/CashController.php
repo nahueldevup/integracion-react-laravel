@@ -1,150 +1,137 @@
 <?php
-//php artisan make:controller CashController
+
 namespace App\Http\Controllers;
 
 use App\Models\CashMovement;
 use App\Models\Sale;
+use App\Models\CashCount; // <--- Asegúrate de tener este Modelo creado
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class CashController extends Controller
 {
-    /**
-     * Mostrar pantalla de caja con movimientos y resumen
-     */
     public function index(Request $request)
     {
-        //Filtros de fecha (por defecto hoy)
-        $fechaDesde = $request->fecha_desde ?? now()->startOfDay()->toDateTimeString();
-        $fechaHasta = $request->fecha_hasta ?? now()->endOfDay()->toDateTimeString();
+        $today = Carbon::today();
 
-        //Movimientos de caja
+        // 1. Movimientos del día
         $movements = CashMovement::with('user')
-                    ->whereBetween('created_at', [$fechaDesde, $fechaHasta])
-                    ->orderBy('created_at', 'desc')
-                    ->get();
+            ->whereDate('created_at', $today)
+            ->orderBy('created_at', 'desc')
+            ->get();
 
-        //Ventas del período
-        $sales = Sale::whereBetween('created_at', [$fechaDesde, $fechaHasta])
-                     ->get();
-
-        //Cálculos de resumen
-        $ingresos = $movements->where('type', 'income')->sum('amount');
-        $egresos = $movements->where('type', 'expense')->sum('amount');
-        $ventasEfectivo = $sales->where('payment_method', 'efectivo')->sum('total');
-        $ventasTarjeta = $sales->where('payment_method', 'tarjeta')->sum('total');
-        $ventasTransferencia = $sales->where('payment_method', 'transferencia')->sum('total');
+        // 2. Historial de Cierres (Recuperamos los últimos 10)
+        $history = CashCount::with('user')
+            ->orderBy('created_at', 'desc')
+            ->take(10)
+            ->get();
         
-        $totalVentas = $ventasEfectivo + $ventasTarjeta + $ventasTransferencia;
-        $saldoCaja = $ingresos - $egresos + $ventasEfectivo; // Solo efectivo afecta caja física
-
         return Inertia::render('Caja', [
-            'movimientos' => [
-                'ingresos' => $movements->where('type', 'income')->values(),
-                'egresos' => $movements->where('type', 'expense')->values(),
-            ],
-            'resumen' => [
-                'total_ingresos' => $ingresos,
-                'total_egresos' => $egresos,
-                'ventas_efectivo' => $ventasEfectivo,
-                'ventas_tarjeta' => $ventasTarjeta,
-                'ventas_transferencia' => $ventasTransferencia,
-                'total_ventas' => $totalVentas,
-                'saldo_caja' => $saldoCaja,
-            ],
-            'filtros' => [
-                'fecha_desde' => $fechaDesde,
-                'fecha_hasta' => $fechaHasta,
-            ]
+            'movements' => $movements,
+            'summary' => $this->calculateDailySummary($today),
+            'history' => $history // <--- Enviamos el historial a la vista
         ]);
     }
 
-    /**
-     * Registrar nuevo movimiento de caja
-     */
+    // Guardar movimiento manual (Ingreso/Egreso)
     public function store(Request $request)
     {
         $request->validate([
-            'type' => 'required|in:income,expense',
             'amount' => 'required|numeric|min:0.01',
             'description' => 'required|string|max:255',
+            'type' => 'required|in:ingreso,egreso',
         ]);
         
         CashMovement::create([
             'type' => $request->type,
             'amount' => $request->amount,
             'description' => $request->description,
-            'user_id' => Auth::id() ?? 1,
+            'user_id' => Auth::id() ?? 1
         ]);
 
-        $mensaje = $request->type === 'income' 
-            ? 'Ingreso registrado correctamente' 
-            : 'Egreso registrado correctamente';
-
-        return redirect()->back()->with('success', $mensaje);
+        return redirect()->back()->with('success', 'Movimiento registrado');
     }
 
+    // --- NUEVO: Guardar el Arqueo/Cierre en la BD ---
+    public function storeCierre(Request $request)
+    {
+        $request->validate([
+            'counted_cash' => 'required|numeric|min:0',
+            'notes' => 'nullable|string'
+        ]);
+
+        $today = Carbon::today();
+        $summary = $this->calculateDailySummary($today);
+        
+        // Calculamos la diferencia final
+        $counted = $request->counted_cash;
+        $difference = $counted - $summary['expected_cash'];
+
+        CashCount::create([
+            'user_id' => Auth::id() ?? 1,
+            'sales_cash' => $summary['sales_cash'],
+            'sales_digital' => $summary['sales_digital'],
+            'manual_incomes' => $summary['manual_incomes'],
+            'manual_expenses' => $summary['manual_expenses'],
+            'expected_cash' => $summary['expected_cash'],
+            'counted_cash' => $counted,
+            'difference' => $difference,
+            'notes' => $request->notes
+        ]);
+
+        return redirect()->back()->with('success', 'Cierre guardado correctamente');
+    }
+    
     /**
-     * Eliminar movimiento de caja
+     * Ver el detalle de un cierre histórico
      */
+    public function show($id)
+    {
+        $cierre = CashCount::with('user')->findOrFail($id);
+        
+        // Buscamos los movimientos que ocurrieron en la fecha del cierre
+        $movements = CashMovement::with('user')
+            ->whereDate('created_at', $cierre->created_at)
+            ->orderBy('created_at', 'asc')
+            ->get();
+
+        return Inertia::render('CajaDetalle', [
+            'cierre' => $cierre,
+            'movements' => $movements
+        ]);
+    }
+
     public function destroy($id)
     {
         $movement = CashMovement::findOrFail($id);
         $movement->delete();
-
-        return redirect()->back()->with('success', 'Movimiento eliminado correctamente');
+        return redirect()->back()->with('success', 'Movimiento eliminado');
     }
 
-    /**
-     * Reporte de cierre de caja
-     */
-    public function cierreCaja(Request $request)
+    public function cierreCaja()
     {
-        $fechaDesde = $request->fecha_desde ?? now()->startOfDay();
-        $fechaHasta = $request->fecha_hasta ?? now()->endOfDay();
+        $today = Carbon::today();
+        return response()->json($this->calculateDailySummary($today));
+    }
 
-        // Obtener datos del período
-        $movements = CashMovement::whereBetween('created_at', [$fechaDesde, $fechaHasta])->get();
-        $sales = Sale::with('details')->whereBetween('created_at', [$fechaDesde, $fechaHasta])->get();
+    private function calculateDailySummary($date)
+    {
+        $salesCash = Sale::whereDate('created_at', $date)->where('payment_method', 'efectivo')->sum('total');
+        $salesTransfer = Sale::whereDate('created_at', $date)->where('payment_method', 'transferencia')->sum('total');
+        $salesCard = Sale::whereDate('created_at', $date)->where('payment_method', 'tarjeta')->sum('total');
 
-        // Cálculos detallados
-        $ingresos = $movements->where('type', 'income')->sum('amount');
-        $egresos = $movements->where('type', 'expense')->sum('amount');
-        
-        $totalVentas = $sales->sum('total');
-        $costoVentas = $sales->flatMap->details->sum(function($detail) {
-            return $detail->cost * $detail->quantity;
-        });
-        $utilidadBruta = $totalVentas - $costoVentas;
+        $incomes = CashMovement::whereDate('created_at', $date)->where('type', 'ingreso')->sum('amount');
+        $expenses = CashMovement::whereDate('created_at', $date)->where('type', 'egreso')->sum('amount');
 
-        // Desglose por método de pago
-        $ventasPorMetodo = $sales->groupBy('payment_method')->map(function($group) {
-            return [
-                'cantidad' => $group->count(),
-                'total' => $group->sum('total'),
-            ];
-        });
-
-        return Inertia::render('CierreCaja', [
-            'periodo' => [
-                'desde' => $fechaDesde->format('d/m/Y H:i'),
-                'hasta' => $fechaHasta->format('d/m/Y H:i'),
-            ],
-            'resumen' => [
-                'total_ventas' => $totalVentas,
-                'costo_ventas' => $costoVentas,
-                'utilidad_bruta' => $utilidadBruta,
-                'ingresos_caja' => $ingresos,
-                'egresos_caja' => $egresos,
-                'saldo_caja' => $ingresos - $egresos + $ventasPorMetodo->get('efectivo')['total'] ?? 0,
-            ],
-            'ventas_por_metodo' => $ventasPorMetodo,
-            'movimientos_detalle' => [
-                'ingresos' => $movements->where('type', 'income')->values(),
-                'egresos' => $movements->where('type', 'expense')->values(),
-            ],
-        ]);
+        return [
+            'sales_cash' => (float) $salesCash,
+            'sales_digital' => (float) ($salesTransfer + $salesCard),
+            'manual_incomes' => (float) $incomes,
+            'manual_expenses' => (float) $expenses,
+            'expected_cash' => (float) ($salesCash + $incomes - $expenses),
+            'total_sales_day' => (float) ($salesCash + $salesTransfer + $salesCard)
+        ];
     }
 }
