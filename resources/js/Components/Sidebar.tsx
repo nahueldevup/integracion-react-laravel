@@ -8,12 +8,11 @@ import { useIsMobile } from "@/Hooks/use-mobile";
 
 const menuItems = [
   { title: "Inicio", icon: Home, path: "/" },
-  { title: "Escritorio", icon: LayoutGrid, path: "/escritorio" },
-  { title: "Productos", icon: Package, path: "/productos" },
   { title: "Vender", icon: ShoppingCart, path: "/vender" },
+  { title: "Productos", icon: Package, path: "/productos" },
+  { title: "Clientes", icon: Users, path: "/clientes" },
   { title: "Caja", icon: Wallet, path: "/caja" },
   { title: "Reportes", icon: FileText, path: "/reportes", hasSubmenu: true },
-  { title: "Gráficas y estadísticas", icon: BarChart3, path: "/graficas" },
   { title: "Más", icon: Plus, path: "#", hasOtherSubmenu: true },
 ];
 

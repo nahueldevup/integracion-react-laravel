@@ -8,11 +8,19 @@ use App\Http\Controllers\SaleController;
 use App\Http\Controllers\CashController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ReportController;
+
 
 Route::middleware(['web'])->group(function () {
 
+    // Dashboard con alertas de stock bajo
     Route::get('/', function () {
-        return Inertia::render('Dashboard');
+        $lowStockProducts = \App\Models\Product::whereRaw('stock <= min_stock')
+            ->get(['id', 'description', 'stock', 'min_stock']);
+            
+        return Inertia::render('Dashboard', [
+            'lowStockProducts' => $lowStockProducts
+        ]);
     });
 
     Route::get('/login', function () { return Inertia::render('Login'); })->name('login');
@@ -40,6 +48,7 @@ Route::middleware(['web'])->group(function () {
     Route::get('/clientes/{id}', [ClientController::class, 'show'])->name('clients.show');
     Route::put('/clientes/{id}', [ClientController::class, 'update'])->name('clients.update');
     Route::delete('/clientes/{id}', [ClientController::class, 'destroy'])->name('clients.destroy');
+    Route::get('/api/clientes/search', [ClientController::class, 'search'])->name('clients.search');
 
     // Caja
     Route::get('/caja', [CashController::class, 'index'])->name('cash.index');

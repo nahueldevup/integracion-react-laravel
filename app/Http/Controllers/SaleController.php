@@ -170,6 +170,9 @@ class SaleController extends Controller
     /**
      * Ver detalle de una venta específica
      */
+   /**
+     * Ver detalle de una venta específica
+     */
     public function show($id)
     {
         $sale = Sale::with(['user', 'client', 'details.product'])
@@ -178,33 +181,34 @@ class SaleController extends Controller
         return Inertia::render('VentaDetalle', [
             'venta' => [
                 'id' => $sale->id,
-                'folio' => $sale->sale_number,
+                'folio' => $sale->sale_number ?? 'N/A',
                 'fecha' => $sale->created_at->format('d/m/Y H:i:s'),
                 'cliente' => $sale->client ? [
                     'nombre' => $sale->client->name,
-                    'telefono' => $sale->client->phone,
+                    'telefono' => $sale->client->phone ?? null,
                 ] : null,
                 'usuario' => $sale->user->name ?? 'Sistema',
-                'subtotal' => $sale->subtotal,
-                'impuestos' => $sale->tax_amount,
-                'total' => $sale->total,
-                'metodo_pago' => $sale->payment_method,
-                'monto_pagado' => $sale->amount_paid,
-                'cambio' => $sale->change_amount,
+                'subtotal' => (float) $sale->subtotal,
+                'impuestos' => (float) $sale->tax_amount,
+                'total' => (float) $sale->total,
+                'metodo_pago' => $sale->payment_method ?? 'efectivo',
+                'monto_pagado' => (float) $sale->amount_paid,
+                'cambio' => (float) $sale->change_amount,
                 'detalles' => $sale->details->map(function($detail) {
                     return [
                         'producto' => $detail->product_name,
-                        'codigo' => $detail->product_barcode,
-                        'cantidad' => $detail->quantity,
-                        'precio_unitario' => $detail->unit_price,
-                        'costo' => $detail->cost,
-                        'total' => $detail->line_total,
-                        'utilidad' => ($detail->unit_price - $detail->cost) * $detail->quantity,
+                        'codigo' => $detail->product_barcode ?? 'S/C',
+                        'cantidad' => (int) $detail->quantity,
+                        'precio_unitario' => (float) $detail->unit_price,
+                        'costo' => (float) $detail->cost,
+                        'total' => (float) $detail->line_total,
+                        'utilidad' => (float) (($detail->unit_price - $detail->cost) * $detail->quantity),
                     ];
-                }),
+                })->values()->toArray(),
             ]
         ]);
     }
+ 
 
     /**
      * Anular una venta (soft delete)
