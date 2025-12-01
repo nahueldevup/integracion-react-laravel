@@ -15,7 +15,9 @@ import {
     CreditCard,
     Banknote,
     UserPlus,
-    Check
+    Check,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 
 // --- Interfaces ---
@@ -138,7 +140,8 @@ function PaymentMethodButton({ icon: Icon, label, isSelected, onClick }: any) {
 }
 
 // --- Componente Principal ---
-export default function Vender({ allProducts, clients }: Props) { // <--- Destructuramos clients
+export default function Vender({ allProducts, clients }: Props) {
+    // <--- Destructuramos clients
     const { toast } = useToast();
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -149,11 +152,17 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
     const searchInputRef = useRef<HTMLInputElement>(null);
 
     // Estados para clientes
-    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+    const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
+        null
+    );
     const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
     const [customerSearch, setCustomerSearch] = useState(""); // Texto del input de búsqueda de clientes
+
+    // Paginación
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 20;
 
     // --- Lógica de Filtros ---
     const filteredProducts = allProducts.filter(
@@ -164,10 +173,25 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
             (product.barcode && product.barcode.includes(searchQuery))
     );
 
+    // Lógica de paginación
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
+    const paginatedProducts = filteredProducts.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Resetear página al buscar
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchQuery]);
+
     // Filtrar clientes para el buscador
-    const filteredClients = customerSearch.trim() === "" 
-        ? [] 
-        : clients.filter(c => c.name.toLowerCase().includes(customerSearch.toLowerCase()));
+    const filteredClients =
+        customerSearch.trim() === ""
+            ? []
+            : clients.filter((c) =>
+                  c.name.toLowerCase().includes(customerSearch.toLowerCase())
+              );
 
     const subtotal = cartItems.reduce((sum, item) => sum + item.total, 0);
     const total = subtotal;
@@ -188,6 +212,13 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
         window.addEventListener("keydown", handleKeyDown);
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [cartItems.length, showCheckout]);
+
+    // Pre-llenar monto al abrir checkout
+    useEffect(() => {
+        if (showCheckout) {
+            setAmountReceived(total.toFixed(2));
+        }
+    }, [showCheckout, total]);
 
     // --- Funciones del Carrito ---
     const addToCart = (product: Product) => {
@@ -267,12 +298,20 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
     // --- Procesar Venta ---
     const completeSale = () => {
         if (cartItems.length === 0) {
-            toast({ title: "Error", description: "El carrito está vacío", variant: "destructive" });
+            toast({
+                title: "Error",
+                description: "El carrito está vacío",
+                variant: "destructive",
+            });
             return;
         }
 
-        if (paymentMethod === "efectivo" && payment < total) {
-            toast({ title: "Error", description: "Monto insuficiente", variant: "destructive" });
+        if (payment < total) {
+            toast({
+                title: "Error",
+                description: "Monto insuficiente",
+                variant: "destructive",
+            });
             return;
         }
 
@@ -283,9 +322,9 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
                 salePrice: Number(item.sale_price),
             })),
             payment_method: paymentMethod,
-            amount_received: paymentMethod === "efectivo" ? payment : total,
+            amount_received: payment,
             // Enviamos ID si existe (cliente de BD) o nombre/teléfono si es nuevo
-            client_id: selectedCustomer?.id || null, 
+            client_id: selectedCustomer?.id || null,
             client_name: selectedCustomer?.id ? null : selectedCustomer?.name,
             client_phone: selectedCustomer?.id ? null : selectedCustomer?.phone,
         };
@@ -294,7 +333,10 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
             onSuccess: () => {
                 toast({
                     title: "¡Venta Exitosa!",
-                    description: paymentMethod === "efectivo" ? `Cambio: $${change.toFixed(2)}` : "Venta procesada correctamente",
+                    description:
+                        paymentMethod === "efectivo"
+                            ? `Cambio: $${change.toFixed(2)}`
+                            : "Venta procesada correctamente",
                     className: "bg-green-500 text-white",
                 });
                 setCartItems([]);
@@ -308,7 +350,8 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
                 console.error("Error en venta:", errors);
                 toast({
                     title: "Error",
-                    description: "No se pudo procesar la venta. Verifique los datos.",
+                    description:
+                        "No se pudo procesar la venta. Verifique los datos.",
                     variant: "destructive",
                 });
             },
@@ -332,22 +375,72 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
                                     type="text"
                                     placeholder="Buscar producto por nombre o código..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                    }
                                     className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all"
                                 />
                             </div>
                         </div>
                         <div className="flex-1 overflow-y-auto p-4 sm:p-6">
                             {filteredProducts.length === 0 ? (
-                                <p className="text-center text-gray-400 mt-10">No se encontraron productos</p>
+                                <p className="text-center text-gray-400 mt-10">
+                                    No se encontraron productos
+                                </p>
                             ) : (
                                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-                                    {filteredProducts.map((product) => (
-                                        <ProductCard key={product.id} product={product} onAdd={addToCart} />
+                                    {paginatedProducts.map((product) => (
+                                        <ProductCard
+                                            key={product.id}
+                                            product={product}
+                                            onAdd={addToCart}
+                                        />
                                     ))}
                                 </div>
                             )}
                         </div>
+
+                        {/* Controles de Paginación */}
+                        {filteredProducts.length > 0 && (
+                            <div className="p-4 bg-white border-t border-gray-100 flex items-center justify-between">
+                                <span className="text-sm text-gray-500">
+                                    Mostrando{" "}
+                                    {(currentPage - 1) * itemsPerPage + 1} -{" "}
+                                    {Math.min(
+                                        currentPage * itemsPerPage,
+                                        filteredProducts.length
+                                    )}{" "}
+                                    de {filteredProducts.length}
+                                </span>
+                                <div className="flex gap-2">
+                                    <button
+                                        onClick={() =>
+                                            setCurrentPage((prev) =>
+                                                Math.max(prev - 1, 1)
+                                            )
+                                        }
+                                        disabled={currentPage === 1}
+                                        className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronLeft className="w-5 h-5" />
+                                    </button>
+                                    <span className="flex items-center px-4 font-medium">
+                                        Página {currentPage} de {totalPages}
+                                    </span>
+                                    <button
+                                        onClick={() =>
+                                            setCurrentPage((prev) =>
+                                                Math.min(prev + 1, totalPages)
+                                            )
+                                        }
+                                        disabled={currentPage === totalPages}
+                                        className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        <ChevronRight className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Panel Derecho - Carrito */}
@@ -356,7 +449,9 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
                             <div className="flex items-center justify-between mb-1">
                                 <div className="flex items-center gap-2">
                                     <ShoppingCart className="w-5 h-5" />
-                                    <h2 className="font-bold text-lg">Carrito</h2>
+                                    <h2 className="font-bold text-lg">
+                                        Carrito
+                                    </h2>
                                 </div>
                                 <span className="bg-white/20 px-3 py-0.5 rounded-full text-sm font-medium">
                                     {cartItems.length} items
@@ -366,14 +461,20 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
 
                         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30">
                             {cartItems.length === 0 ? (
-                                <p className="text-center text-gray-400 mt-10">Carrito vacío</p>
+                                <p className="text-center text-gray-400 mt-10">
+                                    Carrito vacío
+                                </p>
                             ) : (
                                 cartItems.map((item) => (
                                     <CartItemRow
                                         key={item.id}
                                         item={item}
-                                        onIncrease={() => updateQuantity(item.id, 1)}
-                                        onDecrease={() => updateQuantity(item.id, -1)}
+                                        onIncrease={() =>
+                                            updateQuantity(item.id, 1)
+                                        }
+                                        onDecrease={() =>
+                                            updateQuantity(item.id, -1)
+                                        }
                                         onRemove={removeFromCart}
                                     />
                                 ))
@@ -383,8 +484,12 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
                         {cartItems.length > 0 && (
                             <div className="bg-white p-4 border-t border-gray-100">
                                 <div className="flex justify-between items-baseline mb-4">
-                                    <span className="text-xl font-bold text-gray-800">Total</span>
-                                    <span className="text-3xl font-extrabold text-blue-600">${total.toFixed(2)}</span>
+                                    <span className="text-xl font-bold text-gray-800">
+                                        Total
+                                    </span>
+                                    <span className="text-3xl font-extrabold text-blue-600">
+                                        ${total.toFixed(2)}
+                                    </span>
                                 </div>
                                 <div className="grid grid-cols-2 gap-3">
                                     <button
@@ -410,7 +515,9 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
                         <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-6">
                             <div className="flex justify-between items-center border-b pb-4">
-                                <h2 className="text-xl font-bold">Procesar Pago</h2>
+                                <h2 className="text-xl font-bold">
+                                    Procesar Pago
+                                </h2>
                                 <button onClick={() => setShowCheckout(false)}>
                                     <X className="w-5 h-5" />
                                 </button>
@@ -418,39 +525,91 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
 
                             {/* Método de Pago */}
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-3">Método de Pago</label>
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-3">
+                                    Método de Pago
+                                </label>
                                 <div className="grid grid-cols-3 gap-3">
-                                    <PaymentMethodButton icon={Banknote} label="Efectivo" isSelected={paymentMethod === "efectivo"} onClick={() => setPaymentMethod("efectivo")} />
-                                    <PaymentMethodButton icon={CreditCard} label="Tarjeta" isSelected={paymentMethod === "tarjeta"} onClick={() => setPaymentMethod("tarjeta")} />
-                                    <PaymentMethodButton icon={DollarSign} label="Transferencia" isSelected={paymentMethod === "transferencia"} onClick={() => setPaymentMethod("transferencia")} />
+                                    <PaymentMethodButton
+                                        icon={Banknote}
+                                        label="Efectivo"
+                                        isSelected={
+                                            paymentMethod === "efectivo"
+                                        }
+                                        onClick={() => {
+                                            setPaymentMethod("efectivo");
+                                            setAmountReceived(total.toFixed(2));
+                                        }}
+                                    />
+                                    <PaymentMethodButton
+                                        icon={CreditCard}
+                                        label="Tarjeta"
+                                        isSelected={paymentMethod === "tarjeta"}
+                                        onClick={() => {
+                                            setPaymentMethod("tarjeta");
+                                            setAmountReceived(total.toFixed(2));
+                                        }}
+                                    />
+                                    <PaymentMethodButton
+                                        icon={DollarSign}
+                                        label="Transferencia"
+                                        isSelected={
+                                            paymentMethod === "transferencia"
+                                        }
+                                        onClick={() => {
+                                            setPaymentMethod("transferencia");
+                                            setAmountReceived(total.toFixed(2));
+                                        }}
+                                    />
                                 </div>
                             </div>
 
                             {/* Cliente */}
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">Cliente (Opcional)</label>
-                                
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
+                                    Cliente (Opcional)
+                                </label>
+
                                 {isCreatingCustomer ? (
                                     // Modo: Crear Nuevo
                                     <div className="space-y-2 border p-3 rounded bg-gray-50 animate-in fade-in zoom-in-95 duration-200">
                                         <div className="flex justify-between items-center mb-2">
-                                            <span className="text-sm font-semibold text-blue-600">Nuevo Cliente</span>
-                                            <button onClick={() => setIsCreatingCustomer(false)} className="text-gray-400 hover:text-red-500"><X className="w-4 h-4"/></button>
+                                            <span className="text-sm font-semibold text-blue-600">
+                                                Nuevo Cliente
+                                            </span>
+                                            <button
+                                                onClick={() =>
+                                                    setIsCreatingCustomer(false)
+                                                }
+                                                className="text-gray-400 hover:text-red-500"
+                                            >
+                                                <X className="w-4 h-4" />
+                                            </button>
                                         </div>
                                         <input
                                             className="w-full border p-2 rounded text-sm"
                                             placeholder="Nombre completo *"
                                             value={newCustomerName}
-                                            onChange={(e) => setNewCustomerName(e.target.value)}
+                                            onChange={(e) =>
+                                                setNewCustomerName(
+                                                    e.target.value
+                                                )
+                                            }
                                             autoFocus
                                         />
                                         <input
                                             className="w-full border p-2 rounded text-sm"
                                             placeholder="Teléfono (opcional)"
                                             value={newCustomerPhone}
-                                            onChange={(e) => setNewCustomerPhone(e.target.value)}
+                                            onChange={(e) =>
+                                                setNewCustomerPhone(
+                                                    e.target.value
+                                                )
+                                            }
                                         />
-                                        <button onClick={handleCreateCustomer} className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 text-sm font-medium">
+                                        <button
+                                            onClick={handleCreateCustomer}
+                                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 text-sm font-medium"
+                                        >
                                             Usar este cliente
                                         </button>
                                     </div>
@@ -461,13 +620,30 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
                                             // Cliente Seleccionado
                                             <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="bg-blue-100 p-1.5 rounded-full"><User className="w-4 h-4 text-blue-600" /></div>
+                                                    <div className="bg-blue-100 p-1.5 rounded-full">
+                                                        <User className="w-4 h-4 text-blue-600" />
+                                                    </div>
                                                     <div>
-                                                        <p className="font-semibold text-sm text-gray-800">{selectedCustomer.name}</p>
-                                                        {selectedCustomer.phone && <p className="text-xs text-gray-500">{selectedCustomer.phone}</p>}
+                                                        <p className="font-semibold text-sm text-gray-800">
+                                                            {
+                                                                selectedCustomer.name
+                                                            }
+                                                        </p>
+                                                        {selectedCustomer.phone && (
+                                                            <p className="text-xs text-gray-500">
+                                                                {
+                                                                    selectedCustomer.phone
+                                                                }
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </div>
-                                                <button onClick={handleRemoveClient} className="text-gray-400 hover:text-red-500"><X className="w-4 h-4"/></button>
+                                                <button
+                                                    onClick={handleRemoveClient}
+                                                    className="text-gray-400 hover:text-red-500"
+                                                >
+                                                    <X className="w-4 h-4" />
+                                                </button>
                                             </div>
                                         ) : (
                                             // Input de Búsqueda
@@ -478,31 +654,63 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
                                                         className="w-full pl-9 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
                                                         placeholder="Buscar cliente..."
                                                         value={customerSearch}
-                                                        onChange={(e) => setCustomerSearch(e.target.value)}
+                                                        onChange={(e) =>
+                                                            setCustomerSearch(
+                                                                e.target.value
+                                                            )
+                                                        }
                                                     />
-                                                    
+
                                                     {/* Resultados de búsqueda (Dropdown) */}
                                                     {customerSearch && (
                                                         <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
-                                                            {filteredClients.length > 0 ? (
-                                                                filteredClients.map(client => (
-                                                                    <div 
-                                                                        key={client.id} 
-                                                                        onClick={() => handleSelectClient(client)}
-                                                                        className="p-2 hover:bg-gray-100 cursor-pointer text-sm border-b last:border-0 flex justify-between items-center"
-                                                                    >
-                                                                        <span>{client.name}</span>
-                                                                        {client.phone && <span className="text-xs text-gray-400">{client.phone}</span>}
-                                                                    </div>
-                                                                ))
+                                                            {filteredClients.length >
+                                                            0 ? (
+                                                                filteredClients.map(
+                                                                    (
+                                                                        client
+                                                                    ) => (
+                                                                        <div
+                                                                            key={
+                                                                                client.id
+                                                                            }
+                                                                            onClick={() =>
+                                                                                handleSelectClient(
+                                                                                    client
+                                                                                )
+                                                                            }
+                                                                            className="p-2 hover:bg-gray-100 cursor-pointer text-sm border-b last:border-0 flex justify-between items-center"
+                                                                        >
+                                                                            <span>
+                                                                                {
+                                                                                    client.name
+                                                                                }
+                                                                            </span>
+                                                                            {client.phone && (
+                                                                                <span className="text-xs text-gray-400">
+                                                                                    {
+                                                                                        client.phone
+                                                                                    }
+                                                                                </span>
+                                                                            )}
+                                                                        </div>
+                                                                    )
+                                                                )
                                                             ) : (
-                                                                <div className="p-3 text-sm text-gray-500 text-center">No encontrado</div>
+                                                                <div className="p-3 text-sm text-gray-500 text-center">
+                                                                    No
+                                                                    encontrado
+                                                                </div>
                                                             )}
                                                         </div>
                                                     )}
                                                 </div>
                                                 <button
-                                                    onClick={() => setIsCreatingCustomer(true)}
+                                                    onClick={() =>
+                                                        setIsCreatingCustomer(
+                                                            true
+                                                        )
+                                                    }
                                                     className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-gray-600 border border-gray-200"
                                                     title="Crear nuevo cliente"
                                                 >
@@ -518,32 +726,47 @@ export default function Vender({ allProducts, clients }: Props) { // <--- Destru
                             <div className="bg-blue-50 p-4 rounded-xl space-y-3">
                                 <div className="flex justify-between text-xl font-bold">
                                     <span>Total:</span>
-                                    <span className="text-blue-600">${total.toFixed(2)}</span>
+                                    <span className="text-blue-600">
+                                        ${total.toFixed(2)}
+                                    </span>
                                 </div>
 
-                                {paymentMethod === "efectivo" && (
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-3">
-                                            <label className="font-semibold">Recibido:</label>
-                                            <input
-                                                type="number"
-                                                step="0.01"
-                                                autoFocus
-                                                className="flex-1 border rounded p-2 font-bold text-lg"
-                                                value={amountReceived}
-                                                onChange={(e) => setAmountReceived(e.target.value)}
-                                                onKeyDown={(e) => e.key === "Enter" && completeSale()}
-                                                placeholder="0.00"
-                                            />
-                                        </div>
-                                        <div className="flex justify-between text-lg">
-                                            <span>Cambio:</span>
-                                            <span className={`font-bold ${change < 0 ? "text-red-500" : "text-green-600"}`}>
-                                                ${change.toFixed(2)}
-                                            </span>
-                                        </div>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-3">
+                                        <label className="font-semibold">
+                                            Monto a Pagar:
+                                        </label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            autoFocus
+                                            className="flex-1 border rounded p-2 font-bold text-lg"
+                                            value={amountReceived}
+                                            onChange={(e) =>
+                                                setAmountReceived(
+                                                    e.target.value
+                                                )
+                                            }
+                                            onKeyDown={(e) =>
+                                                e.key === "Enter" &&
+                                                completeSale()
+                                            }
+                                            placeholder="0.00"
+                                        />
                                     </div>
-                                )}
+                                    <div className="flex justify-between text-lg">
+                                        <span>Cambio:</span>
+                                        <span
+                                            className={`font-bold ${
+                                                change < 0
+                                                    ? "text-red-500"
+                                                    : "text-green-600"
+                                            }`}
+                                        >
+                                            ${change.toFixed(2)}
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
 
                             <button
