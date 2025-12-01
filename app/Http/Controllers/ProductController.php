@@ -6,6 +6,9 @@ use App\Models\Product;
 use App\Models\Category;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ProductsExport;
+use App\Imports\ProductsImport;
 use Illuminate\Validation\Rule;
 
 class ProductController extends Controller
@@ -24,8 +27,9 @@ class ProductController extends Controller
         }
 
         return Inertia::render('Productos', [
-            'products' => $query->orderBy('id', 'desc')->get(),
-            'categories' => $categories
+            'products' => $query->orderBy('id', 'desc')->paginate(15)->withQueryString(),
+            'categories' => $categories,
+            'filters' => $request->only('search')
         ]);
     }
 
@@ -125,5 +129,48 @@ class ProductController extends Controller
         $product->increment('stock', $request->quantity);
         
         return redirect()->back();
+    }
+
+    public function export()
+    {
+        return Excel::download(new ProductsExport, 'productos_' . date('Y-m-d') . '.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv|max:2048'
+        ]);
+
+        try {
+            Excel::import(new ProductsImport, $request->file('file'));
+            
+            return redirect()->back()->with('success', 'Productos importados exitosamente');
+        } catch (\Exception $e) {
+            return redirect()->back()->withErrors(['file' => 'Error al importar: ' . $e->getMessage()]);
+        }
+    }
+
+    public function downloadTemplate()
+    {
+        // Crear un array con datos de ejemplo
+        $data = [
+            ['Código de Barras', 'Descripción', 'Categoría', 'Precio Compra', 'Precio Venta', 'Stock', 'Stock Mínimo'],
+            ['7790001234567', 'Coca Cola 500ml', 'Bebidas', '100.00', '150.00', '50', '10'],
+            ['7790001234568', 'Pepsi 500ml', 'Bebidas', '95.00', '145.00', '30', '10'],
+            ['', 'Alfajor Jorgito', 'Golosinas', '50.00', '80.00', '100', '20'],
+        ];
+
+        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\FromArray {
+            protected $data;
+            
+            public function __construct($data = []) {
+                $this->data = $data;
+            }
+            
+            public function array(): array {
+                return $this->data;
+            }
+        }, 'plantilla_productos.xlsx');
     }
 }

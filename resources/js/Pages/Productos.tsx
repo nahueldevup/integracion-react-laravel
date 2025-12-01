@@ -2,7 +2,18 @@ import { useState } from "react";
 import { Header } from "@/Components/Header";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
-import { Search, Plus, Minus, Edit, Trash2, FolderPlus, X } from "lucide-react";
+import {
+    Search,
+    Plus,
+    Minus,
+    Edit,
+    Trash2,
+    FolderPlus,
+    X,
+    Upload,
+    Download,
+    FileSpreadsheet,
+} from "lucide-react";
 import { useToast } from "@/Hooks/use-toast";
 import {
     Table,
@@ -27,6 +38,12 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/Components/ui/alert-dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/Components/ui/dropdown-menu";
 import { Label } from "@/Components/ui/label";
 import { Textarea } from "@/Components/ui/textarea";
 import MainLayout from "@/Layouts/MainLayout";
@@ -49,25 +66,40 @@ interface Product {
     min_stock: number;
 }
 
-interface Props {
-    products: Product[];
-    categories: Category[];
+interface PaginatedProducts {
+    data: Product[];
+    current_page: number;
+    last_page: number;
+    per_page: number;
+    total: number;
+    from: number;
+    to: number;
 }
 
-export default function Productos({ products, categories }: Props) {
+interface Props {
+    products: PaginatedProducts;
+    categories: Category[];
+    filters: {
+        search?: string;
+    };
+}
+
+export default function Productos({ products, categories, filters }: Props) {
     const { toast } = useToast();
 
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
-    const [searchQuery, setSearchQuery] = useState("");
+    const [searchQuery, setSearchQuery] = useState(filters.search || "");
     const [categorySearch, setCategorySearch] = useState("");
     const [newCategoryName, setNewCategoryName] = useState("");
     const [selectedProductId, setSelectedProductId] = useState<number | null>(
         null
     );
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     // Estado para NUEVO producto
     const [newProduct, setNewProduct] = useState({
@@ -240,11 +272,88 @@ export default function Productos({ products, categories }: Props) {
         }
     };
 
-    const filteredProducts = products.filter(
-        (p) =>
-            p.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            (p.barcode && p.barcode.includes(searchQuery))
-    );
+    // Manejar búsqueda con debounce
+    const handleSearch = (value: string) => {
+        setSearchQuery(value);
+        if (value.length >= 3 || value.length === 0) {
+            router.get(
+                "/productos",
+                { search: value },
+                {
+                    preserveState: true,
+                    preserveScroll: true,
+                }
+            );
+        }
+    };
+
+    // Navegar entre páginas
+    const goToPage = (page: number) => {
+        router.get(
+            "/productos",
+            {
+                page,
+                search: searchQuery,
+            },
+            {
+                preserveState: true,
+                preserveScroll: true,
+            }
+        );
+    };
+
+    // Exportar productos
+    const handleExport = () => {
+        window.location.href = "/productos/export";
+        toast({
+            title: "Exportando productos",
+            description: "La descarga comenzará en breve",
+        });
+    };
+
+    // Descargar plantilla
+    const handleDownloadTemplate = () => {
+        window.location.href = "/productos/plantilla";
+        toast({
+            title: "Descargando plantilla",
+            description: "La plantilla de ejemplo se descargará ahora",
+        });
+    };
+
+    // Importar productos
+    const handleImport = () => {
+        if (!selectedFile) {
+            toast({
+                title: "Error",
+                description: "Por favor selecciona un archivo",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append("file", selectedFile);
+
+        router.post("/productos/import", formData, {
+            onSuccess: () => {
+                setIsImportDialogOpen(false);
+                setSelectedFile(null);
+                toast({
+                    title: "Productos importados",
+                    description: "Los productos se han importado exitosamente",
+                });
+            },
+            onError: (errors) => {
+                toast({
+                    title: "Error al importar",
+                    description:
+                        errors.file ||
+                        "Hubo un error al importar los productos",
+                    variant: "destructive",
+                });
+            },
+        });
+    };
 
     const filteredCategories = categories.filter((c) =>
         c.name.toLowerCase().includes(categorySearch.toLowerCase())
@@ -265,11 +374,44 @@ export default function Productos({ products, categories }: Props) {
                                     placeholder="Buscar un producto por su descripción o código de barras"
                                     value={searchQuery}
                                     onChange={(e) =>
-                                        setSearchQuery(e.target.value)
+                                        handleSearch(e.target.value)
                                     }
                                     className="pl-10"
                                 />
                             </div>
+
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button
+                                        variant="outline"
+                                        className="flex items-center gap-2"
+                                    >
+                                        <FileSpreadsheet className="w-5 h-5" />
+                                        Importar/Exportar
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuItem
+                                        onClick={() =>
+                                            setIsImportDialogOpen(true)
+                                        }
+                                    >
+                                        <Upload className="w-4 h-4 mr-2" />
+                                        Importar Productos
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={handleExport}>
+                                        <Download className="w-4 h-4 mr-2" />
+                                        Exportar Productos
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                        onClick={handleDownloadTemplate}
+                                    >
+                                        <Download className="w-4 h-4 mr-2" />
+                                        Descargar Plantilla
+                                    </DropdownMenuItem>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+
                             <Button
                                 onClick={() => setIsCategoryDialogOpen(true)}
                                 variant="outline"
@@ -283,15 +425,39 @@ export default function Productos({ products, categories }: Props) {
                         <div className="bg-card rounded-lg border border-border">
                             <div className="flex items-center justify-between px-4 py-3 border-b border-border">
                                 <div className="flex items-center gap-2">
-                                    <Button variant="ghost" size="sm">
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() =>
+                                            goToPage(products.current_page - 1)
+                                        }
+                                        disabled={products.current_page === 1}
+                                    >
                                         <span>←</span>
                                     </Button>
                                     <span className="px-3 py-1 bg-primary text-primary-foreground rounded">
-                                        1
+                                        {products.current_page}
                                     </span>
-                                    <Button variant="ghost" size="sm">
+                                    <span className="text-sm text-muted-foreground">
+                                        de {products.last_page}
+                                    </span>
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() =>
+                                            goToPage(products.current_page + 1)
+                                        }
+                                        disabled={
+                                            products.current_page ===
+                                            products.last_page
+                                        }
+                                    >
                                         <span>→</span>
                                     </Button>
+                                </div>
+                                <div className="text-sm text-muted-foreground">
+                                    Mostrando {products.from} - {products.to} de{" "}
+                                    {products.total} productos
                                 </div>
                             </div>
 
@@ -311,7 +477,7 @@ export default function Productos({ products, categories }: Props) {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {filteredProducts.map((product) => (
+                                    {products.data.map((product) => (
                                         <TableRow key={product.id}>
                                             <TableCell>{product.id}</TableCell>
                                             <TableCell>
@@ -418,12 +584,6 @@ export default function Productos({ products, categories }: Props) {
                                     ))}
                                 </TableBody>
                             </Table>
-
-                            <div className="px-4 py-3 border-t border-border">
-                                <Button variant="link" className="text-primary">
-                                    Exportar o importar productos
-                                </Button>
-                            </div>
                         </div>
                     </div>
                 </main>
@@ -903,6 +1063,83 @@ export default function Productos({ products, categories }: Props) {
                         </AlertDialogFooter>
                     </AlertDialogContent>
                 </AlertDialog>
+
+                {/* --- MODAL: IMPORTAR PRODUCTOS --- */}
+                <Dialog
+                    open={isImportDialogOpen}
+                    onOpenChange={setIsImportDialogOpen}
+                >
+                    <DialogContent className="max-w-md">
+                        <DialogHeader>
+                            <DialogTitle>Importar Productos</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="space-y-2">
+                                <Label>Archivo Excel/CSV</Label>
+                                <Input
+                                    type="file"
+                                    accept=".xlsx,.xls,.csv"
+                                    onChange={(e) =>
+                                        setSelectedFile(
+                                            e.target.files?.[0] || null
+                                        )
+                                    }
+                                />
+                                {selectedFile && (
+                                    <p className="text-sm text-green-600">
+                                        ✓ Archivo seleccionado:{" "}
+                                        {selectedFile.name}
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="bg-blue-50 p-3 rounded-md text-sm">
+                                <p className="font-semibold mb-2">
+                                    📋 Instrucciones:
+                                </p>
+                                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                                    <li>
+                                        El archivo debe tener las columnas:
+                                        Código de Barras, Descripción,
+                                        Categoría, Precio Compra, Precio Venta,
+                                        Stock, Stock Mínimo
+                                    </li>
+                                    <li>
+                                        La descripción y precio de venta son
+                                        obligatorios
+                                    </li>
+                                    <li>
+                                        Las categorías se crearán
+                                        automáticamente si no existen
+                                    </li>
+                                    <li>
+                                        Descarga la plantilla de ejemplo si
+                                        tienes dudas
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        <DialogFooter>
+                            <Button
+                                variant="outline"
+                                onClick={() => {
+                                    setIsImportDialogOpen(false);
+                                    setSelectedFile(null);
+                                }}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                onClick={handleImport}
+                                disabled={!selectedFile}
+                                className="gap-2"
+                            >
+                                <Upload className="w-4 h-4" />
+                                Importar
+                            </Button>
+                        </DialogFooter>
+                    </DialogContent>
+                </Dialog>
             </div>
         </MainLayout>
     );
