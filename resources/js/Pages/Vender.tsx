@@ -15,9 +15,9 @@ import {
     CreditCard,
     Banknote,
     UserPlus,
-    Check,
     ChevronLeft,
     ChevronRight,
+    Menu,
 } from "lucide-react";
 
 // --- Interfaces ---
@@ -35,14 +35,14 @@ interface CartItem extends Product {
 }
 
 interface Customer {
-    id?: number; // El ID es opcional solo porque al crear uno nuevo en el front no lo tiene aún
+    id?: number;
     name: string;
     phone?: string;
 }
 
 interface Props {
     allProducts: Product[];
-    clients: Customer[]; // <--- Recibimos los clientes del controlador
+    clients: Customer[];
 }
 
 // --- Componentes Auxiliares ---
@@ -56,20 +56,20 @@ function ProductCard({
     return (
         <button
             onClick={() => onAdd(product)}
-            className="group relative flex flex-col items-center p-4 bg-white border-2 border-gray-100 rounded-xl hover:border-blue-500 hover:shadow-lg transition-all duration-200"
+            className="group relative flex flex-col items-center p-3 sm:p-4 bg-white border-2 border-gray-100 rounded-xl hover:border-blue-500 hover:shadow-lg transition-all duration-200"
         >
-            <div className="w-14 h-14 mb-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-full flex items-center justify-center text-xl font-bold text-blue-600 shadow-sm">
+            <div className="w-12 h-12 sm:w-14 sm:h-14 mb-2 sm:mb-3 bg-gradient-to-br from-blue-50 to-blue-100 rounded-full flex items-center justify-center text-lg sm:text-xl font-bold text-blue-600 shadow-sm">
                 {product.description.charAt(0).toUpperCase()}
             </div>
-            <p className="text-sm font-semibold text-gray-800 text-center line-clamp-2 mb-1 leading-tight">
+            <p className="text-xs sm:text-sm font-semibold text-gray-800 text-center line-clamp-2 mb-1 leading-tight">
                 {product.description}
             </p>
-            <p className="text-lg font-bold text-blue-600">
+            <p className="text-base sm:text-lg font-bold text-blue-600">
                 ${Number(product.sale_price).toFixed(2)}
             </p>
             <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <div className="bg-blue-600 rounded-full p-1 shadow-md">
-                    <Plus className="w-4 h-4 text-white" />
+                    <Plus className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
             </div>
         </button>
@@ -78,41 +78,41 @@ function ProductCard({
 
 function CartItemRow({ item, onIncrease, onDecrease, onRemove }: any) {
     return (
-        <div className="flex items-center gap-3 p-3 bg-gray-50/80 rounded-lg border border-gray-100 hover:bg-white hover:shadow-sm transition-all">
+        <div className="flex items-center gap-2 sm:gap-3 p-2 sm:p-3 bg-gray-50/80 rounded-lg border border-gray-100 hover:bg-white hover:shadow-sm transition-all">
             <div className="flex-1 min-w-0">
-                <p className="font-semibold text-gray-800 truncate text-sm">
+                <p className="font-semibold text-gray-800 truncate text-xs sm:text-sm">
                     {item.description}
                 </p>
                 <p className="text-xs text-gray-500">
                     ${Number(item.sale_price).toFixed(2)} c/u
                 </p>
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 sm:gap-2">
                 <button
                     onClick={() => onDecrease(item.id)}
-                    className="w-7 h-7 flex items-center justify-center bg-white border border-gray-300 rounded hover:text-red-600"
+                    className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center bg-white border border-gray-300 rounded hover:text-red-600"
                 >
                     <Minus className="w-3 h-3" />
                 </button>
-                <span className="w-8 text-center font-bold text-sm tabular-nums">
+                <span className="w-6 sm:w-8 text-center font-bold text-xs sm:text-sm tabular-nums">
                     {item.quantity}
                 </span>
                 <button
                     onClick={() => onIncrease(item.id)}
-                    className="w-7 h-7 flex items-center justify-center bg-white border border-gray-300 rounded hover:text-green-600"
+                    className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center bg-white border border-gray-300 rounded hover:text-green-600"
                 >
                     <Plus className="w-3 h-3" />
                 </button>
             </div>
             <div className="flex flex-col items-end gap-1 min-w-[60px]">
-                <p className="font-bold text-sm text-gray-800">
+                <p className="font-bold text-xs sm:text-sm text-gray-800">
                     ${item.total.toFixed(2)}
                 </p>
                 <button
                     onClick={() => onRemove(item.id)}
                     className="text-gray-400 hover:text-red-500 p-1"
                 >
-                    <Trash2 className="w-4 h-4" />
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
             </div>
         </div>
@@ -123,14 +123,14 @@ function PaymentMethodButton({ icon: Icon, label, isSelected, onClick }: any) {
     return (
         <button
             onClick={onClick}
-            className={`flex flex-col items-center gap-2 p-3 rounded-lg border transition-all ${
+            className={`flex flex-col items-center gap-2 p-2 sm:p-3 rounded-lg border transition-all ${
                 isSelected
                     ? "border-blue-500 bg-blue-50 text-blue-700"
                     : "border-gray-200 text-gray-600"
             }`}
         >
             <Icon
-                className={`w-6 h-6 ${
+                className={`w-5 h-5 sm:w-6 sm:h-6 ${
                     isSelected ? "text-blue-600" : "text-gray-500"
                 }`}
             />
@@ -141,7 +141,6 @@ function PaymentMethodButton({ icon: Icon, label, isSelected, onClick }: any) {
 
 // --- Componente Principal ---
 export default function Vender({ allProducts, clients }: Props) {
-    // <--- Destructuramos clients
     const { toast } = useToast();
 
     const [searchQuery, setSearchQuery] = useState("");
@@ -150,6 +149,7 @@ export default function Vender({ allProducts, clients }: Props) {
     const [paymentMethod, setPaymentMethod] = useState("efectivo");
     const [amountReceived, setAmountReceived] = useState("");
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const [mobileCartOpen, setMobileCartOpen] = useState(false);
 
     // Estados para clientes
     const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(
@@ -158,13 +158,12 @@ export default function Vender({ allProducts, clients }: Props) {
     const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
-    const [customerSearch, setCustomerSearch] = useState(""); // Texto del input de búsqueda de clientes
+    const [customerSearch, setCustomerSearch] = useState("");
 
     // Paginación
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 20;
+    const itemsPerPage = 15;
 
-    // --- Lógica de Filtros ---
     const filteredProducts = allProducts.filter(
         (product) =>
             product.description
@@ -173,19 +172,16 @@ export default function Vender({ allProducts, clients }: Props) {
             (product.barcode && product.barcode.includes(searchQuery))
     );
 
-    // Lógica de paginación
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     const paginatedProducts = filteredProducts.slice(
         (currentPage - 1) * itemsPerPage,
         currentPage * itemsPerPage
     );
 
-    // Resetear página al buscar
     useEffect(() => {
         setCurrentPage(1);
     }, [searchQuery]);
 
-    // Filtrar clientes para el buscador
     const filteredClients =
         customerSearch.trim() === ""
             ? []
@@ -203,6 +199,13 @@ export default function Vender({ allProducts, clients }: Props) {
     }, []);
 
     useEffect(() => {
+        if (showCheckout) {
+            setAmountReceived(total.toFixed(2));
+        }
+    }, [showCheckout, total]);
+
+    // Atajo de teclado F9
+    useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === "F9" && cartItems.length > 0 && !showCheckout) {
                 e.preventDefault();
@@ -213,14 +216,6 @@ export default function Vender({ allProducts, clients }: Props) {
         return () => window.removeEventListener("keydown", handleKeyDown);
     }, [cartItems.length, showCheckout]);
 
-    // Pre-llenar monto al abrir checkout
-    useEffect(() => {
-        if (showCheckout) {
-            setAmountReceived(total.toFixed(2));
-        }
-    }, [showCheckout, total]);
-
-    // --- Funciones del Carrito ---
     const addToCart = (product: Product) => {
         const existingItem = cartItems.find((item) => item.id === product.id);
         const price = Number(product.sale_price);
@@ -245,6 +240,7 @@ export default function Vender({ allProducts, clients }: Props) {
         }
         setSearchQuery("");
         searchInputRef.current?.focus();
+        setMobileCartOpen(false);
     };
 
     const updateQuantity = (itemId: number, delta: number) => {
@@ -275,10 +271,9 @@ export default function Vender({ allProducts, clients }: Props) {
         }
     };
 
-    // --- Funciones de Clientes ---
     const handleSelectClient = (client: Customer) => {
         setSelectedCustomer(client);
-        setCustomerSearch(""); // Limpiar búsqueda
+        setCustomerSearch("");
     };
 
     const handleRemoveClient = () => {
@@ -287,7 +282,6 @@ export default function Vender({ allProducts, clients }: Props) {
 
     const handleCreateCustomer = () => {
         if (!newCustomerName.trim()) return;
-        // Creamos un objeto temporal, el ID se generará en el backend al guardar la venta
         const tempClient = { name: newCustomerName, phone: newCustomerPhone };
         setSelectedCustomer(tempClient);
         setIsCreatingCustomer(false);
@@ -295,7 +289,7 @@ export default function Vender({ allProducts, clients }: Props) {
         setNewCustomerPhone("");
     };
 
-    // --- Procesar Venta ---
+    // --- Procesar Venta (con Inertia y toast) ---
     const completeSale = () => {
         if (cartItems.length === 0) {
             toast({
@@ -323,7 +317,6 @@ export default function Vender({ allProducts, clients }: Props) {
             })),
             payment_method: paymentMethod,
             amount_received: payment,
-            // Enviamos ID si existe (cliente de BD) o nombre/teléfono si es nuevo
             client_id: selectedCustomer?.id || null,
             client_name: selectedCustomer?.id ? null : selectedCustomer?.name,
             client_phone: selectedCustomer?.id ? null : selectedCustomer?.phone,
@@ -345,13 +338,26 @@ export default function Vender({ allProducts, clients }: Props) {
                 setSelectedCustomer(null);
                 setCustomerSearch("");
                 setPaymentMethod("efectivo");
+                setMobileCartOpen(false);
             },
             onError: (errors) => {
                 console.error("Error en venta:", errors);
+
+                // Extraer el mensaje de error específico del backend
+                let errorMessage =
+                    "No se pudo procesar la venta. Verifique los datos.";
+
+                if (errors.error) {
+                    errorMessage = errors.error;
+                } else if (typeof errors === "string") {
+                    errorMessage = errors;
+                } else if (errors.message) {
+                    errorMessage = errors.message;
+                }
+
                 toast({
                     title: "Error",
-                    description:
-                        "No se pudo procesar la venta. Verifique los datos.",
+                    description: errorMessage,
                     variant: "destructive",
                 });
             },
@@ -361,34 +367,36 @@ export default function Vender({ allProducts, clients }: Props) {
     return (
         <MainLayout>
             <Head title="Vender" />
-            <div className="flex-1 flex flex-col h-full overflow-hidden">
+            <div className="absolute inset-0 flex flex-col bg-gray-50 overflow-hidden">
+                {/* Header - Reemplazamos con el Header del MainLayout */}
                 <Header title="Punto de Venta" subtitle="Nueva Venta" />
 
                 <div className="flex-1 flex overflow-hidden">
                     {/* Panel Izquierdo - Productos */}
-                    <div className="flex-1 flex flex-col bg-gray-50/50 border-r border-gray-200">
-                        <div className="p-4 bg-white border-b border-gray-100 shadow-sm z-10">
+                    <div className="flex-1 flex flex-col bg-gray-50/50">
+                        <div className="p-3 sm:p-4 bg-white border-b border-gray-100 shadow-sm">
                             <div className="relative max-w-2xl mx-auto">
-                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                                <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-gray-400" />
                                 <input
                                     ref={searchInputRef}
                                     type="text"
-                                    placeholder="Buscar producto por nombre o código..."
+                                    placeholder="Buscar producto..."
                                     value={searchQuery}
                                     onChange={(e) =>
                                         setSearchQuery(e.target.value)
                                     }
-                                    className="w-full pl-12 pr-4 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all"
+                                    className="w-full pl-10 sm:pl-12 pr-4 py-2 sm:py-3 bg-gray-50 border-2 border-gray-200 rounded-xl focus:border-blue-500 focus:outline-none transition-all text-sm sm:text-base"
                                 />
                             </div>
                         </div>
-                        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
+
+                        <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
                             {filteredProducts.length === 0 ? (
                                 <p className="text-center text-gray-400 mt-10">
                                     No se encontraron productos
                                 </p>
                             ) : (
-                                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
                                     {paginatedProducts.map((product) => (
                                         <ProductCard
                                             key={product.id}
@@ -400,11 +408,10 @@ export default function Vender({ allProducts, clients }: Props) {
                             )}
                         </div>
 
-                        {/* Controles de Paginación */}
+                        {/* Paginación */}
                         {filteredProducts.length > 0 && (
-                            <div className="p-4 bg-white border-t border-gray-100 flex items-center justify-between">
-                                <span className="text-sm text-gray-500">
-                                    Mostrando{" "}
+                            <div className="p-3 sm:p-4 bg-white border-t border-gray-100 flex items-center justify-between">
+                                <span className="text-xs sm:text-sm text-gray-500">
                                     {(currentPage - 1) * itemsPerPage + 1} -{" "}
                                     {Math.min(
                                         currentPage * itemsPerPage,
@@ -420,12 +427,12 @@ export default function Vender({ allProducts, clients }: Props) {
                                             )
                                         }
                                         disabled={currentPage === 1}
-                                        className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="p-1.5 sm:p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50"
                                     >
-                                        <ChevronLeft className="w-5 h-5" />
+                                        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
-                                    <span className="flex items-center px-4 font-medium">
-                                        Página {currentPage} de {totalPages}
+                                    <span className="flex items-center px-2 sm:px-4 font-medium text-xs sm:text-sm">
+                                        {currentPage} / {totalPages}
                                     </span>
                                     <button
                                         onClick={() =>
@@ -434,36 +441,61 @@ export default function Vender({ allProducts, clients }: Props) {
                                             )
                                         }
                                         disabled={currentPage === totalPages}
-                                        className="p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className="p-1.5 sm:p-2 rounded-lg border hover:bg-gray-50 disabled:opacity-50"
                                     >
-                                        <ChevronRight className="w-5 h-5" />
+                                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
                                     </button>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Panel Derecho - Carrito */}
-                    <div className="w-[380px] lg:w-[450px] bg-white flex flex-col shadow-xl z-20 rounded-t-xl overflow-hidden">
-                        <div className="p-4 bg-blue-600 text-white shadow-md">
-                            <div className="flex items-center justify-between mb-1">
+                    {/* Panel Derecho - Carrito (Desktop) */}
+                    <div
+                        className={`${
+                            mobileCartOpen
+                                ? "fixed inset-0 z-50 bg-white"
+                                : "hidden"
+                        } lg:flex lg:relative lg:w-[380px] xl:w-[420px] bg-white flex-col shadow-xl z-20 rounded-t-xl overflow-hidden`}
+                    >
+                        {/* Header del carrito */}
+                        <div className="p-3 sm:p-4 bg-blue-600 text-white shadow-md flex-shrink-0">
+                            <div className="flex items-center justify-between">
                                 <div className="flex items-center gap-2">
                                     <ShoppingCart className="w-5 h-5" />
-                                    <h2 className="font-bold text-lg">
+                                    <h2 className="font-bold text-base sm:text-lg">
                                         Carrito
                                     </h2>
                                 </div>
-                                <span className="bg-white/20 px-3 py-0.5 rounded-full text-sm font-medium">
-                                    {cartItems.length} items
-                                </span>
+                                <div className="flex items-center gap-2">
+                                    <span className="bg-white/20 px-3 py-0.5 rounded-full text-sm font-medium">
+                                        {cartItems.length}
+                                    </span>
+                                    <button
+                                        onClick={() => setMobileCartOpen(false)}
+                                        className="lg:hidden p-1"
+                                    >
+                                        <X className="w-5 h-5" />
+                                    </button>
+                                </div>
                             </div>
                         </div>
 
-                        <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-gray-50/30">
+                        {/* Items del carrito - CON SCROLL FIJO */}
+                        <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-2 sm:space-y-3 bg-gray-50/30 min-h-0">
                             {cartItems.length === 0 ? (
-                                <p className="text-center text-gray-400 mt-10">
-                                    Carrito vacío
-                                </p>
+                                <div className="h-full flex items-center justify-center">
+                                    <div className="text-center">
+                                        <ShoppingCart className="w-12 h-12 text-gray-300 mx-auto mb-3" />
+                                        <p className="text-gray-400 text-sm">
+                                            Carrito vacío
+                                        </p>
+                                        <p className="text-gray-400 text-xs mt-1">
+                                            Agrega productos desde el panel
+                                            izquierdo
+                                        </p>
+                                    </div>
+                                </div>
                             ) : (
                                 cartItems.map((item) => (
                                     <CartItemRow
@@ -481,26 +513,30 @@ export default function Vender({ allProducts, clients }: Props) {
                             )}
                         </div>
 
+                        {/* Footer del carrito - SIEMPRE VISIBLE */}
                         {cartItems.length > 0 && (
-                            <div className="bg-white p-4 border-t border-gray-100">
-                                <div className="flex justify-between items-baseline mb-4">
-                                    <span className="text-xl font-bold text-gray-800">
+                            <div className="bg-white p-3 sm:p-4 border-t border-gray-100 flex-shrink-0 shadow-lg">
+                                <div className="flex justify-between items-baseline mb-3 sm:mb-4">
+                                    <span className="text-lg sm:text-xl font-bold text-gray-800">
                                         Total
                                     </span>
-                                    <span className="text-3xl font-extrabold text-blue-600">
+                                    <span className="text-2xl sm:text-3xl font-extrabold text-blue-600">
                                         ${total.toFixed(2)}
                                     </span>
                                 </div>
-                                <div className="grid grid-cols-2 gap-3">
+                                <div className="grid grid-cols-2 gap-2 sm:gap-3">
                                     <button
                                         onClick={clearCart}
-                                        className="px-4 py-3 border border-red-100 text-red-600 rounded-xl font-semibold hover:bg-red-50"
+                                        className="px-3 sm:px-4 py-2.5 sm:py-3 border border-red-100 text-red-600 rounded-xl font-semibold hover:bg-red-50 text-sm sm:text-base transition-colors"
                                     >
                                         Cancelar
                                     </button>
                                     <button
-                                        onClick={() => setShowCheckout(true)}
-                                        className="px-4 py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700"
+                                        onClick={() => {
+                                            setShowCheckout(true);
+                                            setMobileCartOpen(false);
+                                        }}
+                                        className="px-3 sm:px-4 py-2.5 sm:py-3 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 text-sm sm:text-base transition-colors"
                                     >
                                         Cobrar (F9)
                                     </button>
@@ -513,22 +549,25 @@ export default function Vender({ allProducts, clients }: Props) {
                 {/* Modal Checkout */}
                 {showCheckout && (
                     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-6">
-                            <div className="flex justify-between items-center border-b pb-4">
-                                <h2 className="text-xl font-bold">
+                        <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto p-4 sm:p-6 space-y-4 sm:space-y-6">
+                            <div className="flex justify-between items-center border-b pb-3 sm:pb-4 sticky top-0 bg-white z-10">
+                                <h2 className="text-lg sm:text-xl font-bold">
                                     Procesar Pago
                                 </h2>
-                                <button onClick={() => setShowCheckout(false)}>
+                                <button
+                                    onClick={() => setShowCheckout(false)}
+                                    className="p-1 hover:bg-gray-100 rounded-full"
+                                >
                                     <X className="w-5 h-5" />
                                 </button>
                             </div>
 
                             {/* Método de Pago */}
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-3">
+                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2 sm:mb-3">
                                     Método de Pago
                                 </label>
-                                <div className="grid grid-cols-3 gap-3">
+                                <div className="grid grid-cols-3 gap-2 sm:gap-3">
                                     <PaymentMethodButton
                                         icon={Banknote}
                                         label="Efectivo"
@@ -551,7 +590,7 @@ export default function Vender({ allProducts, clients }: Props) {
                                     />
                                     <PaymentMethodButton
                                         icon={DollarSign}
-                                        label="Transferencia"
+                                        label="Transfer"
                                         isSelected={
                                             paymentMethod === "transferencia"
                                         }
@@ -570,7 +609,6 @@ export default function Vender({ allProducts, clients }: Props) {
                                 </label>
 
                                 {isCreatingCustomer ? (
-                                    // Modo: Crear Nuevo
                                     <div className="space-y-2 border p-3 rounded bg-gray-50 animate-in fade-in zoom-in-95 duration-200">
                                         <div className="flex justify-between items-center mb-2">
                                             <span className="text-sm font-semibold text-blue-600">
@@ -608,16 +646,14 @@ export default function Vender({ allProducts, clients }: Props) {
                                         />
                                         <button
                                             onClick={handleCreateCustomer}
-                                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 text-sm font-medium"
+                                            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 text-sm font-medium transition-colors"
                                         >
                                             Usar este cliente
                                         </button>
                                     </div>
                                 ) : (
-                                    // Modo: Buscar o Seleccionado
                                     <div className="relative">
                                         {selectedCustomer ? (
-                                            // Cliente Seleccionado
                                             <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
                                                 <div className="flex items-center gap-2">
                                                     <div className="bg-blue-100 p-1.5 rounded-full">
@@ -640,18 +676,17 @@ export default function Vender({ allProducts, clients }: Props) {
                                                 </div>
                                                 <button
                                                     onClick={handleRemoveClient}
-                                                    className="text-gray-400 hover:text-red-500"
+                                                    className="text-gray-400 hover:text-red-500 p-1"
                                                 >
                                                     <X className="w-4 h-4" />
                                                 </button>
                                             </div>
                                         ) : (
-                                            // Input de Búsqueda
                                             <div className="flex gap-2">
                                                 <div className="relative flex-1">
                                                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                                                     <input
-                                                        className="w-full pl-9 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all"
+                                                        className="w-full pl-9 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
                                                         placeholder="Buscar cliente..."
                                                         value={customerSearch}
                                                         onChange={(e) =>
@@ -661,7 +696,6 @@ export default function Vender({ allProducts, clients }: Props) {
                                                         }
                                                     />
 
-                                                    {/* Resultados de búsqueda (Dropdown) */}
                                                     {customerSearch && (
                                                         <div className="absolute z-10 w-full mt-1 bg-white border rounded-lg shadow-lg max-h-40 overflow-y-auto">
                                                             {filteredClients.length >
@@ -711,7 +745,7 @@ export default function Vender({ allProducts, clients }: Props) {
                                                             true
                                                         )
                                                     }
-                                                    className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-gray-600 border border-gray-200"
+                                                    className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-gray-600 border border-gray-200 transition-colors"
                                                     title="Crear nuevo cliente"
                                                 >
                                                     <UserPlus className="w-5 h-5" />
@@ -723,8 +757,8 @@ export default function Vender({ allProducts, clients }: Props) {
                             </div>
 
                             {/* Resumen y Pago */}
-                            <div className="bg-blue-50 p-4 rounded-xl space-y-3">
-                                <div className="flex justify-between text-xl font-bold">
+                            <div className="bg-blue-50 p-3 sm:p-4 rounded-xl space-y-3">
+                                <div className="flex justify-between text-lg sm:text-xl font-bold">
                                     <span>Total:</span>
                                     <span className="text-blue-600">
                                         ${total.toFixed(2)}
@@ -732,15 +766,15 @@ export default function Vender({ allProducts, clients }: Props) {
                                 </div>
 
                                 <div className="space-y-2">
-                                    <div className="flex items-center gap-3">
-                                        <label className="font-semibold">
+                                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
+                                        <label className="font-semibold text-sm sm:text-base whitespace-nowrap">
                                             Monto a Pagar:
                                         </label>
                                         <input
                                             type="number"
                                             step="0.01"
                                             autoFocus
-                                            className="flex-1 border rounded p-2 font-bold text-lg"
+                                            className="flex-1 w-full border rounded p-2 font-bold text-base sm:text-lg text-right"
                                             value={amountReceived}
                                             onChange={(e) =>
                                                 setAmountReceived(
@@ -754,7 +788,7 @@ export default function Vender({ allProducts, clients }: Props) {
                                             placeholder="0.00"
                                         />
                                     </div>
-                                    <div className="flex justify-between text-lg">
+                                    <div className="flex justify-between text-base sm:text-lg">
                                         <span>Cambio:</span>
                                         <span
                                             className={`font-bold ${
@@ -771,7 +805,7 @@ export default function Vender({ allProducts, clients }: Props) {
 
                             <button
                                 onClick={completeSale}
-                                className="w-full py-4 bg-green-600 text-white rounded-xl font-bold text-lg hover:bg-green-700 transition-colors shadow-lg"
+                                className="w-full py-3 sm:py-4 bg-green-600 text-white rounded-xl font-bold text-base sm:text-lg hover:bg-green-700 transition-colors shadow-lg"
                             >
                                 Confirmar Venta
                             </button>
