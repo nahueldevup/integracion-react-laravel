@@ -25,12 +25,10 @@ class CategoryController extends Controller
     {
         $category = Category::findOrFail($id);
         
-        // Validar si hay productos usando esta categoría
-        if (Product::where('category_id', $id)->exists()) {
-            return redirect()->back()->withErrors(['error' => 'No puedes eliminar una categoría en uso']);
-        }
-
-        $category->delete();
+        // Reasignar productos a sin categoría antes de eliminar
+Product::where('category_id', $id)->update(['category_id' => null]);
+// Eliminar la categoría
+$category->delete();
         
         return redirect()->back()->with('success', 'Categoría eliminada');
     }

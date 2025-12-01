@@ -91,6 +91,11 @@ export default function Productos({ products, categories, filters }: Props) {
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
     const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false);
     const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [isDeleteCategoryDialogOpen, setIsDeleteCategoryDialogOpen] =
+        useState(false);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+        null
+    );
     const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 
     const [searchQuery, setSearchQuery] = useState(filters.search || "");
@@ -225,11 +230,8 @@ export default function Productos({ products, categories, filters }: Props) {
     };
 
     const handleDeleteCategory = (id: number) => {
-        if (!confirm("¿Borrar categoría?")) return;
-        router.delete(`/categorias/${id}`, {
-            onSuccess: () => toast({ title: "Categoría eliminada" }),
-            preserveScroll: true,
-        });
+        setSelectedCategoryId(id);
+        setIsDeleteCategoryDialogOpen(true);
     };
 
     // --- Otras funciones ---
@@ -268,6 +270,19 @@ export default function Productos({ products, categories, filters }: Props) {
                             "El producto ha sido removido del inventario",
                     });
                 },
+            });
+        }
+    };
+
+    const confirmDeleteCategory = () => {
+        if (selectedCategoryId) {
+            router.delete(`/categorias/${selectedCategoryId}`, {
+                onSuccess: () => {
+                    setIsDeleteCategoryDialogOpen(false);
+                    setSelectedCategoryId(null);
+                    toast({ title: "Categoría eliminada" });
+                },
+                preserveScroll: true,
             });
         }
     };
@@ -1057,6 +1072,40 @@ export default function Productos({ products, categories, filters }: Props) {
                             <Button
                                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
                                 onClick={confirmDeleteProduct}
+                            >
+                                ELIMINAR
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
+                {/* --- ALERT DIALOG: CONFIRMAR ELIMINACIÓN DE CATEGORÍA --- */}
+                <AlertDialog
+                    open={isDeleteCategoryDialogOpen}
+                    onOpenChange={setIsDeleteCategoryDialogOpen}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                ¿Eliminar categoría?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Esta acción no se puede deshacer. La categoría
+                                será eliminada y los productos quedarán sin
+                                categoría.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <Button
+                                variant="ghost"
+                                onClick={() =>
+                                    setIsDeleteCategoryDialogOpen(false)
+                                }
+                            >
+                                CANCELAR
+                            </Button>
+                            <Button
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={confirmDeleteCategory}
                             >
                                 ELIMINAR
                             </Button>
