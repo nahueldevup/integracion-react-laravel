@@ -5,7 +5,8 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "serve": "concurrently \"php artisan serve\" \"npm run dev\" --names \"Laravel,Vite\" --prefix-colors \"green,blue\""
+        "serve": "concurrently \"php artisan serve\" \"npm run dev\" --names \"Laravel,Vite\" --prefix-colors \"green,blue\"",
+        "cache": "php artisan cache:clear && php artisan config:clear && php artisan view:clear && php artisan route:clear && php artisan event:clear && php artisan optimize:clear"
     },
     "devDependencies": {
         "@tailwindcss/vite": "^4.0.0",
