@@ -24,6 +24,14 @@ import {
     DialogFooter,
     DialogDescription,
 } from "@/Components/ui/dialog";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/Components/ui/alert-dialog";
 import { Label } from "@/Components/ui/label";
 import { Input } from "@/Components/ui/input";
 import { Textarea } from "@/Components/ui/textarea";
@@ -113,6 +121,10 @@ export default function Caja({ movements, summary, history }: Props) {
     const [movementType, setMovementType] = useState<"ingreso" | "egreso">(
         "ingreso"
     );
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [selectedMovementId, setSelectedMovementId] = useState<number | null>(
+        null
+    );
 
     const [formData, setFormData] = useState({ amount: "", description: "" });
     const [arqueoData, setArqueoData] = useState({
@@ -179,9 +191,18 @@ export default function Caja({ movements, summary, history }: Props) {
     };
 
     const handleDelete = (id: number) => {
-        if (confirm("¿Eliminar este movimiento?")) {
-            router.delete(`/caja/${id}`, {
-                onSuccess: () => toast({ title: "Movimiento eliminado" }),
+        setSelectedMovementId(id);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDelete = () => {
+        if (selectedMovementId) {
+            router.delete(`/caja/${selectedMovementId}`, {
+                onSuccess: () => {
+                    toast({ title: "Movimiento eliminado" });
+                    setIsDeleteDialogOpen(false);
+                    setSelectedMovementId(null);
+                },
             });
         }
     };
@@ -787,6 +808,38 @@ export default function Caja({ movements, summary, history }: Props) {
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
+                {/* AlertDialog Eliminar Movimiento */}
+                <AlertDialog
+                    open={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                ¿Eliminar movimiento?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Esta acción no se puede deshacer. El movimiento
+                                será eliminado permanentemente.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsDeleteDialogOpen(false)}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={confirmDelete}
+                            >
+                                Eliminar
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
 
                 {/* MODAL DE REPORTE */}
                 <Dialog open={isReporteOpen} onOpenChange={setIsReporteOpen}>

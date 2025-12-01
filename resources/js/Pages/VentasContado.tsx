@@ -16,6 +16,14 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/Components/ui/dialog";
+import {
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/Components/ui/alert-dialog";
 import { Badge } from "@/Components/ui/badge";
 import MainLayout from "@/Layouts/MainLayout";
 import { Head, Link, router } from "@inertiajs/react";
@@ -44,6 +52,8 @@ export default function VentasContado({ ventas }: Props) {
     const [ticketData, setTicketData] = useState<TicketData | null>(null);
     const [isTicketOpen, setIsTicketOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [selectedVentaId, setSelectedVentaId] = useState<number | null>(null);
 
     const ticketRef = useRef<HTMLDivElement>(null);
 
@@ -112,18 +122,23 @@ export default function VentasContado({ ventas }: Props) {
     };
 
     // Anular venta
+    // Anular venta
     const handleAnular = (id: number) => {
-        if (
-            confirm(
-                "¿Estás seguro de ANULAR esta venta?\n\n- Se devolverá el stock al inventario.\n- La venta desaparecerá de los reportes.\n\nEsta acción no se puede deshacer."
-            )
-        ) {
-            router.delete(`/ventas/${id}`, {
-                onSuccess: () =>
+        setSelectedVentaId(id);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmAnular = () => {
+        if (selectedVentaId) {
+            router.delete(`/ventas/${selectedVentaId}`, {
+                onSuccess: () => {
                     toast({
                         title: "Venta anulada y stock restaurado",
                         className: "bg-green-600 text-white",
-                    }),
+                    });
+                    setIsDeleteDialogOpen(false);
+                    setSelectedVentaId(null);
+                },
                 onError: () =>
                     toast({ title: "Error al anular", variant: "destructive" }),
             });
@@ -294,6 +309,46 @@ export default function VentasContado({ ventas }: Props) {
                         </div>
                     </DialogContent>
                 </Dialog>
+
+                {/* AlertDialog Anular Venta */}
+                <AlertDialog
+                    open={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>¿Anular venta?</AlertDialogTitle>
+                            <AlertDialogDescription className="space-y-2">
+                                <p>¿Estás seguro de ANULAR esta venta?</p>
+                                <ul className="list-disc list-inside text-sm text-muted-foreground">
+                                    <li>
+                                        Se devolverá el stock al inventario.
+                                    </li>
+                                    <li>
+                                        La venta desaparecerá de los reportes.
+                                    </li>
+                                </ul>
+                                <p className="font-bold text-destructive mt-2">
+                                    Esta acción no se puede deshacer.
+                                </p>
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsDeleteDialogOpen(false)}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={confirmAnular}
+                            >
+                                Anular Venta
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </MainLayout>
     );

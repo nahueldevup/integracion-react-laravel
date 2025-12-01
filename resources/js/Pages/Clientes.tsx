@@ -32,10 +32,15 @@ import {
     DialogTitle,
     DialogFooter,
 } from "@/Components/ui/dialog";
+import { Card, CardContent } from "@/Components/ui/card";
 import {
-    Card,
-    CardContent,
-} from "@/Components/ui/card";
+    AlertDialog,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/Components/ui/alert-dialog";
 
 interface Client {
     id: number;
@@ -50,17 +55,17 @@ interface Props {
     clients: Client[];
 }
 
-interface Props {
-    clients: Client[];
-}
-
 export default function Clientes({ clients }: Props) {
     const { toast } = useToast();
 
     const [searchQuery, setSearchQuery] = useState("");
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
     const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-    
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+    const [selectedClientId, setSelectedClientId] = useState<number | null>(
+        null
+    );
+
     const [newClient, setNewClient] = useState({
         name: "",
         phone: "",
@@ -88,20 +93,16 @@ export default function Clientes({ clients }: Props) {
             return;
         }
 
-        router.post(
-            "/clientes",
-            newClient,
-            {
-                onSuccess: () => {
-                    setIsAddDialogOpen(false);
-                    setNewClient({ name: "", phone: "" });
-                    toast({
-                        title: "Cliente creado",
-                        description: "Se ha registrado correctamente",
-                    });
-                },
-            }
-        );
+        router.post("/clientes", newClient, {
+            onSuccess: () => {
+                setIsAddDialogOpen(false);
+                setNewClient({ name: "", phone: "" });
+                toast({
+                    title: "Cliente creado",
+                    description: "Se ha registrado correctamente",
+                });
+            },
+        });
     };
 
     const handleEditClick = (client: Client) => {
@@ -133,16 +134,23 @@ export default function Clientes({ clients }: Props) {
     };
 
     const handleDeleteClient = (clientId: number) => {
-        if (!confirm("¿Eliminar este cliente?")) return;
-        
-        router.delete(`/clientes/${clientId}`, {
-            onSuccess: () => {
-                toast({
-                    title: "Cliente eliminado",
-                    description: "El cliente ha sido removido",
-                });
-            },
-        });
+        setSelectedClientId(clientId);
+        setIsDeleteDialogOpen(true);
+    };
+
+    const confirmDeleteClient = () => {
+        if (selectedClientId) {
+            router.delete(`/clientes/${selectedClientId}`, {
+                onSuccess: () => {
+                    setIsDeleteDialogOpen(false);
+                    setSelectedClientId(null);
+                    toast({
+                        title: "Cliente eliminado",
+                        description: "El cliente ha sido removido",
+                    });
+                },
+            });
+        }
     };
 
     const handleViewDetails = (clientId: number) => {
@@ -220,7 +228,9 @@ export default function Clientes({ clients }: Props) {
                                 <Input
                                     placeholder="Buscar por nombre o teléfono..."
                                     value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onChange={(e) =>
+                                        setSearchQuery(e.target.value)
+                                    }
                                     className="pl-10"
                                 />
                             </div>
@@ -260,18 +270,24 @@ export default function Clientes({ clients }: Props) {
                                     ) : (
                                         filteredClients.map((client) => (
                                             <TableRow key={client.id}>
-                                                <TableCell>{client.id}</TableCell>
+                                                <TableCell>
+                                                    {client.id}
+                                                </TableCell>
                                                 <TableCell className="font-medium">
                                                     {client.name}
                                                 </TableCell>
                                                 <TableCell>
-                                                    {client.phone || "Sin teléfono"}
+                                                    {client.phone ||
+                                                        "Sin teléfono"}
                                                 </TableCell>
                                                 <TableCell>
                                                     {client.total_compras}
                                                 </TableCell>
                                                 <TableCell className="font-semibold text-green-600">
-                                                    ${client.total_gastado.toFixed(2)}
+                                                    $
+                                                    {client.total_gastado.toFixed(
+                                                        2
+                                                    )}
                                                 </TableCell>
                                                 <TableCell className="text-sm text-muted-foreground">
                                                     {client.created_at}
@@ -282,7 +298,11 @@ export default function Clientes({ clients }: Props) {
                                                             size="sm"
                                                             variant="outline"
                                                             className="h-8 w-8 p-0"
-                                                            onClick={() => handleViewDetails(client.id)}
+                                                            onClick={() =>
+                                                                handleViewDetails(
+                                                                    client.id
+                                                                )
+                                                            }
                                                         >
                                                             <Eye className="w-4 h-4 text-blue-600" />
                                                         </Button>
@@ -290,7 +310,11 @@ export default function Clientes({ clients }: Props) {
                                                             size="sm"
                                                             variant="outline"
                                                             className="h-8 w-8 p-0"
-                                                            onClick={() => handleEditClick(client)}
+                                                            onClick={() =>
+                                                                handleEditClick(
+                                                                    client
+                                                                )
+                                                            }
                                                         >
                                                             <Edit className="w-4 h-4 text-warning" />
                                                         </Button>
@@ -298,7 +322,11 @@ export default function Clientes({ clients }: Props) {
                                                             size="sm"
                                                             variant="outline"
                                                             className="h-8 w-8 p-0"
-                                                            onClick={() => handleDeleteClient(client.id)}
+                                                            onClick={() =>
+                                                                handleDeleteClient(
+                                                                    client.id
+                                                                )
+                                                            }
                                                         >
                                                             <Trash2 className="w-4 h-4 text-destructive" />
                                                         </Button>
@@ -314,7 +342,10 @@ export default function Clientes({ clients }: Props) {
                 </main>
 
                 {/* Dialog Agregar Cliente */}
-                <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                <Dialog
+                    open={isAddDialogOpen}
+                    onOpenChange={setIsAddDialogOpen}
+                >
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>Nuevo Cliente</DialogTitle>
@@ -330,7 +361,10 @@ export default function Clientes({ clients }: Props) {
                                     placeholder="Nombre completo"
                                     value={newClient.name}
                                     onChange={(e) =>
-                                        setNewClient({ ...newClient, name: e.target.value })
+                                        setNewClient({
+                                            ...newClient,
+                                            name: e.target.value,
+                                        })
                                     }
                                 />
                             </div>
@@ -344,16 +378,25 @@ export default function Clientes({ clients }: Props) {
                                     placeholder="Número de teléfono"
                                     value={newClient.phone}
                                     onChange={(e) =>
-                                        setNewClient({ ...newClient, phone: e.target.value })
+                                        setNewClient({
+                                            ...newClient,
+                                            phone: e.target.value,
+                                        })
                                     }
                                 />
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="ghost" onClick={() => setIsAddDialogOpen(false)}>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsAddDialogOpen(false)}
+                            >
                                 Cancelar
                             </Button>
-                            <Button onClick={handleSaveClient} className="bg-success">
+                            <Button
+                                onClick={handleSaveClient}
+                                className="bg-success"
+                            >
                                 Guardar
                             </Button>
                         </DialogFooter>
@@ -361,7 +404,10 @@ export default function Clientes({ clients }: Props) {
                 </Dialog>
 
                 {/* Dialog Editar Cliente */}
-                <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+                <Dialog
+                    open={isEditDialogOpen}
+                    onOpenChange={setIsEditDialogOpen}
+                >
                     <DialogContent>
                         <DialogHeader>
                             <DialogTitle>Editar Cliente</DialogTitle>
@@ -374,7 +420,10 @@ export default function Clientes({ clients }: Props) {
                                     placeholder="Nombre completo"
                                     value={editingClient.name}
                                     onChange={(e) =>
-                                        setEditingClient({ ...editingClient, name: e.target.value })
+                                        setEditingClient({
+                                            ...editingClient,
+                                            name: e.target.value,
+                                        })
                                     }
                                 />
                             </div>
@@ -385,21 +434,62 @@ export default function Clientes({ clients }: Props) {
                                     placeholder="Número de teléfono"
                                     value={editingClient.phone}
                                     onChange={(e) =>
-                                        setEditingClient({ ...editingClient, phone: e.target.value })
+                                        setEditingClient({
+                                            ...editingClient,
+                                            phone: e.target.value,
+                                        })
                                     }
                                 />
                             </div>
                         </div>
                         <DialogFooter>
-                            <Button variant="ghost" onClick={() => setIsEditDialogOpen(false)}>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsEditDialogOpen(false)}
+                            >
                                 Cancelar
                             </Button>
-                            <Button onClick={handleUpdateClient} className="bg-success">
+                            <Button
+                                onClick={handleUpdateClient}
+                                className="bg-success"
+                            >
                                 Guardar Cambios
                             </Button>
                         </DialogFooter>
                     </DialogContent>
                 </Dialog>
+
+                {/* AlertDialog Eliminar Cliente */}
+                <AlertDialog
+                    open={isDeleteDialogOpen}
+                    onOpenChange={setIsDeleteDialogOpen}
+                >
+                    <AlertDialogContent>
+                        <AlertDialogHeader>
+                            <AlertDialogTitle>
+                                ¿Eliminar cliente?
+                            </AlertDialogTitle>
+                            <AlertDialogDescription>
+                                Esta acción no se puede deshacer. El cliente
+                                será eliminado permanentemente.
+                            </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                            <Button
+                                variant="ghost"
+                                onClick={() => setIsDeleteDialogOpen(false)}
+                            >
+                                Cancelar
+                            </Button>
+                            <Button
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                                onClick={confirmDeleteClient}
+                            >
+                                Eliminar
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialog>
             </div>
         </MainLayout>
     );
