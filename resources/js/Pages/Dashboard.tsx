@@ -99,7 +99,7 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
                                         variant="outline"
                                         size="sm"
                                         onClick={() =>
-                                            router.visit("/reportes/inventario")
+                                            router.visit("reportes/baja-existencia")
                                         }
                                         className="bg-white hover:bg-gray-100"
                                     >

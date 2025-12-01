@@ -25,9 +25,11 @@ import {
     DollarSign,
     PackageX,
     ShoppingCart,
+    Plus,
+    Minus,
 } from "lucide-react";
 import MainLayout from "@/Layouts/MainLayout";
-import { Head, Link } from "@inertiajs/react";
+import { Head, Link, router } from "@inertiajs/react";
 import {
     Dialog,
     DialogContent,
@@ -136,6 +138,17 @@ export default function BajaExistencia({ productos = [] }: Props) {
     const triggerPrint = () => {
         if (!reporteRef.current) return;
         handlePrint();
+    };
+
+    // Manejar actualización de stock
+    const handleUpdateStock = (productId: number, quantity: number) => {
+        router.post(
+            `/productos/${productId}/stock`,
+            { quantity },
+            {
+                preserveScroll: true,
+            }
+        );
     };
 
     return (
@@ -330,9 +343,6 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                                     Stock Actual
                                                 </TableHead>
                                                 <TableHead className="text-center">
-                                                    Stock Actual
-                                                </TableHead>
-                                                <TableHead className="text-center">
                                                     Stock Mínimo
                                                 </TableHead>
                                                 <TableHead className="text-right">
@@ -344,13 +354,16 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                                 <TableHead className="text-right">
                                                     Inversión
                                                 </TableHead>
+                                                <TableHead className="text-center">
+                                                    Acciones
+                                                </TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {productosFiltrados.length === 0 ? (
                                                 <TableRow>
                                                     <TableCell
-                                                        colSpan={8}
+                                                        colSpan={9}
                                                         className="text-center py-8 text-green-600 font-medium"
                                                     >
                                                         ¡Excelente! No hay
@@ -400,11 +413,6 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                                                         prod.min_stock
                                                                     }
                                                                 </TableCell>
-                                                                <TableCell className="text-right font-bold text-orange-600">
-                                                                    {
-                                                                        prod.min_stock
-                                                                    }
-                                                                </TableCell>
                                                                 <TableCell className="text-right text-gray-600">
                                                                     $
                                                                     {Number(
@@ -424,6 +432,36 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                                                     ).toFixed(
                                                                         2
                                                                     )}
+                                                                </TableCell>
+                                                                <TableCell className="text-center">
+                                                                    <div className="flex gap-1 justify-center">
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline"
+                                                                            className="h-8 w-8 p-0"
+                                                                            onClick={() =>
+                                                                                handleUpdateStock(
+                                                                                    prod.id,
+                                                                                    -1
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <Minus className="w-4 h-4 text-orange-600" />
+                                                                        </Button>
+                                                                        <Button
+                                                                            size="sm"
+                                                                            variant="outline"
+                                                                            className="h-8 w-8 p-0"
+                                                                            onClick={() =>
+                                                                                handleUpdateStock(
+                                                                                    prod.id,
+                                                                                    1
+                                                                                )
+                                                                            }
+                                                                        >
+                                                                            <Plus className="w-4 h-4 text-green-600" />
+                                                                        </Button>
+                                                                    </div>
                                                                 </TableCell>
                                                             </TableRow>
                                                         );
