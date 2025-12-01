@@ -30,14 +30,16 @@ Route::middleware(['web'])->group(function () {
     Route::delete('/categorias/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
     // --- PRODUCTOS ---
+    // Rutas específicas deben estar antes de las rutas con parámetros dinámicos
+    Route::get('/productos/export', [ProductController::class, 'export'])->name('products.export');
+    Route::post('/productos/import', [ProductController::class, 'import'])->name('products.import');
+    Route::get('/productos/plantilla', [ProductController::class, 'downloadTemplate'])->name('products.template');
+    
     Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
     Route::post('/productos', [ProductController::class, 'store'])->name('products.store');
     Route::put('/productos/{id}', [ProductController::class, 'update'])->name('products.update');
     Route::delete('/productos/{id}', [ProductController::class, 'destroy'])->name('products.destroy');
     Route::post('/productos/{id}/stock', [ProductController::class, 'updateStock'])->name('products.stock');
-    Route::get('/productos/export', [ProductController::class, 'export'])->name('products.export');
-    Route::post('/productos/import', [ProductController::class, 'import'])->name('products.import');
-    Route::get('/productos/plantilla', [ProductController::class, 'downloadTemplate'])->name('products.template');
 
     // --- VENTAS ---
     Route::get('/vender', [SaleController::class, 'index'])->name('sales.index');

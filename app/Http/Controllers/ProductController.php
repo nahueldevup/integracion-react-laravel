@@ -161,10 +161,10 @@ class ProductController extends Controller
             ['', 'Alfajor Jorgito', 'Golosinas', '50.00', '80.00', '100', '20'],
         ];
 
-        return Excel::download(new class implements \Maatwebsite\Excel\Concerns\FromArray {
+        return Excel::download(new class($data) implements \Maatwebsite\Excel\Concerns\FromArray {
             protected $data;
             
-            public function __construct($data = []) {
+            public function __construct($data) {
                 $this->data = $data;
             }
             
