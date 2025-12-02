@@ -40,6 +40,18 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('dashboard');
 
+    // ... dentro del grupo middleware(['auth'])
+
+// --- PERFIL DE USUARIO ---
+Route::get('/perfil', function () {
+    return Inertia::render('Perfil');
+})->name('profile.index');
+
+Route::put('/perfil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+Route::put('/perfil/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
+
+// ... el resto de tus rutas
+
     // --- CATEGORÍAS ---
     Route::post('/categorias', [CategoryController::class, 'store'])->name('categories.store');
     Route::delete('/categorias/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
