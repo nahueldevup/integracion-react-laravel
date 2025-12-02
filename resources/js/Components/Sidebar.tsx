@@ -29,7 +29,7 @@ import {
     CollapsibleTrigger,
 } from "@/Components/ui/collapsible";
 
-// Definición de ítems del menú principal con sus keys de permisos
+// Definición de ítems del menú principal
 const menuItems = [
     { title: "Inicio", icon: Home, path: "/", permissionKey: "inicio" },
     {
@@ -65,7 +65,8 @@ const menuItems = [
         isCollapsible: true,
         permissionKey: "configuracion",
     },
-    { title: "Más", icon: Plus, path: "#", hasOtherSubmenu: true },
+    // "Salir" ahora es un ítem principal
+    { title: "Salir", icon: LogOut, path: "/logout", isLogout: true }, 
 ];
 
 // Submenú de Reportes
@@ -102,9 +103,6 @@ const configuracionSubmenu = [
     },
 ];
 
-// Submenú "Más"
-const otherSubmenu = [{ title: "Salir", icon: LogOut, path: "/logout" }];
-
 export function Sidebar() {
     const { url, props } = usePage<{
         auth: {
@@ -126,43 +124,34 @@ export function Sidebar() {
     // Función para verificar si el usuario tiene permiso
     const hasPermission = (permissionKey: string | undefined): boolean => {
         if (!user) return false;
-        if (!permissionKey) return true; // Items sin permissionKey siempre visibles (ej: "Más")
-        if (user.role === "admin") return true; // Admins tienen acceso completo
-        if (!user.permissions || user.permissions.length === 0) return false; // Sin permisos = sin acceso
-        return user.permissions.includes(permissionKey); // Verificar permiso específico
+        // Items sin permissionKey siempre visibles (como Salir)
+        if (!permissionKey) return true; 
+        if (user.role === "admin") return true;
+        if (!user.permissions || user.permissions.length === 0) return false;
+        return user.permissions.includes(permissionKey);
     };
 
     // Filtrar items del menú según permisos
     const filteredMenuItems = menuItems.filter((item) =>
+        // 'isLogout' no tiene permissionKey, así que pasará si no la definimos o si la lógica de arriba lo permite
         hasPermission(item.permissionKey)
     );
 
-    // Estado para el menú "Más"
-    const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
-
-    // Estado para el menú "Reportes" (Collapsible)
-    // Se abre automáticamente si la URL actual empieza con /reportes
+    // Estado para Reportes
     const [isReportsOpen, setIsReportsOpen] = useState(
         url.startsWith("/reportes")
     );
 
-    // Estado para el menú "Configuración" (Collapsible)
-    // Se abre automáticamente si la URL actual empieza con /configuracion
+    // Estado para Configuración
     const [isConfigOpen, setIsConfigOpen] = useState(
         url.startsWith("/configuracion")
     );
 
-    // Efecto para abrir reportes/configuración si navegamos ahí
     useEffect(() => {
         if (url.startsWith("/reportes")) setIsReportsOpen(true);
         if (url.startsWith("/configuracion")) setIsConfigOpen(true);
     }, [url]);
 
-    const toggleSubmenuFn = (title: string) => {
-        setOpenSubmenu(openSubmenu === title ? null : title);
-    };
-
-    // Función para obtener el submenú y estado según el título
     const getCollapsibleData = (title: string) => {
         switch (title) {
             case "Reportes":
@@ -199,6 +188,7 @@ export function Sidebar() {
 
             <nav className="flex-1 overflow-y-auto py-4 space-y-1">
                 {filteredMenuItems.map((item) => {
+                    
                     // CASO 1: Ítem Collapsible (Reportes o Configuración)
                     if (item.isCollapsible) {
                         const collapsibleData = getCollapsibleData(item.title);
@@ -281,65 +271,23 @@ export function Sidebar() {
                         );
                     }
 
-                    // CASO 2: Ítem "Más" (Tu lógica original manual)
-                    if (item.hasOtherSubmenu) {
-                        return (
-                            <div key={item.title}>
-                                <button
-                                    onClick={() => {
-                                        if (!isOpen && !isMobile)
-                                            toggleSidebar();
-                                        toggleSubmenuFn(item.title);
-                                    }}
-                                    className={cn(
-                                        "w-full flex items-center gap-3 px-4 py-3 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors",
-                                        openSubmenu === item.title &&
-                                            "text-primary bg-muted font-medium"
-                                    )}
-                                >
-                                    <item.icon className="w-5 h-5" />
-                                    {(isOpen || isMobile) && (
-                                        <span>{item.title}</span>
-                                    )}
-                                </button>
-                                {openSubmenu === item.title &&
-                                    (isOpen || isMobile) && (
-                                        <div className="ml-8 mt-1 space-y-1 border-l pl-2">
-                                            {otherSubmenu.map((subItem) =>
-                                                subItem.title === "Salir" ? (
-                                                    <Link
-                                                        key={subItem.title}
-                                                        href="/logout"
-                                                        method="post"
-                                                        as="button"
-                                                        className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors rounded-sm"
-                                                    >
-                                                        <subItem.icon className="w-4 h-4" />
-                                                        <span>
-                                                            {subItem.title}
-                                                        </span>
-                                                    </Link>
-                                                ) : (
-                                                    <Link
-                                                        key={subItem.title}
-                                                        href={subItem.path}
-                                                        className={cn(
-                                                            "flex items-center gap-3 px-4 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-muted transition-colors rounded-sm",
-                                                            url ===
-                                                                subItem.path &&
-                                                                "text-primary font-medium"
-                                                        )}
-                                                    >
-                                                        <subItem.icon className="w-4 h-4" />
-                                                        <span>
-                                                            {subItem.title}
-                                                        </span>
-                                                    </Link>
-                                                )
-                                            )}
-                                        </div>
-                                    )}
-                            </div>
+                    // CASO 2: Ítem Salir (Botón POST)
+                    // @ts-ignore
+                    if (item.isLogout) {
+                         return (
+                            <Link
+                                key={item.title}
+                                href={item.path}
+                                method="post"
+                                as="button"
+                                className={cn(
+                                    "w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors mt-auto", // mt-auto para empujarlo un poco si quisieras
+                                    !isOpen && !isMobile && "justify-center"
+                                )}
+                            >
+                                <item.icon className="w-5 h-5" />
+                                {(isOpen || isMobile) && <span>{item.title}</span>}
+                            </Link>
                         );
                     }
 

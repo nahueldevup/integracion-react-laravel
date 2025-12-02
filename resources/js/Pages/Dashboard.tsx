@@ -71,7 +71,7 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
                                     </p>
                                     <div className="space-y-1 mb-3">
                                         {lowStockProducts
-                                            .slice(0, 5)
+                                            .slice(0, 2)
                                             .map((product) => (
                                                 <div
                                                     key={product.id}
@@ -87,10 +87,10 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
                                                     </span>
                                                 </div>
                                             ))}
-                                        {lowStockProducts.length > 5 && (
+                                        {lowStockProducts.length > 2 && (
                                             <p className="text-sm italic">
                                                 ... y{" "}
-                                                {lowStockProducts.length - 5}{" "}
+                                                {lowStockProducts.length - 2}{" "}
                                                 producto(s) más
                                             </p>
                                         )}
