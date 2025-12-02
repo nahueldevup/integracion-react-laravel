@@ -125,13 +125,15 @@ function PaymentMethodButton({ icon: Icon, label, isSelected, onClick }: any) {
             onClick={onClick}
             className={`flex flex-col items-center gap-2 p-2 sm:p-3 rounded-lg border transition-all ${
                 isSelected
-                    ? "border-blue-500 bg-blue-50 text-blue-700"
-                    : "border-gray-200 text-gray-600"
+                    ? "border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400"
+                    : "border-border text-muted-foreground hover:bg-muted"
             }`}
         >
             <Icon
                 className={`w-5 h-5 sm:w-6 sm:h-6 ${
-                    isSelected ? "text-blue-600" : "text-gray-500"
+                    isSelected
+                        ? "text-blue-600 dark:text-blue-400"
+                        : "text-muted-foreground"
                 }`}
             />
             <span className="text-xs font-semibold">{label}</span>
@@ -517,7 +519,7 @@ export default function Vender({ allProducts, clients }: Props) {
                         {cartItems.length > 0 && (
                             <div className="bg-card p-3 sm:p-4 border-t border-border flex-shrink-0 shadow-lg">
                                 <div className="flex justify-between items-baseline mb-3 sm:mb-4">
-                                    <span className="text-lg sm:text-xl font-bold text-gray-800">
+                                    <span className="text-lg sm:text-xl font-bold text-foreground">
                                         Total
                                     </span>
                                     <span className="text-2xl sm:text-3xl font-extrabold text-blue-600">
@@ -564,7 +566,7 @@ export default function Vender({ allProducts, clients }: Props) {
 
                             {/* Método de Pago */}
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2 sm:mb-3">
+                                <label className="block text-xs font-bold text-muted-foreground uppercase mb-2 sm:mb-3">
                                     Método de Pago
                                 </label>
                                 <div className="grid grid-cols-3 gap-2 sm:gap-3">
@@ -604,7 +606,7 @@ export default function Vender({ allProducts, clients }: Props) {
 
                             {/* Cliente */}
                             <div>
-                                <label className="block text-xs font-bold text-gray-500 uppercase mb-2">
+                                <label className="block text-xs font-bold text-muted-foreground uppercase mb-2">
                                     Cliente (Opcional)
                                 </label>
 
