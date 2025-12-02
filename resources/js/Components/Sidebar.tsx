@@ -182,7 +182,7 @@ export function Sidebar() {
                         !isOpen && !isMobile && "opacity-0"
                     )}
                 >
-                    {(isOpen || isMobile) && "Mi POS"}
+                    {(isOpen || isMobile) && "PIPOS"}
                 </h1>
             </div>
 

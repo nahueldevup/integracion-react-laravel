@@ -154,7 +154,7 @@ export default function BajaExistencia({ productos = [] }: Props) {
     return (
         <MainLayout>
             <Head title="Baja Existencia" />
-            <div className="flex-1 flex flex-col h-full bg-gray-50/50">
+            <div className="flex-1 flex flex-col h-full bg-background">
                 <Header
                     title="Reporte de Baja Existencia"
                     subtitle="Productos que requieren reabastecimiento"
@@ -180,35 +180,35 @@ export default function BajaExistencia({ productos = [] }: Props) {
 
                         {/* Tarjetas de Resumen */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Card className="bg-blue-50 border-blue-200">
+                            <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-blue-800">
+                                    <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">
                                         Total a Reponer
                                     </CardTitle>
-                                    <ShoppingCart className="h-4 w-4 text-blue-600" />
+                                    <ShoppingCart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold text-blue-900">
+                                    <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">
                                         {resumen.totalReponer}{" "}
-                                        <span className="text-sm font-normal text-blue-700">
+                                        <span className="text-sm font-normal text-blue-700 dark:text-blue-300">
                                             unidades
                                         </span>
                                     </div>
-                                    <p className="text-xs text-blue-600 mt-1">
+                                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
                                         En {productosFiltrados.length} productos
                                     </p>
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-green-50 border-green-200">
+                            <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-green-800">
+                                    <CardTitle className="text-sm font-medium text-green-800 dark:text-green-300">
                                         Inversión Estimada
                                     </CardTitle>
-                                    <DollarSign className="h-4 w-4 text-green-600" />
+                                    <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold text-green-900">
+                                    <div className="text-2xl font-bold text-green-900 dark:text-green-200">
                                         $
                                         {resumen.totalInversion.toLocaleString(
                                             "es-AR",
@@ -218,24 +218,24 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                             }
                                         )}
                                     </div>
-                                    <p className="text-xs text-green-600 mt-1">
+                                    <p className="text-xs text-green-600 dark:text-green-400 mt-1">
                                         Costo base de reposición
                                     </p>
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-red-50 border-red-200">
+                            <Card className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium text-red-800">
+                                    <CardTitle className="text-sm font-medium text-red-800 dark:text-red-300">
                                         Productos Agotados
                                     </CardTitle>
-                                    <PackageX className="h-4 w-4 text-red-600" />
+                                    <PackageX className="h-4 w-4 text-red-600 dark:text-red-400" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold text-red-900">
+                                    <div className="text-2xl font-bold text-red-900 dark:text-red-200">
                                         {resumen.totalAgotados}
                                     </div>
-                                    <p className="text-xs text-red-600 mt-1">
+                                    <p className="text-xs text-red-600 dark:text-red-400 mt-1">
                                         Requieren atención inmediata
                                     </p>
                                 </CardContent>
@@ -309,7 +309,7 @@ export default function BajaExistencia({ productos = [] }: Props) {
 
                         {/* Tabla de Productos */}
                         <Card className="border-orange-200 shadow-md">
-                            <CardHeader className="bg-orange-50 border-b border-orange-100">
+                            <CardHeader className="bg-orange-50 dark:bg-orange-950/20 border-b border-orange-100 dark:border-orange-900">
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2 text-orange-800">
                                         <AlertTriangle className="w-5 h-5" />
@@ -321,7 +321,7 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                     {productosFiltrados.length > 0 && (
                                         <Badge
                                             variant="outline"
-                                            className="bg-white"
+                                            className="bg-card"
                                         >
                                             {productosFiltrados.length} producto
                                             {productosFiltrados.length !== 1
@@ -408,12 +408,12 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                                                         }
                                                                     </Badge>
                                                                 </TableCell>
-                                                                <TableCell className="text-center text-gray-500">
+                                                                <TableCell className="text-center text-muted-foreground">
                                                                     {
                                                                         prod.min_stock
                                                                     }
                                                                 </TableCell>
-                                                                <TableCell className="text-right text-gray-600">
+                                                                <TableCell className="text-right text-muted-foreground">
                                                                     $
                                                                     {Number(
                                                                         prod.purchase_price
@@ -486,7 +486,7 @@ export default function BajaExistencia({ productos = [] }: Props) {
                         </DialogTitle>
                     </DialogHeader>
 
-                    <div className="bg-gray-100 p-4 rounded-md flex justify-center">
+                    <div className="bg-muted p-4 rounded-md flex justify-center">
                         <ReporteBajaExistencia
                             ref={reporteRef}
                             data={reporteData}

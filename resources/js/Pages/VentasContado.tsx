@@ -165,19 +165,19 @@ export default function VentasContado({ ventas }: Props) {
                     <div className="max-w-7xl mx-auto space-y-6">
                         <div className="flex flex-col md:flex-row gap-6 justify-between items-end">
                             <div className="flex gap-6">
-                                <div className="bg-white p-4 rounded-lg border shadow-sm">
+                                <div className="bg-card p-4 rounded-lg border shadow-sm">
                                     <p className="text-sm text-muted-foreground">
                                         Ventas Totales
                                     </p>
-                                    <p className="text-2xl font-bold text-blue-600">
+                                    <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
                                         $ {totalVendido.toFixed(2)}
                                     </p>
                                 </div>
-                                <div className="bg-white p-4 rounded-lg border shadow-sm">
+                                <div className="bg-card p-4 rounded-lg border shadow-sm">
                                     <p className="text-sm text-muted-foreground">
                                         Utilidad Estimada
                                     </p>
-                                    <p className="text-2xl font-bold text-green-600">
+                                    <p className="text-2xl font-bold text-green-600 dark:text-green-400">
                                         $ {totalUtilidad.toFixed(2)}
                                     </p>
                                 </div>
@@ -257,7 +257,7 @@ export default function VentasContado({ ventas }: Props) {
                                                             }
                                                             disabled={isLoading}
                                                         >
-                                                            <Printer className="w-4 h-4 text-slate-600" />
+                                                            <Printer className="w-4 h-4 text-slate-600 dark:text-slate-400" />
                                                         </Button>
                                                         <Button
                                                             size="sm"
@@ -292,7 +292,7 @@ export default function VentasContado({ ventas }: Props) {
                     Usamos 'hidden' en lugar de no renderizarlo si quisiéramos imprimir sin verlo, 
                     pero aquí lo mostramos.
                 */}
-                        <div className="bg-gray-100 p-4 rounded-md flex justify-center max-h-[60vh] overflow-y-auto">
+                        <div className="bg-muted p-4 rounded-md flex justify-center max-h-[60vh] overflow-y-auto">
                             {ticketData ? (
                                 <Ticket
                                     ref={ticketRef}

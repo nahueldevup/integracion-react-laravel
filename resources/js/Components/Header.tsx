@@ -2,6 +2,7 @@ import { Menu, User } from "lucide-react";
 import { Button } from "@/Components/ui/button";
 import { router, usePage } from "@inertiajs/react";
 import { useSidebarContext } from "@/Contexts/SidebarContext";
+import { ThemeToggle } from "@/Components/ThemeToggle";
 
 interface HeaderProps {
     title: string;
@@ -35,6 +36,10 @@ export function Header({ title, subtitle }: HeaderProps) {
                     <span className="text-sm text-foreground">
                         Hola, {auth?.user?.name || "Usuario"}
                     </span>
+
+                    {/* Toggle de Tema */}
+                    <ThemeToggle />
+
                     <Button
                         variant="ghost"
                         size="icon"

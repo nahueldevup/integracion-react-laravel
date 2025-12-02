@@ -90,22 +90,28 @@ interface Props {
 // --- Componente Tarjeta ---
 function StatCard({ title, value, icon: Icon, colorClass, subtext }: any) {
     return (
-        <div className="bg-white p-6 rounded-xl border shadow-sm flex items-start justify-between transition-all hover:shadow-md">
+        <div className="bg-card p-6 rounded-xl border shadow-sm flex items-start justify-between transition-all hover:shadow-md">
             <div>
-                <p className="text-sm font-medium text-gray-500 mb-1">
+                <p className="text-sm font-medium text-muted-foreground mb-1">
                     {title}
                 </p>
                 <h3 className={`text-2xl font-bold ${colorClass}`}>
                     $ {Number(value).toFixed(2)}
                 </h3>
                 {subtext && (
-                    <p className="text-xs text-gray-400 mt-1">{subtext}</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                        {subtext}
+                    </p>
                 )}
             </div>
             <div
-                className={`p-3 rounded-lg ${colorClass
-                    .replace("text-", "bg-")
-                    .replace("600", "100")}`}
+                className={`p-3 rounded-lg ${
+                    colorClass
+                        .replace("text-", "bg-")
+                        .replace("600", "100 dark:bg-") +
+                    " dark:" +
+                    colorClass.replace("600", "900/20")
+                }`}
             >
                 <Icon className={`w-6 h-6 ${colorClass}`} />
             </div>
@@ -272,7 +278,7 @@ export default function Caja({ movements, summary, history }: Props) {
 
     return (
         <MainLayout>
-            <div className="flex-1 flex flex-col h-full bg-gray-50/50">
+            <div className="flex-1 flex flex-col h-full bg-background">
                 <Header
                     title="Gestión de Caja"
                     subtitle="Control de efectivo y cierres"
@@ -356,11 +362,11 @@ export default function Caja({ movements, summary, history }: Props) {
                             </TabsList>
 
                             <TabsContent value="movimientos">
-                                <div className="bg-white rounded-xl border shadow-sm overflow-hidden mt-4">
-                                    <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                                <div className="bg-card rounded-xl border shadow-sm overflow-hidden mt-4">
+                                    <div className="p-4 border-b bg-muted flex justify-between items-center">
                                         <div className="flex items-center gap-2">
-                                            <History className="w-5 h-5 text-gray-500" />
-                                            <h3 className="font-bold text-gray-700">
+                                            <History className="w-5 h-5 text-muted-foreground" />
+                                            <h3 className="font-bold text-foreground">
                                                 Movimientos Manuales (Hoy)
                                             </h3>
                                         </div>
@@ -465,11 +471,11 @@ export default function Caja({ movements, summary, history }: Props) {
                             </TabsContent>
 
                             <TabsContent value="historial">
-                                <div className="bg-white rounded-xl border shadow-sm overflow-hidden mt-4">
-                                    <div className="p-4 border-b bg-gray-50 flex justify-between items-center">
+                                <div className="bg-card rounded-xl border shadow-sm overflow-hidden mt-4">
+                                    <div className="p-4 border-b bg-muted flex justify-between items-center">
                                         <div className="flex items-center gap-2">
-                                            <CalendarClock className="w-5 h-5 text-gray-500" />
-                                            <h3 className="font-bold text-gray-700">
+                                            <CalendarClock className="w-5 h-5 text-muted-foreground" />
+                                            <h3 className="font-bold text-foreground">
                                                 Reportes Guardados
                                             </h3>
                                         </div>
@@ -659,8 +665,8 @@ export default function Caja({ movements, summary, history }: Props) {
                             {/* LADO IZQUIERDO: SISTEMA */}
                             <div className="space-y-4">
                                 {/* --- AQUI ESTA LO QUE FALTABA: BLOQUE DIGITAL --- */}
-                                <div className="bg-gray-50 p-4 rounded-lg border space-y-3">
-                                    <h4 className="font-bold text-gray-700 flex items-center gap-2">
+                                <div className="bg-muted p-4 rounded-lg border space-y-3">
+                                    <h4 className="font-bold text-foreground flex items-center gap-2">
                                         <CreditCard className="w-4 h-4" />{" "}
                                         Digital (Banco)
                                     </h4>
