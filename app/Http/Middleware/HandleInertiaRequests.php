@@ -30,6 +30,8 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
+            'businessSettings' => \App\Models\BusinessSetting::first(),
+            'printerSettings' => \App\Models\PrinterSetting::first(),
         ]);
     }
 }

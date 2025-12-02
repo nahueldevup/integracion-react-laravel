@@ -11,6 +11,8 @@ use App\Http\Controllers\ClientController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\PrinterSettingController;
+use App\Http\Controllers\BusinessSettingController;
 
 // --- RUTAS PÚBLICAS (Autenticación) ---
 Route::get('/login', function () { 
@@ -77,13 +79,7 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/caja/{id}', [CashController::class, 'destroy'])->name('cash.destroy');
     Route::get('/caja/historial/{id}', [CashController::class, 'show'])->name('cash.show');
 
-    // --- CONFIGURACIÓN ---
-    Route::get('/configuracion', [SettingController::class, 'index'])->name('settings.index');
-    Route::post('/configuracion', [SettingController::class, 'store'])->name('settings.store');
-    Route::put('/configuracion/{id}', [SettingController::class, 'update'])->name('settings.update');
-    Route::delete('/configuracion/{id}', [SettingController::class, 'destroy'])->name('settings.destroy');
-
-    // --- CONFIGURACIÓN > USUARIOS Y PERMISOS ---
+    // --- CONFIGURACIÓN > USUARIOS Y PERMISOS (Primero las rutas específicas) ---
     Route::prefix('configuracion/usuarios')->group(function() {
         Route::get('/', [UserController::class, 'index'])->name('config.users.index');
         Route::post('/', [UserController::class, 'store'])->name('config.users.store');
@@ -94,7 +90,28 @@ Route::middleware(['auth'])->group(function () {
         Route::put('/{id}/permissions', [UserController::class, 'updatePermissions'])->name('config.users.permissions');
     });
 
-    // --- USUARIOS (Página antigua - mantener por compatibilidad) ---
+    // --- CONFIGURACIÓN > DATOS DEL NEGOCIO ---
+    Route::prefix('configuracion/negocio')->group(function() {
+        Route::get('/', [BusinessSettingController::class, 'index'])->name('config.business.index');
+        Route::put('/', [BusinessSettingController::class, 'update'])->name('config.business.update');
+        Route::post('/logo', [BusinessSettingController::class, 'uploadLogo'])->name('config.business.upload-logo');
+    });
+
+    // --- CONFIGURACIÓN > IMPRESORAS Y TICKETS ---
+    Route::prefix('configuracion/tickets')->group(function() {
+        Route::get('/', [PrinterSettingController::class, 'index'])->name('config.tickets.index');
+        Route::put('/', [PrinterSettingController::class, 'update'])->name('config.tickets.update');
+    });
+
+    // --- CONFIGURACIÓN (Rutas genéricas después de las específicas) ---
+    Route::get('/configuracion', [SettingController::class, 'index'])->name('settings.index');
+    Route::post('/configuracion', [SettingController::class, 'store'])->name('settings.store');
+    Route::put('/configuracion/{id}', [SettingController::class, 'update'])->name('settings.update');
+    Route::delete('/configuracion/{id}', [SettingController::class, 'destroy'])->name('settings.destroy');
+
+
+
+
     Route::get('/usuarios', function () { 
         return Inertia::render('Usuarios', ['usuarios' => \App\Models\User::all()]); 
     });

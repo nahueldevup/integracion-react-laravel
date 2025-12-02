@@ -1,4 +1,4 @@
-import { Head, router } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
 import MainLayout from "@/Layouts/MainLayout";
 import { Header } from "@/Components/Header";
 import { Button } from "@/Components/ui/button";
@@ -67,7 +67,14 @@ interface Props {
     venta: Venta;
 }
 
+interface PageProps {
+    businessSettings?: any;
+    printerSettings?: any;
+    [key: string]: any;
+}
+
 export default function VentaDetalle({ venta }: Props) {
+    const { businessSettings, printerSettings } = usePage<PageProps>().props;
     const [isTicketOpen, setIsTicketOpen] = useState(false);
     const ticketRef = useRef<HTMLDivElement>(null);
 
@@ -468,7 +475,12 @@ export default function VentaDetalle({ venta }: Props) {
                     </DialogHeader>
 
                     <div className="bg-gray-100 p-4 rounded-md flex justify-center max-h-[60vh] overflow-y-auto">
-                        <Ticket ref={ticketRef} data={ticketData} />
+                        <Ticket
+                            ref={ticketRef}
+                            data={ticketData}
+                            businessSettings={businessSettings}
+                            printerSettings={printerSettings}
+                        />
                     </div>
 
                     <div className="flex justify-end gap-2 mt-4">

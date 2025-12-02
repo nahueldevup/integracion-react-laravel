@@ -26,7 +26,7 @@ import {
 } from "@/Components/ui/alert-dialog";
 import { Badge } from "@/Components/ui/badge";
 import MainLayout from "@/Layouts/MainLayout";
-import { Head, Link, router } from "@inertiajs/react";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { useToast } from "@/Hooks/use-toast";
 import { Ticket, TicketData } from "@/Components/Ticket";
 import axios from "axios";
@@ -47,7 +47,14 @@ interface Props {
     ventas: Venta[];
 }
 
+interface PageProps {
+    businessSettings?: any;
+    printerSettings?: any;
+    [key: string]: any;
+}
+
 export default function VentasContado({ ventas }: Props) {
+    const { businessSettings, printerSettings } = usePage<PageProps>().props;
     const { toast } = useToast();
     const [ticketData, setTicketData] = useState<TicketData | null>(null);
     const [isTicketOpen, setIsTicketOpen] = useState(false);
@@ -287,7 +294,12 @@ export default function VentasContado({ ventas }: Props) {
                 */}
                         <div className="bg-gray-100 p-4 rounded-md flex justify-center max-h-[60vh] overflow-y-auto">
                             {ticketData ? (
-                                <Ticket ref={ticketRef} data={ticketData} />
+                                <Ticket
+                                    ref={ticketRef}
+                                    data={ticketData}
+                                    businessSettings={businessSettings}
+                                    printerSettings={printerSettings}
+                                />
                             ) : (
                                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
                             )}
