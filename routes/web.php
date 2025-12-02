@@ -2,16 +2,31 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\CashController;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\SettingController;
-use App\Http\Controllers\ReportController; // Asegúrate de tener este import
-// use App\Http\Controllers\UserController; // Descomenta si ya creaste este controlador
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\UserController;
 
-Route::middleware(['web'])->group(function () {
+// --- RUTAS PÚBLICAS (Autenticación) ---
+Route::get('/login', function () { 
+    return Inertia::render('Login'); 
+})->name('login');
+
+Route::get('/register', function () { 
+    return Inertia::render('Register'); 
+})->name('register');
+
+Route::post('/register', [AuthController::class, 'register'])->name('register.post');
+Route::post('/login', [AuthController::class, 'login'])->name('login.post');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// --- RUTAS PROTEGIDAS (Requieren autenticación) ---
+Route::middleware(['auth'])->group(function () {
 
     // --- DASHBOARD ---
     Route::get('/', function () {
@@ -22,8 +37,6 @@ Route::middleware(['web'])->group(function () {
             'lowStockProducts' => $lowStockProducts
         ]);
     })->name('dashboard');
-
-    Route::get('/login', function () { return Inertia::render('Login'); })->name('login');
 
     // --- CATEGORÍAS ---
     Route::post('/categorias', [CategoryController::class, 'store'])->name('categories.store');
@@ -70,7 +83,18 @@ Route::middleware(['web'])->group(function () {
     Route::put('/configuracion/{id}', [SettingController::class, 'update'])->name('settings.update');
     Route::delete('/configuracion/{id}', [SettingController::class, 'destroy'])->name('settings.destroy');
 
-    // --- USUARIOS ---
+    // --- CONFIGURACIÓN > USUARIOS Y PERMISOS ---
+    Route::prefix('configuracion/usuarios')->group(function() {
+        Route::get('/', [UserController::class, 'index'])->name('config.users.index');
+        Route::post('/', [UserController::class, 'store'])->name('config.users.store');
+        Route::put('/{id}', [UserController::class, 'update'])->name('config.users.update');
+        Route::delete('/{id}', [UserController::class, 'destroy'])->name('config.users.destroy');
+        Route::patch('/{id}/toggle-active', [UserController::class, 'toggleActive'])->name('config.users.toggle');
+        Route::put('/{id}/password', [UserController::class, 'updatePassword'])->name('config.users.password');
+        Route::put('/{id}/permissions', [UserController::class, 'updatePermissions'])->name('config.users.permissions');
+    });
+
+    // --- USUARIOS (Página antigua - mantener por compatibilidad) ---
     Route::get('/usuarios', function () { 
         return Inertia::render('Usuarios', ['usuarios' => \App\Models\User::all()]); 
     });
