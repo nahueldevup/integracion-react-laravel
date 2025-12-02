@@ -106,103 +106,152 @@ export default function ConfiguracionNegocio({ settings }: Props) {
     return (
         <MainLayout>
             <Head title="Configuración del Negocio" />
-            
+
             {/* CONTENEDOR PRINCIPAL: Flex vertical y fondo gris suave */}
-            <div className="flex-1 flex flex-col h-full bg-gray-50/50">
-                
+            <div className="flex-1 flex flex-col h-full bg-background">
                 {/* 1. HEADER ESTÁNDAR */}
-                <Header 
-                    title="Datos del Negocio" 
-                    subtitle="Personaliza la información que aparece en tus tickets y reportes" 
+                <Header
+                    title="Datos del Negocio"
+                    subtitle="Personaliza la información que aparece en tus tickets y reportes"
                 />
 
                 {/* 2. CONTENIDO SCROLLEABLE */}
                 <main className="flex-1 p-6 overflow-y-auto">
                     <div className="max-w-6xl mx-auto space-y-6">
-
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                            
                             {/* COLUMNA IZQUIERDA: FORMULARIO */}
                             <div className="lg:col-span-2 space-y-6">
                                 <Card className="border shadow-sm">
-                                    <CardHeader className="border-b bg-white pb-4">
+                                    <CardHeader className="border-b bg-card pb-4">
                                         <div className="flex items-center gap-3 text-blue-600 mb-1">
                                             <div className="p-2 bg-blue-50 rounded-lg">
                                                 <Building className="w-5 h-5" />
                                             </div>
-                                            <CardTitle className="text-lg text-foreground">Información General</CardTitle>
+                                            <CardTitle className="text-lg text-foreground">
+                                                Información General
+                                            </CardTitle>
                                         </div>
                                         <CardDescription>
-                                            Estos datos son públicos en tus comprobantes.
+                                            Estos datos son públicos en tus
+                                            comprobantes.
                                         </CardDescription>
                                     </CardHeader>
-                                    
+
                                     <CardContent className="pt-6">
-                                        <form onSubmit={handleSubmit} className="space-y-5">
+                                        <form
+                                            onSubmit={handleSubmit}
+                                            className="space-y-5"
+                                        >
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="business_name">Nombre del Negocio *</Label>
+                                                    <Label htmlFor="business_name">
+                                                        Nombre del Negocio *
+                                                    </Label>
                                                     <Input
                                                         id="business_name"
-                                                        value={formData.business_name}
-                                                        onChange={(e) => setFormData({ ...formData, business_name: e.target.value })}
+                                                        value={
+                                                            formData.business_name
+                                                        }
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                business_name:
+                                                                    e.target
+                                                                        .value,
+                                                            })
+                                                        }
                                                         placeholder="Ej: Kiosco El Rincón"
                                                         required
-                                                        className="bg-gray-50/50"
+                                                        className="bg-muted/50"
                                                     />
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="tax_id">CUIT / RUT</Label>
+                                                    <Label htmlFor="tax_id">
+                                                        CUIT / RUT
+                                                    </Label>
                                                     <Input
                                                         id="tax_id"
                                                         value={formData.tax_id}
-                                                        onChange={(e) => setFormData({ ...formData, tax_id: e.target.value })}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                tax_id: e.target
+                                                                    .value,
+                                                            })
+                                                        }
                                                         placeholder="Ej: 20-12345678-9"
-                                                        className="bg-gray-50/50"
+                                                        className="bg-muted/50"
                                                     />
                                                 </div>
                                             </div>
 
                                             <div className="space-y-2">
-                                                <Label htmlFor="address">Dirección Comercial</Label>
+                                                <Label htmlFor="address">
+                                                    Dirección Comercial
+                                                </Label>
                                                 <Textarea
                                                     id="address"
                                                     value={formData.address}
-                                                    onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                                                    onChange={(e) =>
+                                                        setFormData({
+                                                            ...formData,
+                                                            address:
+                                                                e.target.value,
+                                                        })
+                                                    }
                                                     placeholder="Ej: Av. Libertador 1234, Local 5"
                                                     rows={3}
-                                                    className="bg-gray-50/50 resize-none"
+                                                    className="bg-muted/50 resize-none"
                                                 />
                                             </div>
 
                                             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="phone">Teléfono / WhatsApp</Label>
+                                                    <Label htmlFor="phone">
+                                                        Teléfono / WhatsApp
+                                                    </Label>
                                                     <Input
                                                         id="phone"
                                                         value={formData.phone}
-                                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                phone: e.target
+                                                                    .value,
+                                                            })
+                                                        }
                                                         placeholder="+54 11 ..."
-                                                        className="bg-gray-50/50"
+                                                        className="bg-muted/50"
                                                     />
                                                 </div>
 
                                                 <div className="space-y-2">
-                                                    <Label htmlFor="email">Correo Electrónico</Label>
+                                                    <Label htmlFor="email">
+                                                        Correo Electrónico
+                                                    </Label>
                                                     <Input
                                                         id="email"
                                                         type="email"
                                                         value={formData.email}
-                                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                        onChange={(e) =>
+                                                            setFormData({
+                                                                ...formData,
+                                                                email: e.target
+                                                                    .value,
+                                                            })
+                                                        }
                                                         placeholder="contacto@negocio.com"
-                                                        className="bg-gray-50/50"
+                                                        className="bg-muted/50"
                                                     />
                                                 </div>
                                             </div>
 
                                             <div className="pt-4 flex justify-end">
-                                                <Button type="submit" className="bg-blue-600 hover:bg-blue-700 text-white shadow-md gap-2">
+                                                <Button
+                                                    type="submit"
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-md gap-2"
+                                                >
                                                     <Save className="w-4 h-4" />
                                                     Guardar Cambios
                                                 </Button>
@@ -215,12 +264,14 @@ export default function ConfiguracionNegocio({ settings }: Props) {
                             {/* COLUMNA DERECHA: LOGO */}
                             <div className="lg:col-span-1">
                                 <Card className="border shadow-sm h-full">
-                                    <CardHeader className="border-b bg-white pb-4">
+                                    <CardHeader className="border-b bg-card pb-4">
                                         <div className="flex items-center gap-3 text-purple-600 mb-1">
                                             <div className="p-2 bg-purple-50 rounded-lg">
                                                 <ImageIcon className="w-5 h-5" />
                                             </div>
-                                            <CardTitle className="text-lg text-foreground">Logo</CardTitle>
+                                            <CardTitle className="text-lg text-foreground">
+                                                Logo
+                                            </CardTitle>
                                         </div>
                                         <CardDescription>
                                             Visible en ticket y sistema.
@@ -228,9 +279,11 @@ export default function ConfiguracionNegocio({ settings }: Props) {
                                     </CardHeader>
                                     <CardContent className="pt-6 flex flex-col items-center space-y-6">
                                         {/* Área de Preview */}
-                                        <div 
-                                            className="relative group w-full aspect-square max-w-[250px] bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden hover:border-blue-400 transition-colors cursor-pointer"
-                                            onClick={() => fileInputRef.current?.click()}
+                                        <div
+                                            className="relative group w-full aspect-square max-w-[250px] bg-muted rounded-xl border-2 border-dashed border-border flex items-center justify-center overflow-hidden hover:border-ring transition-colors cursor-pointer"
+                                            onClick={() =>
+                                                fileInputRef.current?.click()
+                                            }
                                         >
                                             {logoPreview ? (
                                                 <img
@@ -239,17 +292,22 @@ export default function ConfiguracionNegocio({ settings }: Props) {
                                                     className="w-full h-full object-contain p-4"
                                                 />
                                             ) : (
-                                                <div className="text-center p-6 text-gray-400">
+                                                <div className="text-center p-6 text-muted-foreground">
                                                     <Upload className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                                                    <p className="text-sm font-medium">Clic para subir imagen</p>
-                                                    <p className="text-xs mt-1">PNG, JPG (Máx 2MB)</p>
+                                                    <p className="text-sm font-medium">
+                                                        Clic para subir imagen
+                                                    </p>
+                                                    <p className="text-xs mt-1">
+                                                        PNG, JPG (Máx 2MB)
+                                                    </p>
                                                 </div>
                                             )}
-                                            
+
                                             {/* Overlay al hacer hover */}
                                             <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                                 <p className="text-white font-medium flex items-center gap-2">
-                                                    <Upload className="w-4 h-4" /> Cambiar
+                                                    <Upload className="w-4 h-4" />{" "}
+                                                    Cambiar
                                                 </p>
                                             </div>
                                         </div>
@@ -263,22 +321,24 @@ export default function ConfiguracionNegocio({ settings }: Props) {
                                         />
 
                                         <div className="w-full">
-                                            <Button 
-                                                type="button" 
-                                                variant="outline" 
-                                                className="w-full border-gray-300 hover:bg-gray-50"
-                                                onClick={() => fileInputRef.current?.click()}
+                                            <Button
+                                                type="button"
+                                                variant="outline"
+                                                className="w-full border-border hover:bg-accent"
+                                                onClick={() =>
+                                                    fileInputRef.current?.click()
+                                                }
                                             >
                                                 Seleccionar Archivo
                                             </Button>
                                             <p className="text-xs text-muted-foreground text-center mt-3">
-                                                Recomendado: Formato cuadrado (500x500px)
+                                                Recomendado: Formato cuadrado
+                                                (500x500px)
                                             </p>
                                         </div>
                                     </CardContent>
                                 </Card>
                             </div>
-
                         </div>
                     </div>
                 </main>

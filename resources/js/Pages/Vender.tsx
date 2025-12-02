@@ -613,20 +613,20 @@ export default function Vender({ allProducts, clients }: Props) {
                                 {isCreatingCustomer ? (
                                     <div className="space-y-2 border p-3 rounded bg-muted animate-in fade-in zoom-in-95 duration-200">
                                         <div className="flex justify-between items-center mb-2">
-                                            <span className="text-sm font-semibold text-blue-600">
+                                            <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
                                                 Nuevo Cliente
                                             </span>
                                             <button
                                                 onClick={() =>
                                                     setIsCreatingCustomer(false)
                                                 }
-                                                className="text-gray-400 hover:text-red-500"
+                                                className="text-muted-foreground hover:text-red-500"
                                             >
                                                 <X className="w-4 h-4" />
                                             </button>
                                         </div>
                                         <input
-                                            className="w-full border p-2 rounded text-sm"
+                                            className="w-full border border-input bg-background text-foreground p-2 rounded text-sm"
                                             placeholder="Nombre completo *"
                                             value={newCustomerName}
                                             onChange={(e) =>
@@ -637,7 +637,7 @@ export default function Vender({ allProducts, clients }: Props) {
                                             autoFocus
                                         />
                                         <input
-                                            className="w-full border p-2 rounded text-sm"
+                                            className="w-full border border-input bg-background text-foreground p-2 rounded text-sm"
                                             placeholder="Teléfono (opcional)"
                                             value={newCustomerPhone}
                                             onChange={(e) =>
@@ -656,19 +656,19 @@ export default function Vender({ allProducts, clients }: Props) {
                                 ) : (
                                     <div className="relative">
                                         {selectedCustomer ? (
-                                            <div className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                            <div className="flex items-center justify-between p-3 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg">
                                                 <div className="flex items-center gap-2">
-                                                    <div className="bg-blue-100 p-1.5 rounded-full">
-                                                        <User className="w-4 h-4 text-blue-600" />
+                                                    <div className="bg-blue-100 dark:bg-blue-900/40 p-1.5 rounded-full">
+                                                        <User className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                                                     </div>
                                                     <div>
-                                                        <p className="font-semibold text-sm text-gray-800">
+                                                        <p className="font-semibold text-sm text-foreground">
                                                             {
                                                                 selectedCustomer.name
                                                             }
                                                         </p>
                                                         {selectedCustomer.phone && (
-                                                            <p className="text-xs text-gray-500">
+                                                            <p className="text-xs text-muted-foreground">
                                                                 {
                                                                     selectedCustomer.phone
                                                                 }
@@ -678,7 +678,7 @@ export default function Vender({ allProducts, clients }: Props) {
                                                 </div>
                                                 <button
                                                     onClick={handleRemoveClient}
-                                                    className="text-gray-400 hover:text-red-500 p-1"
+                                                    className="text-muted-foreground hover:text-red-500 p-1"
                                                 >
                                                     <X className="w-4 h-4" />
                                                 </button>
@@ -686,9 +686,9 @@ export default function Vender({ allProducts, clients }: Props) {
                                         ) : (
                                             <div className="flex gap-2">
                                                 <div className="relative flex-1">
-                                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                                                     <input
-                                                        className="w-full pl-9 pr-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all text-sm"
+                                                        className="w-full pl-9 pr-4 py-2 border border-input bg-background text-foreground rounded-lg focus:ring-2 focus:ring-ring focus:border-ring outline-none transition-all text-sm"
                                                         placeholder="Buscar cliente..."
                                                         value={customerSearch}
                                                         onChange={(e) =>
@@ -715,7 +715,7 @@ export default function Vender({ allProducts, clients }: Props) {
                                                                                     client
                                                                                 )
                                                                             }
-                                                                            className="p-2 hover:bg-gray-100 cursor-pointer text-sm border-b last:border-0 flex justify-between items-center"
+                                                                            className="p-2 hover:bg-accent cursor-pointer text-sm border-b last:border-0 flex justify-between items-center"
                                                                         >
                                                                             <span>
                                                                                 {
@@ -723,7 +723,7 @@ export default function Vender({ allProducts, clients }: Props) {
                                                                                 }
                                                                             </span>
                                                                             {client.phone && (
-                                                                                <span className="text-xs text-gray-400">
+                                                                                <span className="text-xs text-muted-foreground">
                                                                                     {
                                                                                         client.phone
                                                                                     }
@@ -733,7 +733,7 @@ export default function Vender({ allProducts, clients }: Props) {
                                                                     )
                                                                 )
                                                             ) : (
-                                                                <div className="p-3 text-sm text-gray-500 text-center">
+                                                                <div className="p-3 text-sm text-muted-foreground text-center">
                                                                     No
                                                                     encontrado
                                                                 </div>
@@ -747,7 +747,7 @@ export default function Vender({ allProducts, clients }: Props) {
                                                             true
                                                         )
                                                     }
-                                                    className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200 text-gray-600 border border-gray-200 transition-colors"
+                                                    className="p-2 bg-muted rounded-lg hover:bg-accent text-muted-foreground border border-border transition-colors"
                                                     title="Crear nuevo cliente"
                                                 >
                                                     <UserPlus className="w-5 h-5" />
@@ -759,24 +759,26 @@ export default function Vender({ allProducts, clients }: Props) {
                             </div>
 
                             {/* Resumen y Pago */}
-                            <div className="bg-blue-50 p-3 sm:p-4 rounded-xl space-y-3">
+                            <div className="bg-blue-50 dark:bg-blue-950/20 p-3 sm:p-4 rounded-xl space-y-3">
                                 <div className="flex justify-between text-lg sm:text-xl font-bold">
-                                    <span>Total:</span>
-                                    <span className="text-blue-600">
+                                    <span className="text-foreground">
+                                        Total:
+                                    </span>
+                                    <span className="text-blue-600 dark:text-blue-400">
                                         ${total.toFixed(2)}
                                     </span>
                                 </div>
 
                                 <div className="space-y-2">
                                     <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
-                                        <label className="font-semibold text-sm sm:text-base whitespace-nowrap">
+                                        <label className="font-semibold text-sm sm:text-base text-foreground whitespace-nowrap">
                                             Monto a Pagar:
                                         </label>
                                         <input
                                             type="number"
                                             step="0.01"
                                             autoFocus
-                                            className="flex-1 w-full border rounded p-2 font-bold text-base sm:text-lg text-right"
+                                            className="flex-1 w-full border border-input bg-background text-foreground rounded p-2 font-bold text-base sm:text-lg text-right"
                                             value={amountReceived}
                                             onChange={(e) =>
                                                 setAmountReceived(
@@ -791,12 +793,14 @@ export default function Vender({ allProducts, clients }: Props) {
                                         />
                                     </div>
                                     <div className="flex justify-between text-base sm:text-lg">
-                                        <span>Cambio:</span>
+                                        <span className="text-foreground">
+                                            Cambio:
+                                        </span>
                                         <span
                                             className={`font-bold ${
                                                 change < 0
-                                                    ? "text-red-500"
-                                                    : "text-green-600"
+                                                    ? "text-red-500 dark:text-red-400"
+                                                    : "text-green-600 dark:text-green-400"
                                             }`}
                                         >
                                             ${change.toFixed(2)}

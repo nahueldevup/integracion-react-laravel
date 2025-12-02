@@ -679,15 +679,15 @@ export default function Caja({ movements, summary, history }: Props) {
                                             )}
                                         </span>
                                     </div>
-                                    <p className="text-xs text-gray-400 italic">
+                                    <p className="text-xs text-muted-foreground italic">
                                         Este dinero debe estar en tu cuenta
                                         bancaria.
                                     </p>
                                 </div>
                                 {/* ----------------------------------------------- */}
 
-                                <div className="bg-emerald-50 p-4 rounded-lg border border-emerald-100 space-y-3">
-                                    <h4 className="font-bold text-emerald-800 flex items-center gap-2">
+                                <div className="bg-emerald-50 dark:bg-emerald-950/20 p-4 rounded-lg border border-emerald-100 dark:border-emerald-900 space-y-3">
+                                    <h4 className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
                                         <Wallet className="w-4 h-4" /> Efectivo
                                         Esperado
                                     </h4>
@@ -716,7 +716,7 @@ export default function Caja({ movements, summary, history }: Props) {
                                             )}
                                         </span>
                                     </div>
-                                    <div className="pt-2 border-t border-emerald-200 flex justify-between font-bold text-lg text-emerald-900">
+                                    <div className="pt-2 border-t border-emerald-200 dark:border-emerald-900 flex justify-between font-bold text-lg text-emerald-900 dark:text-emerald-200">
                                         <span>Total en Cajón:</span>
                                         <span>
                                             ${" "}
@@ -730,14 +730,14 @@ export default function Caja({ movements, summary, history }: Props) {
 
                             {/* LADO DERECHO: USUARIO */}
                             <div className="space-y-4 border-l pl-6 border-dashed">
-                                <h4 className="font-bold text-gray-800">
+                                <h4 className="font-bold text-foreground">
                                     Conteo Físico
                                 </h4>
                                 <div className="space-y-2">
                                     <Label>¿Cuánto efectivo hay?</Label>
                                     <Input
                                         type="number"
-                                        className="pl-4 text-xl font-bold bg-yellow-50 border-yellow-200"
+                                        className="pl-4 text-xl font-bold bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-900"
                                         placeholder="0.00"
                                         value={arqueoData.counted_cash}
                                         onChange={(e) =>
@@ -753,10 +753,10 @@ export default function Caja({ movements, summary, history }: Props) {
                                     <div
                                         className={`p-4 rounded-lg text-center border-2 ${
                                             difference === 0
-                                                ? "bg-green-50 border-green-200 text-green-700"
+                                                ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900 text-green-700 dark:text-green-300"
                                                 : difference > 0
-                                                ? "bg-blue-50 border-blue-200 text-blue-700"
-                                                : "bg-red-50 border-red-200 text-red-700"
+                                                ? "bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900 text-blue-700 dark:text-blue-300"
+                                                : "bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900 text-red-700 dark:text-red-300"
                                         }`}
                                     >
                                         <p className="text-sm font-semibold uppercase tracking-wider mb-1">

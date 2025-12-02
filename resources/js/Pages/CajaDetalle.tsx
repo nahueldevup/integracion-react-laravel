@@ -115,7 +115,7 @@ export default function CajaDetalle({ cierre, movements }: Props) {
     return (
         <MainLayout>
             <Head title={`Cierre #${cierre.id}`} />
-            <div className="flex-1 flex flex-col h-full bg-gray-50/50">
+            <div className="flex-1 flex flex-col h-full bg-background">
                 <Header
                     title={`Detalle de Cierre #${cierre.id}`}
                     subtitle={formatDate(cierre.created_at)}
@@ -140,30 +140,30 @@ export default function CajaDetalle({ cierre, movements }: Props) {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             {/* Panel Izquierdo: Datos del Sistema */}
                             <Card>
-                                <CardHeader className="bg-gray-100/50 border-b pb-3">
-                                    <CardTitle className="text-base font-bold text-gray-700">
+                                <CardHeader className="bg-muted/50 border-b pb-3">
+                                    <CardTitle className="text-base font-bold text-foreground">
                                         Resumen del Sistema
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-4 space-y-3">
-                                    <div className="flex justify-between items-center p-2 bg-emerald-50 rounded border border-emerald-100">
-                                        <span className="text-sm font-medium text-emerald-800 flex items-center gap-2">
+                                    <div className="flex justify-between items-center p-2 bg-emerald-50 dark:bg-emerald-950/20 rounded border border-emerald-100 dark:border-emerald-900">
+                                        <span className="text-sm font-medium text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
                                             <Wallet className="w-4 h-4" />{" "}
                                             Ventas Efectivo
                                         </span>
-                                        <span className="font-bold text-emerald-700">
+                                        <span className="font-bold text-emerald-700 dark:text-emerald-400">
                                             ${" "}
                                             {Number(cierre.sales_cash).toFixed(
                                                 2
                                             )}
                                         </span>
                                     </div>
-                                    <div className="flex justify-between items-center p-2 bg-blue-50 rounded border border-blue-100">
-                                        <span className="text-sm font-medium text-blue-800 flex items-center gap-2">
+                                    <div className="flex justify-between items-center p-2 bg-blue-50 dark:bg-blue-950/20 rounded border border-blue-100 dark:border-blue-900">
+                                        <span className="text-sm font-medium text-blue-800 dark:text-blue-300 flex items-center gap-2">
                                             <CreditCard className="w-4 h-4" />{" "}
                                             Ventas Digitales
                                         </span>
-                                        <span className="font-bold text-blue-700">
+                                        <span className="font-bold text-blue-700 dark:text-blue-400">
                                             ${" "}
                                             {Number(
                                                 cierre.sales_digital
@@ -172,7 +172,7 @@ export default function CajaDetalle({ cierre, movements }: Props) {
                                     </div>
                                     <div className="grid grid-cols-2 gap-4 pt-2">
                                         <div>
-                                            <p className="text-xs text-gray-500">
+                                            <p className="text-xs text-muted-foreground">
                                                 Ingresos Manuales
                                             </p>
                                             <p className="text-green-600 font-bold flex items-center gap-1">
@@ -184,7 +184,7 @@ export default function CajaDetalle({ cierre, movements }: Props) {
                                             </p>
                                         </div>
                                         <div>
-                                            <p className="text-xs text-gray-500">
+                                            <p className="text-xs text-muted-foreground">
                                                 Egresos Manuales
                                             </p>
                                             <p className="text-red-600 font-bold flex items-center gap-1">
@@ -197,10 +197,10 @@ export default function CajaDetalle({ cierre, movements }: Props) {
                                         </div>
                                     </div>
                                     <div className="pt-2 border-t mt-2 flex justify-between items-center">
-                                        <span className="font-bold text-gray-700">
+                                        <span className="font-bold text-foreground">
                                             Esperado en Cajón:
                                         </span>
-                                        <span className="text-xl font-bold text-gray-900">
+                                        <span className="text-xl font-bold text-foreground">
                                             ${" "}
                                             {Number(
                                                 cierre.expected_cash
@@ -211,15 +211,15 @@ export default function CajaDetalle({ cierre, movements }: Props) {
                             </Card>
 
                             {/* Panel Derecho: Resultado del Cierre */}
-                            <Card className="border-2 border-slate-200">
-                                <CardHeader className="bg-slate-50 border-b pb-3">
-                                    <CardTitle className="text-base font-bold text-slate-700">
+                            <Card className="border-2 border-border">
+                                <CardHeader className="bg-muted/50 border-b pb-3">
+                                    <CardTitle className="text-base font-bold text-foreground">
                                         Resultado del Arqueo
                                     </CardTitle>
                                 </CardHeader>
                                 <CardContent className="pt-4 space-y-4">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-gray-600">
+                                        <span className="text-muted-foreground">
                                             Usuario Responsable:
                                         </span>
                                         <span className="font-medium">
@@ -227,11 +227,11 @@ export default function CajaDetalle({ cierre, movements }: Props) {
                                         </span>
                                     </div>
 
-                                    <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-center">
-                                        <p className="text-sm text-yellow-800 uppercase tracking-wide font-semibold">
+                                    <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-900 rounded-lg text-center">
+                                        <p className="text-sm text-yellow-800 dark:text-yellow-300 uppercase tracking-wide font-semibold">
                                             Dinero Contado
                                         </p>
-                                        <p className="text-3xl font-bold text-yellow-900">
+                                        <p className="text-3xl font-bold text-yellow-900 dark:text-yellow-200">
                                             ${" "}
                                             {Number(
                                                 cierre.counted_cash
@@ -242,10 +242,10 @@ export default function CajaDetalle({ cierre, movements }: Props) {
                                     <div
                                         className={`p-3 rounded text-center border font-bold ${
                                             Number(cierre.difference) === 0
-                                                ? "bg-green-100 text-green-700 border-green-200"
+                                                ? "bg-green-100 dark:bg-green-950/30 text-green-700 dark:text-green-300 border-green-200 dark:border-green-900"
                                                 : Number(cierre.difference) > 0
-                                                ? "bg-blue-100 text-blue-700 border-blue-200"
-                                                : "bg-red-100 text-red-700 border-red-200"
+                                                ? "bg-blue-100 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-900"
+                                                : "bg-red-100 dark:bg-red-950/30 text-red-700 dark:text-red-300 border-red-200 dark:border-red-900"
                                         }`}
                                     >
                                         {Number(cierre.difference) === 0
@@ -260,7 +260,7 @@ export default function CajaDetalle({ cierre, movements }: Props) {
                                     </div>
 
                                     {cierre.notes && (
-                                        <div className="text-sm text-gray-600 bg-gray-50 p-3 rounded italic">
+                                        <div className="text-sm text-muted-foreground bg-muted p-3 rounded italic">
                                             " {cierre.notes} "
                                         </div>
                                     )}
@@ -371,7 +371,7 @@ export default function CajaDetalle({ cierre, movements }: Props) {
                         <DialogTitle>Vista Previa del Reporte</DialogTitle>
                     </DialogHeader>
 
-                    <div className="bg-gray-100 p-4 rounded-md flex justify-center">
+                    <div className="bg-muted p-4 rounded-md flex justify-center">
                         <ReporteCaja ref={reporteRef} data={reporteData} />
                     </div>
 
