@@ -35,7 +35,7 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
         <MainLayout>
             <Head title="Inicio" />
             <div className="flex-1 flex flex-col">
-                <Header title="proyecto" subtitle="Inicio" />
+                <Header title="Pipos" subtitle="Inicio" />
 
                 <main className="flex-1 p-6">
                     <div className="max-w-7xl mx-auto">
@@ -52,15 +52,12 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
 
                         {/* Alerta de Stock Bajo */}
                         {hasLowStock && (
-                            <Alert
-                                variant="destructive"
-                                className="mb-6 border-2 border-red-500/50 bg-red-50 dark:bg-red-950"
-                            >
-                                <AlertTriangle className="h-5 w-5" />
-                                <AlertTitle className="text-lg font-bold">
+                            <Alert className="mb-6 border-2 border-red-500/30 dark:border-red-500/40 bg-red-50 dark:bg-red-950/30">
+                                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                                <AlertTitle className="text-lg font-bold text-red-800 dark:text-red-300">
                                     ¡Atención! Productos con stock bajo
                                 </AlertTitle>
-                                <AlertDescription className="mt-2">
+                                <AlertDescription className="mt-2 text-red-700 dark:text-red-300">
                                     <p className="mb-3">
                                         Hay{" "}
                                         <strong>
@@ -75,12 +72,12 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
                                             .map((product) => (
                                                 <div
                                                     key={product.id}
-                                                    className="flex justify-between items-center text-sm bg-white dark:bg-gray-900 p-2 rounded"
+                                                    className="flex justify-between items-center text-sm bg-white dark:bg-red-900/20 p-2 rounded border border-red-200 dark:border-red-800/50"
                                                 >
-                                                    <span className="font-semibold">
+                                                    <span className="font-semibold text-red-900 dark:text-red-200">
                                                         {product.description}
                                                     </span>
-                                                    <span className="text-red-600 font-bold">
+                                                    <span className="text-red-600 dark:text-red-400 font-bold">
                                                         Stock: {product.stock} /
                                                         Mínimo:{" "}
                                                         {product.min_stock}
@@ -88,7 +85,7 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
                                                 </div>
                                             ))}
                                         {lowStockProducts.length > 2 && (
-                                            <p className="text-sm italic">
+                                            <p className="text-sm italic text-red-600 dark:text-red-400">
                                                 ... y{" "}
                                                 {lowStockProducts.length - 2}{" "}
                                                 producto(s) más
@@ -99,9 +96,11 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
                                         variant="outline"
                                         size="sm"
                                         onClick={() =>
-                                            router.visit("reportes/baja-existencia")
+                                            router.visit(
+                                                "reportes/baja-existencia"
+                                            )
                                         }
-                                        className="bg-white hover:bg-gray-100"
+                                        className="bg-white dark:bg-red-900/30 hover:bg-red-100 dark:hover:bg-red-900/50 border-red-300 dark:border-red-700 text-red-700 dark:text-red-300 hover:text-red-700 dark:hover:text-red-200"
                                     >
                                         Ver todos los productos con stock bajo
                                     </Button>
@@ -149,21 +148,14 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
                                 iconColor="text-foreground"
                                 onClick={() => router.visit("/reportes")}
                             />
-
                             <DashboardCard
-                                title="Usuarios"
-                                description="Administrar usuarios (o cajeros) así como sus permisos"
-                                icon={Shield}
-                                iconColor="text-success"
-                                onClick={() => router.visit("/usuarios")}
-                            />
-
-                            <DashboardCard
-                                title="Ajustes"
-                                description="Cambiar los datos de su tienda, configurar la impresora, etcétera"
+                                title="Configuración"
+                                description="Cambiar los datos de su tienda, configurar la impresora,gestionar usuarios y permisos"
                                 icon={Settings}
                                 iconColor="text-warning"
-                                onClick={() => router.visit("/ajustes")}
+                                onClick={() =>
+                                    router.visit("/configuracion/usuarios")
+                                }
                             />
                         </div>
                     </div>

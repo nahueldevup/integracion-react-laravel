@@ -1142,11 +1142,11 @@ export default function Productos({ products, categories, filters }: Props) {
                                 )}
                             </div>
 
-                            <div className="bg-blue-50 p-3 rounded-md text-sm">
-                                <p className="font-semibold mb-2">
-                                    📋 Instrucciones:
+                            <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-md text-sm">
+                                <p className="font-semibold mb-2 text-foreground">
+                                    Instrucciones:
                                 </p>
-                                <ul className="list-disc list-inside space-y-1 text-gray-700">
+                                <ul className="list-disc list-inside space-y-1 text-gray-700 dark:text-gray-300">
                                     <li>
                                         El archivo debe tener las columnas:
                                         Código de Barras, Descripción,

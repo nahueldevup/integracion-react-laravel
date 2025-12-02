@@ -308,10 +308,10 @@ export default function BajaExistencia({ productos = [] }: Props) {
                         )}
 
                         {/* Tabla de Productos */}
-                        <Card className="border-orange-200 shadow-md">
-                            <CardHeader className="bg-orange-50 dark:bg-orange-950/20 border-b border-orange-100 dark:border-orange-900">
+                        <Card className="border border-border shadow-md bg-card">
+                            <CardHeader className="bg-orange-50 dark:bg-orange-950/30 border-b border-border">
                                 <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-2 text-orange-800">
+                                    <div className="flex items-center gap-2 text-orange-800 dark:text-orange-400">
                                         <AlertTriangle className="w-5 h-5" />
                                         <CardTitle>
                                             Inventario Crítico (
@@ -321,7 +321,7 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                     {productosFiltrados.length > 0 && (
                                         <Badge
                                             variant="outline"
-                                            className="bg-card"
+                                            className="bg-card border-orange-300 dark:border-orange-700 text-orange-700 dark:text-orange-400"
                                         >
                                             {productosFiltrados.length} producto
                                             {productosFiltrados.length !== 1

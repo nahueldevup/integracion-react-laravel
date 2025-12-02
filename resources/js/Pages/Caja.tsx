@@ -342,8 +342,8 @@ export default function Caja({ movements, summary, history }: Props) {
                             </Button>
                             <Button
                                 onClick={handleOpenCierre}
-                                variant="outline"
-                                className="ml-auto border-blue-200 text-blue-700 hover:bg-blue-50 shadow-sm px-6 py-6 h-auto text-base flex gap-2"
+                                variant="ghost"
+                                className="ml-auto border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-400 active:text-blue-700 dark:active:text-blue-400 bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/20 shadow-sm px-6 py-6 h-auto text-base flex gap-2"
                             >
                                 <Calculator className="w-5 h-5" /> Realizar
                                 Arqueo (Cierre)

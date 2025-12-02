@@ -66,7 +66,7 @@ const menuItems = [
         permissionKey: "configuracion",
     },
     // "Salir" ahora es un ítem principal
-    { title: "Salir", icon: LogOut, path: "/logout", isLogout: true }, 
+    { title: "Salir", icon: LogOut, path: "/logout", isLogout: true },
 ];
 
 // Submenú de Reportes
@@ -125,7 +125,7 @@ export function Sidebar() {
     const hasPermission = (permissionKey: string | undefined): boolean => {
         if (!user) return false;
         // Items sin permissionKey siempre visibles (como Salir)
-        if (!permissionKey) return true; 
+        if (!permissionKey) return true;
         if (user.role === "admin") return true;
         if (!user.permissions || user.permissions.length === 0) return false;
         return user.permissions.includes(permissionKey);
@@ -188,7 +188,6 @@ export function Sidebar() {
 
             <nav className="flex-1 overflow-y-auto py-4 space-y-1">
                 {filteredMenuItems.map((item) => {
-                    
                     // CASO 1: Ítem Collapsible (Reportes o Configuración)
                     if (item.isCollapsible) {
                         const collapsibleData = getCollapsibleData(item.title);
@@ -274,19 +273,21 @@ export function Sidebar() {
                     // CASO 2: Ítem Salir (Botón POST)
                     // @ts-ignore
                     if (item.isLogout) {
-                         return (
+                        return (
                             <Link
                                 key={item.title}
                                 href={item.path}
                                 method="post"
                                 as="button"
                                 className={cn(
-                                    "w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 transition-colors mt-auto", // mt-auto para empujarlo un poco si quisieras
+                                    "w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:text-red-500 active:text-red-500 dark:text-red-400 dark:hover:text-red-400 dark:active:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors mt-auto",
                                     !isOpen && !isMobile && "justify-center"
                                 )}
                             >
                                 <item.icon className="w-5 h-5" />
-                                {(isOpen || isMobile) && <span>{item.title}</span>}
+                                {(isOpen || isMobile) && (
+                                    <span>{item.title}</span>
+                                )}
                             </Link>
                         );
                     }
