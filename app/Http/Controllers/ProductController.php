@@ -23,7 +23,16 @@ class ProductController extends Controller
             $query->where(function($q) use ($search) {
                 $q->where('description', 'like', "%$search%")
                   ->orWhere('barcode', 'like', "%$search%");
-            });
+            })
+            // Ordenar por relevancia: código exacto primero, luego código parcial, luego descripción
+            ->orderByRaw("
+                CASE 
+                    WHEN barcode = ? THEN 1
+                    WHEN barcode LIKE ? THEN 2
+                    WHEN description LIKE ? THEN 3
+                    ELSE 4
+                END
+            ", [$search, "$search%", "%$search%"]);
         }
 
         return Inertia::render('Productos', [

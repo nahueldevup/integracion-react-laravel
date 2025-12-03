@@ -166,13 +166,31 @@ export default function Vender({ allProducts, clients }: Props) {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 15;
 
-    const filteredProducts = allProducts.filter(
-        (product) =>
-            product.description
-                .toLowerCase()
-                .includes(searchQuery.toLowerCase()) ||
-            (product.barcode && product.barcode.includes(searchQuery))
-    );
+    const filteredProducts = allProducts
+        .filter(
+            (product) =>
+                product.description
+                    .toLowerCase()
+                    .includes(searchQuery.toLowerCase()) ||
+                (product.barcode && product.barcode.includes(searchQuery))
+        )
+        .sort((a, b) => {
+            // Ordenar por relevancia: código exacto primero, luego código parcial, luego descripción
+            const getPriority = (product: Product) => {
+                if (product.barcode === searchQuery) return 1; // Código exacto
+                if (product.barcode && product.barcode.startsWith(searchQuery))
+                    return 2; // Código empieza con búsqueda
+                if (
+                    product.description
+                        .toLowerCase()
+                        .includes(searchQuery.toLowerCase())
+                )
+                    return 3; // Descripción contiene
+                return 4;
+            };
+
+            return getPriority(a) - getPriority(b);
+        });
 
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
     const paginatedProducts = filteredProducts.slice(
