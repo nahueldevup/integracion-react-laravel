@@ -607,6 +607,7 @@ export default function Caja({ movements, summary, history }: Props) {
                                 <Input
                                     type="number"
                                     className="pl-4 text-lg font-bold"
+                                    placeholder="Ej: 500.00"
                                     value={formData.amount}
                                     onChange={(e) =>
                                         setFormData({
@@ -620,6 +621,7 @@ export default function Caja({ movements, summary, history }: Props) {
                             <div className="grid gap-2">
                                 <Label>Descripción</Label>
                                 <Textarea
+                                    placeholder="Ej: Pago de proveedor, venta extra, etc."
                                     value={formData.description}
                                     onChange={(e) =>
                                         setFormData({

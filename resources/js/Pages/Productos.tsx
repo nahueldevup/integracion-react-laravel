@@ -621,37 +621,21 @@ export default function Productos({ products, categories, filters }: Props) {
                             <DialogTitle>Registrar producto</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="barcode">
-                                        Código de barras *
-                                    </Label>
-                                    <Input
-                                        id="barcode"
-                                        value={newProduct.barcode}
-                                        onChange={(e) =>
-                                            setNewProduct({
-                                                ...newProduct,
-                                                barcode: e.target.value,
-                                            })
-                                        }
-                                        placeholder="Código de barras"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="name">Nombre *</Label>
-                                    <Input
-                                        id="name"
-                                        value={newProduct.description}
-                                        onChange={(e) =>
-                                            setNewProduct({
-                                                ...newProduct,
-                                                description: e.target.value,
-                                            })
-                                        }
-                                        placeholder="Nombre del producto"
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="barcode">
+                                    Código de barras *
+                                </Label>
+                                <Input
+                                    id="barcode"
+                                    value={newProduct.barcode}
+                                    onChange={(e) =>
+                                        setNewProduct({
+                                            ...newProduct,
+                                            barcode: e.target.value,
+                                        })
+                                    }
+                                    placeholder="Código de barras"
+                                />
                             </div>
 
                             <div className="space-y-2">
@@ -792,37 +776,21 @@ export default function Productos({ products, categories, filters }: Props) {
                             <DialogTitle>Editar producto</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="edit-barcode">
-                                        Código de barras *
-                                    </Label>
-                                    <Input
-                                        id="edit-barcode"
-                                        value={editingProduct.barcode}
-                                        onChange={(e) =>
-                                            setEditingProduct({
-                                                ...editingProduct,
-                                                barcode: e.target.value,
-                                            })
-                                        }
-                                        placeholder="Código de barras"
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="edit-name">Nombre *</Label>
-                                    <Input
-                                        id="edit-name"
-                                        value={editingProduct.description}
-                                        onChange={(e) =>
-                                            setEditingProduct({
-                                                ...editingProduct,
-                                                description: e.target.value,
-                                            })
-                                        }
-                                        placeholder="Nombre del producto"
-                                    />
-                                </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="edit-barcode">
+                                    Código de barras *
+                                </Label>
+                                <Input
+                                    id="edit-barcode"
+                                    value={editingProduct.barcode}
+                                    onChange={(e) =>
+                                        setEditingProduct({
+                                            ...editingProduct,
+                                            barcode: e.target.value,
+                                        })
+                                    }
+                                    placeholder="Código de barras"
+                                />
                             </div>
 
                             <div className="space-y-2">

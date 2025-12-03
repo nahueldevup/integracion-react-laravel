@@ -116,7 +116,7 @@ export default function Usuarios({ users }: Props) {
 
     const handleCreateUser = (e: React.FormEvent) => {
         e.preventDefault();
-        router.post("/usuarios", createForm, {
+        router.post("/configuracion/usuarios", createForm, {
             onSuccess: () => {
                 setIsCreateOpen(false);
                 setCreateForm({
@@ -248,135 +248,143 @@ export default function Usuarios({ users }: Props) {
 
                 <main className="flex-1 p-6 overflow-y-auto">
                     <div className="max-w-7xl mx-auto space-y-6">
-                        <div className="flex justify-end">
-                            <Dialog
-                                open={isCreateOpen}
-                                onOpenChange={setIsCreateOpen}
-                            >
-                                <DialogTrigger asChild>
-                                    <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                                        <UserPlus className="w-4 h-4" />
-                                        Nuevo Usuario
-                                    </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>
-                                            Crear Nuevo Usuario
-                                        </DialogTitle>
-                                        <DialogDescription>
-                                            Agrega un nuevo empleado al sistema
-                                        </DialogDescription>
-                                    </DialogHeader>
-                                    <div className="space-y-4">
-                                        <div className="space-y-2">
-                                            <Label htmlFor="create-name">
-                                                Nombre Completo
-                                            </Label>
-                                            <Input
-                                                id="create-name"
-                                                value={createForm.name}
-                                                onChange={(e) =>
-                                                    setCreateForm({
-                                                        ...createForm,
-                                                        name: e.target.value,
-                                                    })
-                                                }
-                                                placeholder="Ej: Juan Pérez"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="create-email">
-                                                Correo Electrónico
-                                            </Label>
-                                            <Input
-                                                id="create-email"
-                                                type="email"
-                                                value={createForm.email}
-                                                onChange={(e) =>
-                                                    setCreateForm({
-                                                        ...createForm,
-                                                        email: e.target.value,
-                                                    })
-                                                }
-                                                placeholder="correo@ejemplo.com"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="create-password">
-                                                Contraseña
-                                            </Label>
-                                            <Input
-                                                id="create-password"
-                                                type="password"
-                                                value={createForm.password}
-                                                onChange={(e) =>
-                                                    setCreateForm({
-                                                        ...createForm,
-                                                        password:
-                                                            e.target.value,
-                                                    })
-                                                }
-                                                placeholder="Mínimo 6 caracteres"
-                                                required
-                                            />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="create-role">
-                                                Rol
-                                            </Label>
-                                            <Select
-                                                value={createForm.role}
-                                                onValueChange={(
-                                                    value: "admin" | "vendedor"
-                                                ) =>
-                                                    setCreateForm({
-                                                        ...createForm,
-                                                        role: value,
-                                                    })
-                                                }
-                                            >
-                                                <SelectTrigger id="create-role">
-                                                    <SelectValue />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="admin">
-                                                        <div className="flex items-center gap-2">
-                                                            <ShieldCheck className="w-4 h-4" />{" "}
-                                                            Administrador
-                                                        </div>
-                                                    </SelectItem>
-                                                    <SelectItem value="vendedor">
-                                                        <div className="flex items-center gap-2">
-                                                            <User className="w-4 h-4" />{" "}
-                                                            Cajero/Vendedor
-                                                        </div>
-                                                    </SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </div>
-                                        <Button
-                                            onClick={handleCreateUser}
-                                            className="w-full bg-blue-600 hover:bg-blue-700"
-                                        >
-                                            Crear Usuario
-                                        </Button>
-                                    </div>
-                                </DialogContent>
-                            </Dialog>
-                        </div>
-
                         <Card className="border shadow-sm">
                             <CardHeader className="border-b bg-card pb-4">
-                                <CardTitle>Lista de Empleados</CardTitle>
-                                <CardDescription>
-                                    {users.length}{" "}
-                                    {users.length !== 1
-                                        ? "usuarios registrados"
-                                        : "usuario registrado"}
-                                </CardDescription>
+                                <div className="flex items-start justify-between">
+                                    <div>
+                                        <CardTitle>
+                                            Lista de Empleados
+                                        </CardTitle>
+                                        <CardDescription>
+                                            {users.length}{" "}
+                                            {users.length !== 1
+                                                ? "usuarios registrados"
+                                                : "usuario registrado"}
+                                        </CardDescription>
+                                    </div>
+                                    <Dialog
+                                        open={isCreateOpen}
+                                        onOpenChange={setIsCreateOpen}
+                                    >
+                                        <DialogTrigger asChild>
+                                            <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
+                                                <UserPlus className="w-4 h-4" />
+                                                Nuevo Usuario
+                                            </Button>
+                                        </DialogTrigger>
+                                        <DialogContent>
+                                            <DialogHeader>
+                                                <DialogTitle>
+                                                    Crear Nuevo Usuario
+                                                </DialogTitle>
+                                                <DialogDescription>
+                                                    Agrega un nuevo empleado al
+                                                    sistema
+                                                </DialogDescription>
+                                            </DialogHeader>
+                                            <div className="space-y-4">
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="create-name">
+                                                        Nombre Completo
+                                                    </Label>
+                                                    <Input
+                                                        id="create-name"
+                                                        value={createForm.name}
+                                                        onChange={(e) =>
+                                                            setCreateForm({
+                                                                ...createForm,
+                                                                name: e.target
+                                                                    .value,
+                                                            })
+                                                        }
+                                                        placeholder="Ej: Juan Pérez"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="create-email">
+                                                        Correo Electrónico
+                                                    </Label>
+                                                    <Input
+                                                        id="create-email"
+                                                        type="email"
+                                                        value={createForm.email}
+                                                        onChange={(e) =>
+                                                            setCreateForm({
+                                                                ...createForm,
+                                                                email: e.target
+                                                                    .value,
+                                                            })
+                                                        }
+                                                        placeholder="correo@ejemplo.com"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="create-password">
+                                                        Contraseña
+                                                    </Label>
+                                                    <Input
+                                                        id="create-password"
+                                                        type="password"
+                                                        value={
+                                                            createForm.password
+                                                        }
+                                                        onChange={(e) =>
+                                                            setCreateForm({
+                                                                ...createForm,
+                                                                password:
+                                                                    e.target
+                                                                        .value,
+                                                            })
+                                                        }
+                                                        placeholder="Mínimo 8 caracteres"
+                                                    />
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <Label htmlFor="create-rol">
+                                                        Rol del Usuario
+                                                    </Label>
+                                                    <Select
+                                                        value={createForm.role}
+                                                        onValueChange={(
+                                                            value
+                                                        ) =>
+                                                            setCreateForm({
+                                                                ...createForm,
+                                                                role: value as
+                                                                    | "admin"
+                                                                    | "vendedor",
+                                                            })
+                                                        }
+                                                    >
+                                                        <SelectTrigger id="create-rol">
+                                                            <SelectValue placeholder="Seleccionar rol" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            <SelectItem value="admin">
+                                                                <div className="flex items-center gap-2">
+                                                                    <Shield className="w-4 h-4" />{" "}
+                                                                    Administrador
+                                                                </div>
+                                                            </SelectItem>
+                                                            <SelectItem value="vendedor">
+                                                                <div className="flex items-center gap-2">
+                                                                    <User className="w-4 h-4" />{" "}
+                                                                    Cajero/Vendedor
+                                                                </div>
+                                                            </SelectItem>
+                                                        </SelectContent>
+                                                    </Select>
+                                                </div>
+                                                <Button
+                                                    onClick={handleCreateUser}
+                                                    className="w-full bg-blue-600 hover:bg-blue-700"
+                                                >
+                                                    Crear Usuario
+                                                </Button>
+                                            </div>
+                                        </DialogContent>
+                                    </Dialog>
+                                </div>
                             </CardHeader>
                             <CardContent className="p-0">
                                 <Table>
