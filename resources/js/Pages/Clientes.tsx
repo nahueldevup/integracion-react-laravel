@@ -371,7 +371,7 @@ export default function Clientes({ clients }: Props) {
                             <div className="space-y-2">
                                 <Label htmlFor="phone">
                                     <Phone className="inline w-4 h-4 mr-2" />
-                                    Teléfono
+                                    Teléfono*
                                 </Label>
                                 <Input
                                     id="phone"
@@ -428,7 +428,7 @@ export default function Clientes({ clients }: Props) {
                                 />
                             </div>
                             <div className="space-y-2">
-                                <Label htmlFor="edit-phone">Teléfono</Label>
+                                <Label htmlFor="edit-phone">Teléfono*</Label>
                                 <Input
                                     id="edit-phone"
                                     placeholder="Número de teléfono"

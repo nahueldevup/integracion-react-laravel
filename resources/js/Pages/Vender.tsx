@@ -3,6 +3,11 @@ import { Head, router, usePage } from "@inertiajs/react";
 import { Ticket, TicketData } from "@/Components/Ticket";
 import { useReactToPrint } from "react-to-print";
 import axios from "axios";
+import { Switch } from "@/Components/ui/switch";
+import { Label } from "@/Components/ui/label";
+import { Input } from "@/Components/ui/input";
+import { Button } from "@/Components/ui/button";
+import { Printer } from "lucide-react";
 import MainLayout from "@/Layouts/MainLayout";
 import { Header } from "@/Components/Header";
 import { useToast } from "@/Hooks/use-toast";
@@ -165,6 +170,16 @@ export default function Vender({ allProducts, clients }: Props) {
     const [ticketData, setTicketData] = useState<TicketData | null>(null);
     const ticketRef = useRef<HTMLDivElement>(null);
 
+    // Auto Print State with Persistence
+    const [autoPrint, setAutoPrint] = useState<boolean>(() => {
+        const saved = localStorage.getItem("autoPrint");
+        return saved ? JSON.parse(saved) : true;
+    });
+
+    useEffect(() => {
+        localStorage.setItem("autoPrint", JSON.stringify(autoPrint));
+    }, [autoPrint]);
+
     const handlePrint = useReactToPrint({
         contentRef: ticketRef,
         documentTitle: ticketData
@@ -176,7 +191,7 @@ export default function Vender({ allProducts, clients }: Props) {
 
     // Effect to handle automatic printing when sale_id is present in flash
     useEffect(() => {
-        if (flash?.sale_id) {
+        if (flash?.sale_id && autoPrint) {
             const fetchTicketAndPrint = async () => {
                 try {
                     const response = await axios.get(
@@ -195,7 +210,7 @@ export default function Vender({ allProducts, clients }: Props) {
             };
             fetchTicketAndPrint();
         }
-    }, [flash?.sale_id]);
+    }, [flash?.sale_id, autoPrint]);
 
     // Trigger print when ticketData is ready
     useEffect(() => {
@@ -223,7 +238,40 @@ export default function Vender({ allProducts, clients }: Props) {
 
     // Paginación
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 15;
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const gridContainerRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const calculateItemsPerPage = () => {
+            if (gridContainerRef.current) {
+                const width = gridContainerRef.current.clientWidth;
+                const height = gridContainerRef.current.clientHeight;
+
+                // Estimaciones refinadas:
+                // Ancho min 150px, Alto estimado 180px, Gap 16px (gap-4)
+                const GAP = 16;
+                const MIN_CARD_WIDTH = 150;
+                const CARD_HEIGHT = 180;
+
+                // Fórmula que considera el gap: floor((espacio + gap) / (item + gap))
+                const colCount = Math.floor(
+                    (width + GAP) / (MIN_CARD_WIDTH + GAP)
+                );
+                const rowCount = Math.floor(
+                    (height + GAP) / (CARD_HEIGHT + GAP)
+                );
+
+                const count = Math.max(colCount * rowCount, 1);
+                setItemsPerPage(count);
+            }
+        };
+
+        calculateItemsPerPage();
+        window.addEventListener("resize", calculateItemsPerPage);
+
+        return () =>
+            window.removeEventListener("resize", calculateItemsPerPage);
+    }, []);
 
     const filteredProducts = allProducts
         .filter(
@@ -279,9 +327,9 @@ export default function Vender({ allProducts, clients }: Props) {
 
     useEffect(() => {
         if (showCheckout) {
-            setAmountReceived(total.toFixed(2));
+            setAmountReceived("");
         }
-    }, [showCheckout, total]);
+    }, [showCheckout]);
 
     // Atajo de teclado F9
     useEffect(() => {
@@ -465,81 +513,143 @@ export default function Vender({ allProducts, clients }: Props) {
 
                 <div className="flex-1 flex overflow-hidden">
                     {/* Panel Izquierdo - Productos */}
-                    <div className="flex-1 flex flex-col bg-background">
-                        <div className="p-3 sm:p-4 bg-card border-b border-border shadow-sm">
-                            <div className="relative max-w-2xl mx-auto">
-                                <Search className="absolute left-3 sm:left-4 top-1/2 transform -translate-y-1/2 w-4 h-4 sm:w-5 sm:h-5 text-muted-foreground" />
-                                <input
-                                    ref={searchInputRef}
-                                    type="text"
-                                    placeholder="Buscar producto..."
-                                    value={searchQuery}
-                                    onChange={(e) =>
-                                        setSearchQuery(e.target.value)
-                                    }
-                                    className="w-full pl-10 sm:pl-12 pr-4 py-2 sm:py-3 bg-muted border-2 border-input rounded-xl focus:border-ring focus:outline-none transition-all text-sm sm:text-base"
-                                />
-                            </div>
-                        </div>
-
-                        <div className="flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6">
-                            {filteredProducts.length === 0 ? (
-                                <p className="text-center text-muted-foreground mt-10">
-                                    No se encontraron productos
-                                </p>
-                            ) : (
-                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 gap-2 sm:gap-3 lg:gap-4">
-                                    {paginatedProducts.map((product) => (
-                                        <ProductCard
-                                            key={product.id}
-                                            product={product}
-                                            onAdd={addToCart}
+                    {/* Panel Izquierdo - Productos */}
+                    <div className="flex-1 flex flex-col bg-background p-6">
+                        <div className="max-w-7xl mx-auto w-full">
+                            {/* Configuración de Impresión Automática */}
+                            <div className="bg-card border border-border rounded-lg p-3 sm:p-4 shadow-sm mb-6">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 mb-1">
+                                            <Printer className="w-4 h-4 sm:w-5 sm:h-5 text-primary" />
+                                            <h3 className="font-semibold text-foreground text-sm sm:text-base">
+                                                Impresión Automática
+                                            </h3>
+                                        </div>
+                                        <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
+                                            Imprime el ticket automáticamente al
+                                            finalizar la venta
+                                        </p>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Label
+                                            htmlFor="auto-print-switch"
+                                            className="text-xs sm:text-sm font-medium"
+                                        >
+                                            {autoPrint ? "Activo" : "Inactivo"}
+                                        </Label>
+                                        <Switch
+                                            id="auto-print-switch"
+                                            checked={autoPrint}
+                                            onCheckedChange={setAutoPrint}
                                         />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Paginación */}
-                        {filteredProducts.length > 0 && (
-                            <div className="p-3 sm:p-4 bg-card border-t border-border flex items-center justify-between">
-                                <span className="text-xs sm:text-sm text-muted-foreground">
-                                    {(currentPage - 1) * itemsPerPage + 1} -{" "}
-                                    {Math.min(
-                                        currentPage * itemsPerPage,
-                                        filteredProducts.length
-                                    )}{" "}
-                                    de {filteredProducts.length}
-                                </span>
-                                <div className="flex gap-2">
-                                    <button
-                                        onClick={() =>
-                                            setCurrentPage((prev) =>
-                                                Math.max(prev - 1, 1)
-                                            )
-                                        }
-                                        disabled={currentPage === 1}
-                                        className="p-1.5 sm:p-2 rounded-lg border hover:bg-accent disabled:opacity-50"
-                                    >
-                                        <ChevronLeft className="w-4 h-4 sm:w-5 sm:h-5" />
-                                    </button>
-                                    <span className="flex items-center px-2 sm:px-4 font-medium text-xs sm:text-sm">
-                                        {currentPage} / {totalPages}
-                                    </span>
-                                    <button
-                                        onClick={() =>
-                                            setCurrentPage((prev) =>
-                                                Math.min(prev + 1, totalPages)
-                                            )
-                                        }
-                                        disabled={currentPage === totalPages}
-                                        className="p-1.5 sm:p-2 rounded-lg border hover:bg-accent disabled:opacity-50"
-                                    >
-                                        <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5" />
-                                    </button>
+                                    </div>
                                 </div>
                             </div>
-                        )}
+
+                            {/* Buscador */}
+                            <div className="mb-6 flex items-center gap-4">
+                                <div className="flex-1 relative">
+                                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                                    <Input
+                                        ref={searchInputRef}
+                                        type="text"
+                                        placeholder="Buscar un producto por su descripción o código de barras"
+                                        value={searchQuery}
+                                        onChange={(e) =>
+                                            setSearchQuery(e.target.value)
+                                        }
+                                        className="pl-10"
+                                    />
+                                </div>
+                            </div>
+
+                            {/* Grid de Productos */}
+                            <div className="bg-card rounded-lg border border-border flex flex-col flex-1 min-h-0">
+                                {/* Paginación */}
+                                {filteredProducts.length > 0 && (
+                                    <div className="flex items-center justify-between px-4 py-3 border-b border-border">
+                                        <div className="flex items-center gap-2">
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setCurrentPage((prev) =>
+                                                        Math.max(prev - 1, 1)
+                                                    )
+                                                }
+                                                disabled={currentPage === 1}
+                                            >
+                                                <span>←</span>
+                                            </Button>
+                                            <span className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm">
+                                                {currentPage}
+                                            </span>
+                                            <span className="text-sm text-muted-foreground">
+                                                de {totalPages}
+                                            </span>
+                                            <Button
+                                                variant="ghost"
+                                                size="sm"
+                                                onClick={() =>
+                                                    setCurrentPage((prev) =>
+                                                        Math.min(
+                                                            prev + 1,
+                                                            totalPages
+                                                        )
+                                                    )
+                                                }
+                                                disabled={
+                                                    currentPage === totalPages
+                                                }
+                                            >
+                                                <span>→</span>
+                                            </Button>
+                                        </div>
+                                        <div className="text-sm text-muted-foreground">
+                                            Mostrando{" "}
+                                            {(currentPage - 1) * itemsPerPage +
+                                                1}{" "}
+                                            -{" "}
+                                            {Math.min(
+                                                currentPage * itemsPerPage,
+                                                filteredProducts.length
+                                            )}{" "}
+                                            de {filteredProducts.length}{" "}
+                                            productos
+                                        </div>
+                                    </div>
+                                )}
+                                <div
+                                    className="flex-1 overflow-hidden p-4"
+                                    ref={gridContainerRef}
+                                >
+                                    {filteredProducts.length === 0 ? (
+                                        <p className="text-center text-muted-foreground mt-10">
+                                            No se encontraron productos
+                                        </p>
+                                    ) : (
+                                        <div
+                                            className="grid gap-3 sm:gap-4"
+                                            style={{
+                                                gridTemplateColumns:
+                                                    "repeat(auto-fill, minmax(150px, 1fr))",
+                                            }}
+                                        >
+                                            {paginatedProducts.map(
+                                                (product) => (
+                                                    <ProductCard
+                                                        key={product.id}
+                                                        product={product}
+                                                        onAdd={addToCart}
+                                                    />
+                                                )
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     {/* Panel Derecho - Carrito (Desktop) */}
@@ -849,7 +959,7 @@ export default function Vender({ allProducts, clients }: Props) {
                             </div>
 
                             {/* Resumen y Pago */}
-                            <div className="bg-blue-50 dark:bg-blue-950/20 p-3 sm:p-4 rounded-xl space-y-3">
+                            <div className="bg-card border border-border p-3 sm:p-4 rounded-xl space-y-3">
                                 <div className="flex justify-between text-lg sm:text-xl font-bold">
                                     <span className="text-foreground">
                                         Total:
