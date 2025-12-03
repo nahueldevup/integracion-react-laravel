@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/Components/Header";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
@@ -13,6 +13,7 @@ import {
     Upload,
     Download,
     FileSpreadsheet,
+    Calculator,
 } from "lucide-react";
 import { useToast } from "@/Hooks/use-toast";
 import {
@@ -46,6 +47,7 @@ import {
 } from "@/Components/ui/dropdown-menu";
 import { Label } from "@/Components/ui/label";
 import { Textarea } from "@/Components/ui/textarea";
+import { Switch } from "@/Components/ui/switch";
 import MainLayout from "@/Layouts/MainLayout";
 import { Head, router } from "@inertiajs/react";
 
@@ -106,6 +108,18 @@ export default function Productos({ products, categories, filters }: Props) {
     );
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+    // Estado para margen de ganancia automático
+    const [profitMargin, setProfitMargin] = useState<number>(() => {
+        const saved = localStorage.getItem("profitMargin");
+        return saved ? parseFloat(saved) : 40;
+    });
+    const [autoCalculateEnabled, setAutoCalculateEnabled] = useState<boolean>(
+        () => {
+            const saved = localStorage.getItem("autoCalculateEnabled");
+            return saved ? JSON.parse(saved) : true;
+        }
+    );
+
     // Estado para NUEVO producto
     const [newProduct, setNewProduct] = useState({
         barcode: "",
@@ -128,6 +142,48 @@ export default function Productos({ products, categories, filters }: Props) {
         existence: "",
         minStock: "",
     });
+
+    // Guardar configuración en localStorage
+    useEffect(() => {
+        localStorage.setItem("profitMargin", profitMargin.toString());
+    }, [profitMargin]);
+
+    useEffect(() => {
+        localStorage.setItem(
+            "autoCalculateEnabled",
+            JSON.stringify(autoCalculateEnabled)
+        );
+    }, [autoCalculateEnabled]);
+
+    // Auto-cálculo para NUEVO producto
+    useEffect(() => {
+        if (autoCalculateEnabled && newProduct.purchasePrice) {
+            const purchasePrice = parseFloat(newProduct.purchasePrice);
+            if (!isNaN(purchasePrice) && purchasePrice > 0) {
+                const calculatedPrice =
+                    purchasePrice * (1 + profitMargin / 100);
+                setNewProduct((prev) => ({
+                    ...prev,
+                    salePrice: calculatedPrice.toFixed(2),
+                }));
+            }
+        }
+    }, [newProduct.purchasePrice, profitMargin, autoCalculateEnabled]);
+
+    // Auto-cálculo para EDITAR producto
+    useEffect(() => {
+        if (autoCalculateEnabled && editingProduct.purchasePrice) {
+            const purchasePrice = parseFloat(editingProduct.purchasePrice);
+            if (!isNaN(purchasePrice) && purchasePrice > 0) {
+                const calculatedPrice =
+                    purchasePrice * (1 + profitMargin / 100);
+                setEditingProduct((prev) => ({
+                    ...prev,
+                    salePrice: calculatedPrice.toFixed(2),
+                }));
+            }
+        }
+    }, [editingProduct.purchasePrice, profitMargin, autoCalculateEnabled]);
 
     // --- Lógica Backend: Productos ---
 
@@ -382,6 +438,72 @@ export default function Productos({ products, categories, filters }: Props) {
 
                 <main className="flex-1 p-6 bg-background">
                     <div className="max-w-7xl mx-auto">
+                        {/* Card de configuración de margen de ganancia */}
+                        <div className="bg-card border border-border rounded-lg p-4 mb-6 shadow-sm">
+                            <div className="flex items-center justify-between">
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <Calculator className="w-5 h-5 text-primary" />
+                                        <h3 className="font-semibold text-foreground">
+                                            Margen de Ganancia Automático
+                                        </h3>
+                                    </div>
+                                    <p className="text-sm text-muted-foreground">
+                                        Calcula automáticamente el precio de
+                                        venta al ingresar el precio de compra
+                                    </p>
+                                </div>
+                                <div className="flex items-center gap-6">
+                                    <div className="flex items-center gap-3">
+                                        <Label
+                                            htmlFor="profit-margin"
+                                            className="text-sm font-medium whitespace-nowrap"
+                                        >
+                                            Margen:
+                                        </Label>
+                                        <div className="flex items-center gap-2">
+                                            <Input
+                                                id="profit-margin"
+                                                type="number"
+                                                min="0"
+                                                max="1000"
+                                                step="1"
+                                                value={profitMargin}
+                                                onChange={(e) =>
+                                                    setProfitMargin(
+                                                        parseFloat(
+                                                            e.target.value
+                                                        ) || 0
+                                                    )
+                                                }
+                                                className="w-20 text-center font-bold"
+                                            />
+                                            <span className="text-lg font-semibold text-foreground">
+                                                %
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-3">
+                                        <Label
+                                            htmlFor="auto-calc-switch"
+                                            className="text-sm font-medium"
+                                        >
+                                            {autoCalculateEnabled
+                                                ? "Activo"
+                                                : "Inactivo"}
+                                        </Label>
+                                        <Switch
+                                            id="auto-calc-switch"
+                                            checked={autoCalculateEnabled}
+                                            onCheckedChange={
+                                                setAutoCalculateEnabled
+                                            }
+                                        />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         <div className="mb-6 flex items-center gap-4">
                             <div className="flex-1 relative">
                                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-muted-foreground" />
@@ -659,6 +781,19 @@ export default function Productos({ products, categories, filters }: Props) {
                                     <Label htmlFor="purchase-price">
                                         Precio de compra *
                                     </Label>
+                                    {/* Espaciador invisible para alinear con el label de precio de venta */}
+                                    {autoCalculateEnabled &&
+                                        newProduct.purchasePrice && (
+                                            <div
+                                                className="text-xs"
+                                                style={{
+                                                    height: "16px",
+                                                    visibility: "hidden",
+                                                }}
+                                            >
+                                                Espaciador
+                                            </div>
+                                        )}
                                     <Input
                                         id="purchase-price"
                                         type="number"
@@ -677,6 +812,16 @@ export default function Productos({ products, categories, filters }: Props) {
                                     <Label htmlFor="sale-price">
                                         Precio de venta *
                                     </Label>
+                                    {autoCalculateEnabled &&
+                                        newProduct.purchasePrice && (
+                                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                                <Calculator className="w-3 h-3 text-green-600 dark:text-green-400" />
+                                                <span className="text-green-600 dark:text-green-400">
+                                                    Auto-calculado (+
+                                                    {profitMargin}%)
+                                                </span>
+                                            </div>
+                                        )}
                                     <Input
                                         id="sale-price"
                                         type="number"
@@ -689,6 +834,12 @@ export default function Productos({ products, categories, filters }: Props) {
                                             })
                                         }
                                         placeholder="0.00"
+                                        className={
+                                            autoCalculateEnabled &&
+                                            newProduct.purchasePrice
+                                                ? "bg-green-50 dark:bg-green-900/10 border-green-300 dark:border-green-700"
+                                                : ""
+                                        }
                                     />
                                 </div>
                             </div>
@@ -816,6 +967,19 @@ export default function Productos({ products, categories, filters }: Props) {
                                     <Label htmlFor="edit-purchase-price">
                                         Precio de compra *
                                     </Label>
+                                    {/* Espaciador invisible para alinear con el label de precio de venta */}
+                                    {autoCalculateEnabled &&
+                                        editingProduct.purchasePrice && (
+                                            <div
+                                                className="text-xs"
+                                                style={{
+                                                    height: "16px",
+                                                    visibility: "hidden",
+                                                }}
+                                            >
+                                                Espaciador
+                                            </div>
+                                        )}
                                     <Input
                                         id="edit-purchase-price"
                                         type="number"
@@ -834,6 +998,16 @@ export default function Productos({ products, categories, filters }: Props) {
                                     <Label htmlFor="edit-sale-price">
                                         Precio de venta *
                                     </Label>
+                                    {autoCalculateEnabled &&
+                                        editingProduct.purchasePrice && (
+                                            <div className="text-xs text-muted-foreground flex items-center gap-1">
+                                                <Calculator className="w-3 h-3 text-green-600 dark:text-green-400" />
+                                                <span className="text-green-600 dark:text-green-400">
+                                                    Auto-calculado (+
+                                                    {profitMargin}%)
+                                                </span>
+                                            </div>
+                                        )}
                                     <Input
                                         id="edit-sale-price"
                                         type="number"
@@ -846,6 +1020,12 @@ export default function Productos({ products, categories, filters }: Props) {
                                             })
                                         }
                                         placeholder="0.00"
+                                        className={
+                                            autoCalculateEnabled &&
+                                            editingProduct.purchasePrice
+                                                ? "bg-green-50 dark:bg-green-900/10 border-green-300 dark:border-green-700"
+                                                : ""
+                                        }
                                     />
                                 </div>
                             </div>
