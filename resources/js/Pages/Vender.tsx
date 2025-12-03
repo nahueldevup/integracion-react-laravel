@@ -1,5 +1,8 @@
 import { useState, useEffect, useRef } from "react";
-import { Head, router } from "@inertiajs/react";
+import { Head, router, usePage } from "@inertiajs/react";
+import { Ticket, TicketData } from "@/Components/Ticket";
+import { useReactToPrint } from "react-to-print";
+import axios from "axios";
 import MainLayout from "@/Layouts/MainLayout";
 import { Header } from "@/Components/Header";
 import { useToast } from "@/Hooks/use-toast";
@@ -43,6 +46,17 @@ interface Customer {
 interface Props {
     allProducts: Product[];
     clients: Customer[];
+}
+
+interface PageProps {
+    flash: {
+        success?: string;
+        error?: string;
+        sale_id?: number;
+    };
+    businessSettings?: any;
+    printerSettings?: any;
+    [key: string]: any;
 }
 
 // --- Componentes Auxiliares ---
@@ -143,7 +157,52 @@ function PaymentMethodButton({ icon: Icon, label, isSelected, onClick }: any) {
 
 // --- Componente Principal ---
 export default function Vender({ allProducts, clients }: Props) {
+    const { props } = usePage<PageProps>();
+    const { flash, businessSettings, printerSettings } = props;
     const { toast } = useToast();
+
+    // Ticket Printing State
+    const [ticketData, setTicketData] = useState<TicketData | null>(null);
+    const ticketRef = useRef<HTMLDivElement>(null);
+
+    const handlePrint = useReactToPrint({
+        contentRef: ticketRef,
+        documentTitle: ticketData
+            ? `Ticket-${ticketData.folio}`
+            : "Ticket-Venta",
+        onAfterPrint: () => setTicketData(null), // Limpiar después de imprimir
+        onPrintError: (error) => console.error("Error al imprimir:", error),
+    });
+
+    // Effect to handle automatic printing when sale_id is present in flash
+    useEffect(() => {
+        if (flash?.sale_id) {
+            const fetchTicketAndPrint = async () => {
+                try {
+                    const response = await axios.get(
+                        `/api/ventas/${flash.sale_id}/ticket`
+                    );
+                    setTicketData(response.data);
+                } catch (error) {
+                    console.error("Error fetching ticket:", error);
+                    toast({
+                        title: "Error",
+                        description:
+                            "No se pudo cargar el ticket para impresión",
+                        variant: "destructive",
+                    });
+                }
+            };
+            fetchTicketAndPrint();
+        }
+    }, [flash?.sale_id]);
+
+    // Trigger print when ticketData is ready
+    useEffect(() => {
+        if (ticketData) {
+            handlePrint();
+        }
+    }, [ticketData]);
 
     const [searchQuery, setSearchQuery] = useState("");
     const [cartItems, setCartItems] = useState<CartItem[]>([]);
@@ -387,6 +446,19 @@ export default function Vender({ allProducts, clients }: Props) {
     return (
         <MainLayout>
             <Head title="Vender" />
+
+            {/* Hidden Ticket Component */}
+            <div className="hidden">
+                {ticketData && (
+                    <Ticket
+                        ref={ticketRef}
+                        data={ticketData}
+                        businessSettings={businessSettings}
+                        printerSettings={printerSettings}
+                    />
+                )}
+            </div>
+
             <div className="absolute inset-0 flex flex-col bg-background overflow-hidden">
                 {/* Header - Reemplazamos con el Header del MainLayout */}
                 <Header title="Punto de Venta" subtitle="Nueva Venta" />

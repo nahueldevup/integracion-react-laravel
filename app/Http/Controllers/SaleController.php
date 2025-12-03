@@ -46,7 +46,7 @@ class SaleController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($request) {
+            $sale = DB::transaction(function () use ($request) {
                 // 1. Gestión de Cliente
                 $clientId = null;
                 if ($request->client_name) {
@@ -121,9 +121,10 @@ class SaleController extends Controller
                     //Descontar Stock
                     $product->decrement('stock', $data['quantity']);
                 }
+                return $sale;
             });
 
-            return redirect()->back()->with('success', 'Venta registrada correctamente');
+            return redirect()->back()->with('success', 'Venta registrada correctamente')->with('sale_id', $sale->id);
 
         } catch (\Exception $e) {
             return redirect()->back()->withErrors(['error' => $e->getMessage()]);
