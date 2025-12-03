@@ -11,12 +11,7 @@ import {
     Receipt,
     Eye,
 } from "lucide-react";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/Components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/Components/ui/card";
 import {
     Table,
     TableBody,
@@ -89,14 +84,14 @@ export default function ClienteDetalle({ cliente }: Props) {
                         <Button
                             variant="outline"
                             onClick={handleBack}
-                            className="flex items-center gap-2"
+                            className="flex items-center gap-3 transition-all duration-200 hover:scale-105"
                         >
-                            <ArrowLeft className="w-4 h-4" />
+                            <ArrowLeft className="w-6 h-6" />
                             Volver a Clientes
                         </Button>
 
                         {/* Información del cliente */}
-                        <Card className="border-2">
+                        <Card className="border-2 hover:shadow-lg transition-all duration-200">
                             <CardHeader className="bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-950 dark:to-purple-950">
                                 <CardTitle className="text-2xl flex items-center gap-2">
                                     <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
@@ -116,7 +111,8 @@ export default function ClienteDetalle({ cliente }: Props) {
                                                 Teléfono
                                             </p>
                                             <p className="font-semibold">
-                                                {cliente.phone || "Sin teléfono"}
+                                                {cliente.phone ||
+                                                    "Sin teléfono"}
                                             </p>
                                         </div>
                                     </div>
@@ -158,7 +154,10 @@ export default function ClienteDetalle({ cliente }: Props) {
                                                 Total Gastado
                                             </p>
                                             <p className="font-semibold text-2xl text-green-600">
-                                                ${Number(cliente.total_comprado).toFixed(2)}
+                                                $
+                                                {Number(
+                                                    cliente.total_comprado
+                                                ).toFixed(2)}
                                             </p>
                                         </div>
                                     </div>
@@ -181,7 +180,8 @@ export default function ClienteDetalle({ cliente }: Props) {
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Receipt className="w-5 h-5" />
-                                    Historial de Compras ({cliente.ventas.length})
+                                    Historial de Compras (
+                                    {cliente.ventas.length})
                                 </CardTitle>
                             </CardHeader>
                             <CardContent>
@@ -189,7 +189,8 @@ export default function ClienteDetalle({ cliente }: Props) {
                                     <div className="text-center py-12">
                                         <ShoppingBag className="w-16 h-16 mx-auto text-muted-foreground/50 mb-4" />
                                         <p className="text-muted-foreground text-lg">
-                                            Este cliente aún no ha realizado compras
+                                            Este cliente aún no ha realizado
+                                            compras
                                         </p>
                                     </div>
                                 ) : (
@@ -197,17 +198,32 @@ export default function ClienteDetalle({ cliente }: Props) {
                                         <Table>
                                             <TableHeader>
                                                 <TableRow className="bg-muted/50">
-                                                    <TableHead className="font-bold">Folio</TableHead>
-                                                    <TableHead className="font-bold">Fecha</TableHead>
-                                                    <TableHead className="font-bold">Productos</TableHead>
-                                                    <TableHead className="font-bold">Método de Pago</TableHead>
-                                                    <TableHead className="font-bold">Total</TableHead>
-                                                    <TableHead className="font-bold">Acciones</TableHead>
+                                                    <TableHead className="font-bold">
+                                                        Folio
+                                                    </TableHead>
+                                                    <TableHead className="font-bold">
+                                                        Fecha
+                                                    </TableHead>
+                                                    <TableHead className="font-bold">
+                                                        Productos
+                                                    </TableHead>
+                                                    <TableHead className="font-bold">
+                                                        Método de Pago
+                                                    </TableHead>
+                                                    <TableHead className="font-bold">
+                                                        Total
+                                                    </TableHead>
+                                                    <TableHead className="font-bold">
+                                                        Acciones
+                                                    </TableHead>
                                                 </TableRow>
                                             </TableHeader>
                                             <TableBody>
                                                 {cliente.ventas.map((venta) => (
-                                                    <TableRow key={venta.id} className="hover:bg-muted/50">
+                                                    <TableRow
+                                                        key={venta.id}
+                                                        className="hover:bg-muted/50"
+                                                    >
                                                         <TableCell className="font-mono font-semibold">
                                                             {venta.folio}
                                                         </TableCell>
@@ -217,7 +233,10 @@ export default function ClienteDetalle({ cliente }: Props) {
                                                         <TableCell>
                                                             <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">
                                                                 <ShoppingBag className="w-3 h-3" />
-                                                                {venta.productos} items
+                                                                {
+                                                                    venta.productos
+                                                                }{" "}
+                                                                items
                                                             </span>
                                                         </TableCell>
                                                         <TableCell>
@@ -226,22 +245,29 @@ export default function ClienteDetalle({ cliente }: Props) {
                                                                     venta.metodo_pago
                                                                 )}`}
                                                             >
-                                                                {getPaymentMethodLabel(venta.metodo_pago)}
+                                                                {getPaymentMethodLabel(
+                                                                    venta.metodo_pago
+                                                                )}
                                                             </span>
                                                         </TableCell>
                                                         <TableCell className="font-bold text-lg text-green-600">
-                                                            ${Number(venta.total).toFixed(2)}
+                                                            $
+                                                            {Number(
+                                                                venta.total
+                                                            ).toFixed(2)}
                                                         </TableCell>
                                                         <TableCell>
                                                             <Button
                                                                 size="sm"
                                                                 variant="outline"
                                                                 onClick={() =>
-                                                                    handleViewSale(venta.id)
+                                                                    handleViewSale(
+                                                                        venta.id
+                                                                    )
                                                                 }
-                                                                className="flex items-center gap-2"
+                                                                className="flex items-center gap-3 transition-all duration-200 hover:scale-105"
                                                             >
-                                                                <Eye className="w-4 h-4" />
+                                                                <Eye className="w-5 h-5" />
                                                                 Ver Detalles
                                                             </Button>
                                                         </TableCell>

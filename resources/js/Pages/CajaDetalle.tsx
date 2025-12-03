@@ -131,8 +131,11 @@ export default function CajaDetalle({ cierre, movements }: Props) {
                                     Caja
                                 </Button>
                             </Link>
-                            <Button onClick={openPrintModal} className="gap-2">
-                                <Printer className="w-4 h-4" /> Imprimir Reporte
+                            <Button
+                                onClick={openPrintModal}
+                                className="gap-3 transition-all duration-200 hover:scale-105"
+                            >
+                                <Printer className="w-6 h-6" /> Imprimir Reporte
                             </Button>
                         </div>
 

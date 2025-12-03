@@ -180,12 +180,14 @@ export default function BajaExistencia({ productos = [] }: Props) {
 
                         {/* Tarjetas de Resumen */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900">
+                            <Card className="bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-900 transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium text-blue-800 dark:text-blue-300">
                                         Total a Reponer
                                     </CardTitle>
-                                    <ShoppingCart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/30 transition-transform duration-200 hover:scale-110">
+                                        <ShoppingCart className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold text-blue-900 dark:text-blue-200">
@@ -200,12 +202,14 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900">
+                            <Card className="bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900 transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium text-green-800 dark:text-green-300">
                                         Inversión Estimada
                                     </CardTitle>
-                                    <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                    <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/30 transition-transform duration-200 hover:scale-110">
+                                        <DollarSign className="h-4 w-4 text-green-600 dark:text-green-400" />
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold text-green-900 dark:text-green-200">
@@ -224,12 +228,14 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                 </CardContent>
                             </Card>
 
-                            <Card className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900">
+                            <Card className="bg-red-50 dark:bg-red-950/20 border-red-200 dark:border-red-900 transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium text-red-800 dark:text-red-300">
                                         Productos Agotados
                                     </CardTitle>
-                                    <PackageX className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                    <div className="p-2 rounded-lg bg-red-100 dark:bg-red-900/30 transition-transform duration-200 hover:scale-110">
+                                        <PackageX className="h-4 w-4 text-red-600 dark:text-red-400" />
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold text-red-900 dark:text-red-200">

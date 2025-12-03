@@ -521,9 +521,9 @@ export default function Productos({ products, categories, filters }: Props) {
                                 <DropdownMenuTrigger asChild>
                                     <Button
                                         variant="outline"
-                                        className="flex items-center gap-2"
+                                        className="flex items-center gap-3 transition-all duration-200 hover:scale-105"
                                     >
-                                        <FileSpreadsheet className="w-5 h-5" />
+                                        <FileSpreadsheet className="w-6 h-6" />
                                         Importar/Exportar
                                     </Button>
                                 </DropdownMenuTrigger>
@@ -552,9 +552,9 @@ export default function Productos({ products, categories, filters }: Props) {
                             <Button
                                 onClick={() => setIsCategoryDialogOpen(true)}
                                 variant="outline"
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-3 transition-all duration-200 hover:scale-105"
                             >
-                                <FolderPlus className="w-5 h-5" />
+                                <FolderPlus className="w-6 h-6" />
                                 Categorías
                             </Button>
                         </div>
@@ -725,9 +725,9 @@ export default function Productos({ products, categories, filters }: Props) {
                     </div>
                 </main>
 
+                {/* Botón flotante para agregar producto */}
                 <Button
-                    size="lg"
-                    className="fixed bottom-8 right-8 rounded-full w-14 h-14 shadow-lg"
+                    className="fixed bottom-8 right-8 rounded-full w-14 h-14 shadow-lg transition-all duration-200 hover:scale-110"
                     onClick={() => setIsAddDialogOpen(true)}
                 >
                     <Plus className="w-6 h-6" />

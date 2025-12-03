@@ -172,7 +172,7 @@ export default function Clientes({ clients }: Props) {
                     <div className="max-w-7xl mx-auto space-y-6">
                         {/* Estadísticas */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <Card>
+                            <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                 <CardContent className="p-4">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -183,12 +183,14 @@ export default function Clientes({ clients }: Props) {
                                                 {totalClients}
                                             </p>
                                         </div>
-                                        <User className="w-8 h-8 text-blue-500" />
+                                        <div className="p-3 rounded-lg bg-blue-100 dark:bg-blue-900/20 transition-transform duration-200 hover:scale-110">
+                                            <User className="w-8 h-8 text-blue-500" />
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <Card>
+                            <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                 <CardContent className="p-4">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -199,12 +201,14 @@ export default function Clientes({ clients }: Props) {
                                                 {totalVentas}
                                             </p>
                                         </div>
-                                        <ShoppingBag className="w-8 h-8 text-green-500" />
+                                        <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900/20 transition-transform duration-200 hover:scale-110">
+                                            <ShoppingBag className="w-8 h-8 text-green-500" />
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
 
-                            <Card>
+                            <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                 <CardContent className="p-4">
                                     <div className="flex items-center justify-between">
                                         <div>
@@ -215,7 +219,9 @@ export default function Clientes({ clients }: Props) {
                                                 ${totalIngresos.toFixed(2)}
                                             </p>
                                         </div>
-                                        <DollarSign className="w-8 h-8 text-purple-500" />
+                                        <div className="p-3 rounded-lg bg-purple-100 dark:bg-purple-900/20 transition-transform duration-200 hover:scale-110">
+                                            <DollarSign className="w-8 h-8 text-purple-500" />
+                                        </div>
                                     </div>
                                 </CardContent>
                             </Card>
@@ -236,9 +242,9 @@ export default function Clientes({ clients }: Props) {
                             </div>
                             <Button
                                 onClick={() => setIsAddDialogOpen(true)}
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-3 transition-all duration-200 hover:scale-105"
                             >
-                                <Plus className="w-5 h-5" />
+                                <Plus className="w-6 h-6" />
                                 Nuevo Cliente
                             </Button>
                         </div>

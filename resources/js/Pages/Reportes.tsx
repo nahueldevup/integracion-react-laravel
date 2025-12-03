@@ -108,12 +108,14 @@ export default function Reportes({
 
                         {/* TARJETAS KPI */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <Card>
+                            <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium">
                                         Ventas Totales
                                     </CardTitle>
-                                    <DollarSign className="h-4 w-4 text-green-600" />
+                                    <div className="p-2 rounded-lg bg-green-100 dark:bg-green-900/20 transition-transform duration-200 hover:scale-110">
+                                        <DollarSign className="h-4 w-4 text-green-600" />
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">
@@ -124,12 +126,14 @@ export default function Reportes({
                                     </p>
                                 </CardContent>
                             </Card>
-                            <Card>
+                            <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium">
                                         Ganancia Estimada
                                     </CardTitle>
-                                    <TrendingUp className="h-4 w-4 text-blue-600" />
+                                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900/20 transition-transform duration-200 hover:scale-110">
+                                        <TrendingUp className="h-4 w-4 text-blue-600" />
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold text-blue-600">
@@ -142,12 +146,14 @@ export default function Reportes({
                                 </CardContent>
                             </Card>
                             <Link href="/reportes/baja-existencia">
-                                <Card className="hover:bg-orange-50 dark:hover:bg-orange-950/20 transition-colors cursor-pointer border-orange-200 dark:border-orange-900">
+                                <Card className="hover:bg-orange-50 dark:hover:bg-orange-950/20 transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-pointer border-orange-200 dark:border-orange-900">
                                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                         <CardTitle className="text-sm font-medium text-orange-800">
                                             Baja Existencia
                                         </CardTitle>
-                                        <AlertTriangle className="h-4 w-4 text-orange-600" />
+                                        <div className="p-2 rounded-lg bg-orange-100 dark:bg-orange-900/20 transition-transform duration-200 hover:scale-110">
+                                            <AlertTriangle className="h-4 w-4 text-orange-600" />
+                                        </div>
                                     </CardHeader>
                                     <CardContent>
                                         <div className="text-2xl font-bold text-orange-700">
@@ -159,12 +165,14 @@ export default function Reportes({
                                     </CardContent>
                                 </Card>
                             </Link>
-                            <Card>
+                            <Card className="transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium">
                                         Ticket Promedio
                                     </CardTitle>
-                                    <Package className="h-4 w-4 text-purple-600" />
+                                    <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900/20 transition-transform duration-200 hover:scale-110">
+                                        <Package className="h-4 w-4 text-purple-600" />
+                                    </div>
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">

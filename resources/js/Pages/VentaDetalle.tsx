@@ -159,23 +159,23 @@ export default function VentaDetalle({ venta }: Props) {
                             <Button
                                 variant="outline"
                                 onClick={handleBack}
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-3 transition-all duration-200 hover:scale-105"
                             >
-                                <ArrowLeft className="w-4 h-4" />
+                                <ArrowLeft className="w-6 h-6" />
                                 Volver
                             </Button>
                             <Button
                                 variant="outline"
                                 onClick={openPrintModal}
-                                className="flex items-center gap-2"
+                                className="flex items-center gap-3 transition-all duration-200 hover:scale-105"
                             >
-                                <Printer className="w-4 h-4" />
+                                <Printer className="w-6 h-6" />
                                 Imprimir Ticket
                             </Button>
                         </div>
 
                         {/* Información general de la venta */}
-                        <Card className="border-2">
+                        <Card className="border-2 hover:shadow-lg transition-all duration-200">
                             <CardHeader className="bg-gradient-to-r from-blue-50 to-green-50 dark:from-blue-950 dark:to-green-950">
                                 <CardTitle className="text-2xl flex items-center justify-between">
                                     <div className="flex items-center gap-3">
@@ -268,7 +268,7 @@ export default function VentaDetalle({ venta }: Props) {
                         </Card>
 
                         {/* Productos vendidos */}
-                        <Card className="border-2">
+                        <Card className="border-2 hover:shadow-lg transition-all duration-200">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Package className="w-5 h-5" />
@@ -346,7 +346,7 @@ export default function VentaDetalle({ venta }: Props) {
 
                         {/* Resumen financiero */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <Card className="border-2">
+                            <Card className="border-2 hover:shadow-lg transition-all duration-200">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <DollarSign className="w-5 h-5" />
@@ -410,7 +410,7 @@ export default function VentaDetalle({ venta }: Props) {
                                 </CardContent>
                             </Card>
 
-                            <Card className="border-2">
+                            <Card className="border-2 hover:shadow-lg transition-all duration-200">
                                 <CardHeader>
                                     <CardTitle className="flex items-center gap-2">
                                         <TrendingUp className="w-5 h-5" />

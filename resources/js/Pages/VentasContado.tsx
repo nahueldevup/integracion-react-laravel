@@ -165,7 +165,7 @@ export default function VentasContado({ ventas }: Props) {
                     <div className="max-w-7xl mx-auto space-y-6">
                         <div className="flex flex-col md:flex-row gap-6 justify-between items-end">
                             <div className="flex gap-6">
-                                <div className="bg-card p-4 rounded-lg border shadow-sm">
+                                <div className="bg-card p-4 rounded-lg border shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                     <p className="text-sm text-muted-foreground">
                                         Ventas Totales
                                     </p>
@@ -173,7 +173,7 @@ export default function VentasContado({ ventas }: Props) {
                                         $ {totalVendido.toFixed(2)}
                                     </p>
                                 </div>
-                                <div className="bg-card p-4 rounded-lg border shadow-sm">
+                                <div className="bg-card p-4 rounded-lg border shadow-sm transition-all duration-200 hover:shadow-lg hover:-translate-y-1">
                                     <p className="text-sm text-muted-foreground">
                                         Utilidad Estimada
                                     </p>
@@ -249,7 +249,8 @@ export default function VentasContado({ ventas }: Props) {
                                                     <div className="flex justify-center gap-2">
                                                         <Button
                                                             size="sm"
-                                                            variant="ghost"
+                                                            variant="outline"
+                                                            className="h-8 w-8 p-0"
                                                             onClick={() =>
                                                                 openTicketModal(
                                                                     venta.id
@@ -261,14 +262,15 @@ export default function VentasContado({ ventas }: Props) {
                                                         </Button>
                                                         <Button
                                                             size="sm"
-                                                            variant="ghost"
+                                                            variant="outline"
+                                                            className="h-8 w-8 p-0"
                                                             onClick={() =>
                                                                 handleAnular(
                                                                     venta.id
                                                                 )
                                                             }
                                                         >
-                                                            <Trash2 className="w-4 h-4 text-red-500 hover:text-red-700" />
+                                                            <Trash2 className="w-4 h-4 text-destructive" />
                                                         </Button>
                                                     </div>
                                                 </TableCell>

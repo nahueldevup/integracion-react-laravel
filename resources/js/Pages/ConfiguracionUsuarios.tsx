@@ -267,8 +267,8 @@ export default function Usuarios({ users }: Props) {
                                         onOpenChange={setIsCreateOpen}
                                     >
                                         <DialogTrigger asChild>
-                                            <Button className="gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-sm">
-                                                <UserPlus className="w-4 h-4" />
+                                            <Button className="gap-3 bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-all duration-200 hover:scale-105">
+                                                <UserPlus className="w-6 h-6" />
                                                 Nuevo Usuario
                                             </Button>
                                         </DialogTrigger>
@@ -466,57 +466,53 @@ export default function Usuarios({ users }: Props) {
                                                     <TableCell className="text-right pr-6">
                                                         <div className="flex justify-end gap-1">
                                                             <Button
-                                                                variant="ghost"
-                                                                size="icon"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0"
                                                                 onClick={() =>
                                                                     openEditDialog(
                                                                         user
                                                                     )
                                                                 }
-                                                                className="h-8 w-8 hover:bg-blue-50"
                                                                 title="Editar usuario"
                                                             >
-                                                                <Pencil className="w-4 h-4 text-gray-600 hover:text-gray-800" />
+                                                                <Pencil className="w-4 h-4 text-blue-600" />
                                                             </Button>
                                                             <Button
-                                                                variant="ghost"
-                                                                size="icon"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0"
                                                                 onClick={() =>
                                                                     openPasswordDialog(
                                                                         user
                                                                     )
                                                                 }
-                                                                className="h-8 w-8 hover:bg-orange-50"
                                                                 title="Cambiar contraseña"
                                                             >
-                                                                <Key className="w-4 h-4 text-gray-600 hover:text-gray-800" />
+                                                                <Key className="w-4 h-4 text-amber-600" />
                                                             </Button>
                                                             <Button
-                                                                variant="ghost"
-                                                                size="icon"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0"
                                                                 onClick={() =>
                                                                     openPermissionsDialog(
                                                                         user
                                                                     )
                                                                 }
-                                                                className="h-8 w-8 hover:bg-blue-50"
                                                                 title="Gestionar permisos"
                                                             >
-                                                                <Shield className="w-4 h-4 text-blue-500" />
+                                                                <Shield className="w-4 h-4 text-purple-600" />
                                                             </Button>
                                                             <Button
-                                                                variant="ghost"
-                                                                size="icon"
+                                                                variant="outline"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0"
                                                                 onClick={() =>
                                                                     handleToggleActive(
                                                                         user
                                                                     )
                                                                 }
-                                                                className={`h-8 w-8 ${
-                                                                    user.active
-                                                                        ? "hover:bg-green-50"
-                                                                        : "hover:bg-gray-100"
-                                                                }`}
                                                                 title={
                                                                     user.active
                                                                         ? "Desactivar"
@@ -537,9 +533,9 @@ export default function Usuarios({ users }: Props) {
                                                                     asChild
                                                                 >
                                                                     <Button
-                                                                        variant="ghost"
-                                                                        size="icon"
-                                                                        className="h-8 w-8 hover:bg-red-50"
+                                                                        variant="outline"
+                                                                        size="sm"
+                                                                        className="h-8 w-8 p-0"
                                                                         title="Eliminar usuario"
                                                                     >
                                                                         <Trash2 className="w-4 h-4 text-destructive" />

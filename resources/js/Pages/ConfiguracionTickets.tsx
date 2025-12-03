@@ -365,9 +365,9 @@ export default function ConfiguracionTickets({ settings }: Props) {
                                 <Button
                                     type="submit"
                                     size="lg"
-                                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-md gap-2"
+                                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-md gap-3 transition-all duration-200 hover:scale-105"
                                 >
-                                    <Settings2 className="w-4 h-4" />
+                                    <Settings2 className="w-6 h-6" />
                                     Guardar Configuración
                                 </Button>
                             </div>

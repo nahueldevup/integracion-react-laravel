@@ -90,7 +90,7 @@ interface Props {
 // --- Componente Tarjeta ---
 function StatCard({ title, value, icon: Icon, colorClass, subtext }: any) {
     return (
-        <div className="bg-card p-6 rounded-xl border shadow-sm flex items-start justify-between transition-all hover:shadow-md">
+        <div className="bg-card p-6 rounded-xl border shadow-sm flex items-start justify-between transition-all duration-200 hover:shadow-lg hover:-translate-y-1 cursor-default">
             <div>
                 <p className="text-sm font-medium text-muted-foreground mb-1">
                     {title}
@@ -105,7 +105,7 @@ function StatCard({ title, value, icon: Icon, colorClass, subtext }: any) {
                 )}
             </div>
             <div
-                className={`p-3 rounded-lg ${
+                className={`p-3 rounded-lg transition-transform duration-200 hover:scale-110 ${
                     colorClass
                         .replace("text-", "bg-")
                         .replace("600", "100 dark:bg-") +
@@ -319,15 +319,15 @@ export default function Caja({ movements, summary, history }: Props) {
                         </div>
 
                         {/* BOTONERA */}
-                        <div className="flex flex-wrap gap-4">
+                        <div className="flex flex-col sm:flex-row flex-wrap gap-4">
                             <Button
                                 onClick={() => {
                                     setMovementType("ingreso");
                                     setIsDialogOpen(true);
                                 }}
-                                className="bg-emerald-600 hover:bg-emerald-700 shadow-md text-white px-6 py-6 h-auto text-base flex gap-2"
+                                className="bg-emerald-600 hover:bg-emerald-700 shadow-md text-white px-6 py-6 h-auto text-base flex gap-3 transition-all duration-200 hover:scale-105"
                             >
-                                <ArrowUpCircle className="w-5 h-5" /> Registrar
+                                <ArrowUpCircle className="w-6 h-6" /> Registrar
                                 Ingreso
                             </Button>
                             <Button
@@ -335,17 +335,17 @@ export default function Caja({ movements, summary, history }: Props) {
                                     setMovementType("egreso");
                                     setIsDialogOpen(true);
                                 }}
-                                className="bg-rose-600 hover:bg-rose-700 shadow-md text-white px-6 py-6 h-auto text-base flex gap-2"
+                                className="bg-rose-600 hover:bg-rose-700 shadow-md text-white px-6 py-6 h-auto text-base flex gap-3 transition-all duration-200 hover:scale-105"
                             >
-                                <ArrowDownCircle className="w-5 h-5" />{" "}
+                                <ArrowDownCircle className="w-6 h-6" />{" "}
                                 Registrar Gasto/Retiro
                             </Button>
                             <Button
                                 onClick={handleOpenCierre}
                                 variant="ghost"
-                                className="ml-auto border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-400 active:text-blue-700 dark:active:text-blue-400 bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/20 shadow-sm px-6 py-6 h-auto text-base flex gap-2"
+                                className="sm:ml-auto border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-400 active:text-blue-700 dark:active:text-blue-400 bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/20 shadow-sm px-6 py-6 h-auto text-base flex gap-3 transition-all duration-200 hover:scale-105"
                             >
-                                <Calculator className="w-5 h-5" /> Realizar
+                                <Calculator className="w-6 h-6" /> Realizar
                                 Arqueo (Cierre)
                             </Button>
                         </div>
@@ -451,15 +451,16 @@ export default function Caja({ movements, summary, history }: Props) {
                                                         </TableCell>
                                                         <TableCell className="text-center">
                                                             <Button
-                                                                variant="ghost"
                                                                 size="sm"
+                                                                variant="outline"
+                                                                className="h-8 w-8 p-0"
                                                                 onClick={() =>
                                                                     handleDelete(
                                                                         mov.id
                                                                     )
                                                                 }
                                                             >
-                                                                <Trash2 className="w-4 h-4 text-gray-400 hover:text-red-500" />
+                                                                <Trash2 className="w-4 h-4 text-destructive" />
                                                             </Button>
                                                         </TableCell>
                                                     </TableRow>
@@ -566,8 +567,9 @@ export default function Caja({ movements, summary, history }: Props) {
                                                         </TableCell>
                                                         <TableCell className="text-center">
                                                             <Button
-                                                                variant="ghost"
+                                                                variant="outline"
                                                                 size="sm"
+                                                                className="h-8 w-8 p-0"
                                                                 asChild
                                                             >
                                                                 {/* Usamos asChild para que el botón se comporte como Link de Inertia */}
@@ -663,13 +665,17 @@ export default function Caja({ movements, summary, history }: Props) {
                             </DialogDescription>
                         </DialogHeader>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 py-4">
                             {/* LADO IZQUIERDO: SISTEMA */}
-                            <div className="space-y-4">
-                                {/* --- AQUI ESTA LO QUE FALTABA: BLOQUE DIGITAL --- */}
-                                <div className="bg-muted p-4 rounded-lg border space-y-3">
+                            <div className="space-y-4 bg-muted/30 p-4 rounded-lg">
+                                <h4 className="font-bold text-foreground flex items-center gap-2 text-lg mb-4">
+                                    <Calculator className="w-6 h-6 text-blue-600" />
+                                    Datos del Sistema
+                                </h4>
+                                {/* --- BLOQUE DIGITAL --- */}
+                                <div className="bg-card p-4 rounded-lg border space-y-3">
                                     <h4 className="font-bold text-foreground flex items-center gap-2">
-                                        <CreditCard className="w-4 h-4" />{" "}
+                                        <CreditCard className="w-5 h-5 text-blue-600" />{" "}
                                         Digital (Banco)
                                     </h4>
                                     <div className="flex justify-between text-sm">
@@ -690,7 +696,7 @@ export default function Caja({ movements, summary, history }: Props) {
 
                                 <div className="bg-emerald-50 dark:bg-emerald-950/20 p-4 rounded-lg border border-emerald-100 dark:border-emerald-900 space-y-3">
                                     <h4 className="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-2">
-                                        <Wallet className="w-4 h-4" /> Efectivo
+                                        <Wallet className="w-5 h-5" /> Efectivo
                                         Esperado
                                     </h4>
                                     <div className="flex justify-between text-sm">
@@ -731,8 +737,9 @@ export default function Caja({ movements, summary, history }: Props) {
                             </div>
 
                             {/* LADO DERECHO: USUARIO */}
-                            <div className="space-y-4 border-l pl-6 border-dashed">
-                                <h4 className="font-bold text-foreground">
+                            <div className="space-y-4 border-l-2 pl-8 border-dashed border-border">
+                                <h4 className="font-bold text-foreground flex items-center gap-2 text-lg mb-4">
+                                    <Calculator className="w-6 h-6 text-amber-600" />
                                     Conteo Físico
                                 </h4>
                                 <div className="space-y-2">
@@ -753,7 +760,7 @@ export default function Caja({ movements, summary, history }: Props) {
                                 </div>
                                 {arqueoData.counted_cash && (
                                     <div
-                                        className={`p-4 rounded-lg text-center border-2 ${
+                                        className={`p-4 rounded-lg text-center border-2 animate-in fade-in zoom-in-95 duration-300 ${
                                             difference === 0
                                                 ? "bg-green-50 dark:bg-green-950/20 border-green-200 dark:border-green-900 text-green-700 dark:text-green-300"
                                                 : difference > 0

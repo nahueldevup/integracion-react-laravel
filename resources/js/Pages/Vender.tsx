@@ -107,32 +107,38 @@ function CartItemRow({ item, onIncrease, onDecrease, onRemove }: any) {
                 </p>
             </div>
             <div className="flex items-center gap-1 sm:gap-2">
-                <button
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 w-7 p-0 transition-all duration-200"
                     onClick={() => onDecrease(item.id)}
-                    className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center bg-card border border-input rounded hover:text-red-600"
                 >
-                    <Minus className="w-3 h-3" />
-                </button>
+                    <Minus className="w-3 h-3 text-red-600" />
+                </Button>
                 <span className="w-6 sm:w-8 text-center font-bold text-xs sm:text-sm tabular-nums">
                     {item.quantity}
                 </span>
-                <button
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 w-7 p-0 transition-all duration-200"
                     onClick={() => onIncrease(item.id)}
-                    className="w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center bg-card border border-input rounded hover:text-green-600"
                 >
-                    <Plus className="w-3 h-3" />
-                </button>
+                    <Plus className="w-3 h-3 text-green-600" />
+                </Button>
             </div>
             <div className="flex flex-col items-end gap-1 min-w-[60px]">
                 <p className="font-bold text-xs sm:text-sm text-foreground">
                     ${item.total.toFixed(2)}
                 </p>
-                <button
+                <Button
+                    variant="outline"
+                    size="sm"
+                    className="h-7 w-7 p-0 transition-all duration-200"
                     onClick={() => onRemove(item.id)}
-                    className="text-muted-foreground hover:text-red-500 p-1"
                 >
-                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4" />
-                </button>
+                    <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 text-destructive" />
+                </Button>
             </div>
         </div>
     );
@@ -142,10 +148,10 @@ function PaymentMethodButton({ icon: Icon, label, isSelected, onClick }: any) {
     return (
         <button
             onClick={onClick}
-            className={`flex flex-col items-center gap-2 p-2 sm:p-3 rounded-lg border transition-all ${
+            className={`flex flex-col items-center gap-2 p-2 sm:p-3 rounded-lg border transition-all duration-200 ${
                 isSelected
                     ? "border-blue-500 bg-blue-500/10 text-blue-600 dark:text-blue-400"
-                    : "border-border text-muted-foreground hover:bg-muted"
+                    : "border-border text-muted-foreground hover:bg-muted hover:scale-105"
             }`}
         >
             <Icon

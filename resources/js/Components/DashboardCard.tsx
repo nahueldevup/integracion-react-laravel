@@ -19,13 +19,13 @@ export function DashboardCard({
 }: DashboardCardProps) {
     return (
         <Card
-            className="cursor-pointer hover:shadow-lg transition-shadow border-border bg-card"
+            className="cursor-pointer hover:shadow-lg hover:-translate-y-1 transition-all duration-200 border-border bg-card"
             onClick={onClick}
         >
             <CardContent className="p-6 flex flex-col items-center text-center gap-3">
                 <div
                     className={cn(
-                        "w-20 h-20 rounded-lg bg-muted flex items-center justify-center",
+                        "w-20 h-20 rounded-lg bg-muted flex items-center justify-center transition-transform duration-200 hover:scale-110",
                         iconColor
                     )}
                 >

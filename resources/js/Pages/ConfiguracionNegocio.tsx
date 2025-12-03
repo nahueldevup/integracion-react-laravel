@@ -250,9 +250,9 @@ export default function ConfiguracionNegocio({ settings }: Props) {
                                             <div className="pt-4 flex justify-end">
                                                 <Button
                                                     type="submit"
-                                                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-md gap-2"
+                                                    className="bg-blue-600 hover:bg-blue-700 text-white shadow-md gap-3 transition-all duration-200 hover:scale-105"
                                                 >
-                                                    <Save className="w-4 h-4" />
+                                                    <Save className="w-6 h-6" />
                                                     Guardar Cambios
                                                 </Button>
                                             </div>
