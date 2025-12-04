@@ -27,6 +27,16 @@ import {
     ChevronRight,
     Menu,
 } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/Components/ui/alert-dialog";
 
 // --- Interfaces ---
 interface Product {
@@ -238,46 +248,12 @@ export default function Vender({ allProducts, clients }: Props) {
         null
     );
     const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
+    const [isClearCartDialogOpen, setIsClearCartDialogOpen] = useState(false);
     const [newCustomerName, setNewCustomerName] = useState("");
     const [newCustomerPhone, setNewCustomerPhone] = useState("");
     const [customerSearch, setCustomerSearch] = useState("");
 
     // Paginación
-    const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage, setItemsPerPage] = useState(10);
-    const gridContainerRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        const calculateItemsPerPage = () => {
-            if (gridContainerRef.current) {
-                const width = gridContainerRef.current.clientWidth;
-                const height = gridContainerRef.current.clientHeight;
-
-                // Estimaciones refinadas:
-                // Ancho min 150px, Alto estimado 180px, Gap 16px (gap-4)
-                const GAP = 16;
-                const MIN_CARD_WIDTH = 150;
-                const CARD_HEIGHT = 180;
-
-                // Fórmula que considera el gap: floor((espacio + gap) / (item + gap))
-                const colCount = Math.floor(
-                    (width + GAP) / (MIN_CARD_WIDTH + GAP)
-                );
-                const rowCount = Math.floor(
-                    (height + GAP) / (CARD_HEIGHT + GAP)
-                );
-
-                const count = Math.max(colCount * rowCount, 1);
-                setItemsPerPage(count);
-            }
-        };
-
-        calculateItemsPerPage();
-        window.addEventListener("resize", calculateItemsPerPage);
-
-        return () =>
-            window.removeEventListener("resize", calculateItemsPerPage);
-    }, []);
 
     const filteredProducts = allProducts
         .filter(
@@ -304,16 +280,6 @@ export default function Vender({ allProducts, clients }: Props) {
 
             return getPriority(a) - getPriority(b);
         });
-
-    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
-    const paginatedProducts = filteredProducts.slice(
-        (currentPage - 1) * itemsPerPage,
-        currentPage * itemsPerPage
-    );
-
-    useEffect(() => {
-        setCurrentPage(1);
-    }, [searchQuery]);
 
     const filteredClients =
         customerSearch.trim() === ""
@@ -397,11 +363,14 @@ export default function Vender({ allProducts, clients }: Props) {
     };
 
     const clearCart = () => {
-        if (confirm("¿Vaciar carrito?")) {
-            setCartItems([]);
-            setShowCheckout(false);
-            setAmountReceived("");
-        }
+        setIsClearCartDialogOpen(true);
+    };
+
+    const confirmClearCart = () => {
+        setCartItems([]);
+        setShowCheckout(false);
+        setAmountReceived("");
+        setIsClearCartDialogOpen(false);
     };
 
     const handleSelectClient = (client: Customer) => {
@@ -501,6 +470,30 @@ export default function Vender({ allProducts, clients }: Props) {
         <MainLayout>
             <Head title="Vender" />
 
+            <AlertDialog
+                open={isClearCartDialogOpen}
+                onOpenChange={setIsClearCartDialogOpen}
+            >
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta acción vaciará todo el carrito de compras. No
+                            podrás deshacer esta acción.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction
+                            onClick={confirmClearCart}
+                            className="bg-red-600 hover:bg-red-700"
+                        >
+                            Sí, vaciar carrito
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
             {/* Hidden Ticket Component */}
             <div className="hidden">
                 {ticketData && (
@@ -515,13 +508,13 @@ export default function Vender({ allProducts, clients }: Props) {
 
             <div className="absolute inset-0 flex flex-col bg-background overflow-hidden">
                 {/* Header - Reemplazamos con el Header del MainLayout */}
-                <Header title="Punto de Venta" subtitle="Nueva Venta" />
+                <Header title="Venta" subtitle="Realizar Ventas" />
 
                 <div className="flex-1 flex overflow-hidden">
                     {/* Panel Izquierdo - Productos */}
                     {/* Panel Izquierdo - Productos */}
                     <div className="flex-1 flex flex-col bg-background p-6">
-                        <div className="max-w-7xl mx-auto w-full">
+                        <div className="max-w-7xl mx-auto w-full flex flex-col flex-1 min-h-0">
                             {/* Configuración de Impresión Automática */}
                             <div className="bg-card border border-border rounded-lg p-3 sm:p-4 shadow-sm mb-6">
                                 <div className="flex items-center justify-between">
@@ -573,63 +566,8 @@ export default function Vender({ allProducts, clients }: Props) {
                             {/* Grid de Productos */}
                             <div className="bg-card rounded-lg border border-border flex flex-col flex-1 min-h-0">
                                 {/* Paginación */}
-                                {filteredProducts.length > 0 && (
-                                    <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-                                        <div className="flex items-center gap-2">
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() =>
-                                                    setCurrentPage((prev) =>
-                                                        Math.max(prev - 1, 1)
-                                                    )
-                                                }
-                                                disabled={currentPage === 1}
-                                            >
-                                                <span>←</span>
-                                            </Button>
-                                            <span className="px-3 py-1 bg-primary text-primary-foreground rounded text-sm">
-                                                {currentPage}
-                                            </span>
-                                            <span className="text-sm text-muted-foreground">
-                                                de {totalPages}
-                                            </span>
-                                            <Button
-                                                variant="ghost"
-                                                size="sm"
-                                                onClick={() =>
-                                                    setCurrentPage((prev) =>
-                                                        Math.min(
-                                                            prev + 1,
-                                                            totalPages
-                                                        )
-                                                    )
-                                                }
-                                                disabled={
-                                                    currentPage === totalPages
-                                                }
-                                            >
-                                                <span>→</span>
-                                            </Button>
-                                        </div>
-                                        <div className="text-sm text-muted-foreground">
-                                            Mostrando{" "}
-                                            {(currentPage - 1) * itemsPerPage +
-                                                1}{" "}
-                                            -{" "}
-                                            {Math.min(
-                                                currentPage * itemsPerPage,
-                                                filteredProducts.length
-                                            )}{" "}
-                                            de {filteredProducts.length}{" "}
-                                            productos
-                                        </div>
-                                    </div>
-                                )}
-                                <div
-                                    className="flex-1 overflow-hidden p-4"
-                                    ref={gridContainerRef}
-                                >
+
+                                <div className="flex-1 overflow-y-auto p-4">
                                     {filteredProducts.length === 0 ? (
                                         <p className="text-center text-muted-foreground mt-10">
                                             No se encontraron productos
@@ -642,15 +580,15 @@ export default function Vender({ allProducts, clients }: Props) {
                                                     "repeat(auto-fill, minmax(150px, 1fr))",
                                             }}
                                         >
-                                            {paginatedProducts.map(
-                                                (product) => (
+                                            {filteredProducts
+                                                .slice(0, 20)
+                                                .map((product) => (
                                                     <ProductCard
                                                         key={product.id}
                                                         product={product}
                                                         onAdd={addToCart}
                                                     />
-                                                )
-                                            )}
+                                                ))}
                                         </div>
                                     )}
                                 </div>

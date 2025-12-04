@@ -28,6 +28,7 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from "@/Components/ui/collapsible";
+import { PiposLogo } from "@/Components/PiposLogo";
 
 // Definición de ítems del menú principal
 const menuItems = [
@@ -175,11 +176,12 @@ export function Sidebar() {
 
     const SidebarContent = () => (
         <>
-            <div className="p-4 border-b border-border h-[60px] flex items-center">
+            <div className="p-4 border-b border-border h-[60px] flex items-center overflow-hidden">
+                <PiposLogo className="w-16 h-16 text-blue-500 flex-shrink-0" />
                 <h1
                     className={cn(
-                        "text-lg font-bold text-primary transition-opacity duration-300",
-                        !isOpen && !isMobile && "opacity-0"
+                        "text-xl font-poetsen text-blue-500 tracking-wide transition-opacity duration-300 -ml-3",
+                        !isOpen && !isMobile && "opacity-0 hidden"
                     )}
                 >
                     {(isOpen || isMobile) && "PIPOS"}

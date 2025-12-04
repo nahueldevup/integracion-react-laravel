@@ -150,7 +150,7 @@ export default function VentaDetalle({ venta }: Props) {
         <MainLayout>
             <Head title={`Venta - ${venta.folio}`} />
             <div className="flex-1 flex flex-col">
-                <Header title="Detalle de Venta" />
+                <Header title="Ventas" subtitle="Información de la venta" />
 
                 <main className="flex-1 p-6 bg-background">
                     <div className="max-w-7xl mx-auto space-y-6">

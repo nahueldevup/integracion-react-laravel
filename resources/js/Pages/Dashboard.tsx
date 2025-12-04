@@ -35,7 +35,7 @@ export default function Dashboard({ lowStockProducts = [] }: Props) {
         <MainLayout>
             <Head title="Inicio" />
             <div className="flex-1 flex flex-col">
-                <Header title="Pipos" subtitle="Inicio" />
+                <Header title="Inicio" subtitle="Bienvenido" />
 
                 <main className="flex-1 p-6">
                     <div className="max-w-7xl mx-auto">

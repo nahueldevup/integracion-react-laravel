@@ -76,7 +76,7 @@ export default function ClienteDetalle({ cliente }: Props) {
         <MainLayout>
             <Head title={`Cliente - ${cliente.name}`} />
             <div className="flex-1 flex flex-col">
-                <Header title="Detalle del Cliente" />
+                <Header title="Clientes" subtitle="Información del cliente" />
 
                 <main className="flex-1 p-6 bg-background">
                     <div className="max-w-7xl mx-auto space-y-6">

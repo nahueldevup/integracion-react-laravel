@@ -434,7 +434,7 @@ export default function Productos({ products, categories, filters }: Props) {
         <MainLayout>
             <Head title="Productos" />
             <div className="flex-1 flex flex-col">
-                <Header title="proyecto" subtitle="Inventario" />
+                <Header title="Productos" subtitle="Gestionar Productos" />
 
                 <main className="flex-1 p-6 bg-background">
                     <div className="max-w-7xl mx-auto">

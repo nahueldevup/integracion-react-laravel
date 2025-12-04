@@ -21,6 +21,9 @@ export default {
       },
     },
     extend: {
+        fontFamily: {
+            poetsen: ["'Poetsen One'", "sans-serif"],
+        },
         // ... COPIA AQUI TODO LO QUE TENIAS EN TÚ tailwind.config.ts ORIGINAL dentro de extend
         colors: {
             border: "hsl(var(--border))",

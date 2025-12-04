@@ -280,7 +280,7 @@ export default function Caja({ movements, summary, history }: Props) {
         <MainLayout>
             <div className="flex-1 flex flex-col h-full bg-background">
                 <Header
-                    title="Gestión de Caja"
+                    title="Caja"
                     subtitle="Control de efectivo y cierres"
                 />
 
