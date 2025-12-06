@@ -13,6 +13,7 @@ use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PrinterSettingController;
 use App\Http\Controllers\BusinessSettingController;
+use App\Http\Controllers\ProfileController;
 
 // --- RUTAS PÚBLICAS (Autenticación) ---
 Route::get('/login', function () { 
@@ -40,28 +41,21 @@ Route::middleware(['auth'])->group(function () {
         ]);
     })->name('dashboard');
 
-    // ... dentro del grupo middleware(['auth'])
-
-// --- PERFIL DE USUARIO ---
-Route::get('/perfil', function () {
-    return Inertia::render('Perfil');
-})->name('profile.index');
-
-Route::put('/perfil', [App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
-Route::put('/perfil/password', [App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.password');
-
-// ... el resto de tus rutas
+    // --- PERFIL DE USUARIO ---
+    Route::get('/perfil', function () {
+        return Inertia::render('Perfil');
+    })->name('profile.index');
+    Route::put('/perfil', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/perfil/password', [ProfileController::class, 'updatePassword'])->name('profile.password');
 
     // --- CATEGORÍAS ---
     Route::post('/categorias', [CategoryController::class, 'store'])->name('categories.store');
     Route::delete('/categorias/{id}', [CategoryController::class, 'destroy'])->name('categories.destroy');
 
     // --- PRODUCTOS ---
-    // Rutas específicas deben estar antes de las rutas con parámetros dinámicos
     Route::get('/productos/export', [ProductController::class, 'export'])->name('products.export');
     Route::post('/productos/import', [ProductController::class, 'import'])->name('products.import');
     Route::get('/productos/plantilla', [ProductController::class, 'downloadTemplate'])->name('products.template');
-    
     Route::get('/productos', [ProductController::class, 'index'])->name('products.index');
     Route::post('/productos', [ProductController::class, 'store'])->name('products.store');
     Route::put('/productos/{id}', [ProductController::class, 'update'])->name('products.update');
@@ -91,7 +85,7 @@ Route::put('/perfil/password', [App\Http\Controllers\ProfileController::class, '
     Route::delete('/caja/{id}', [CashController::class, 'destroy'])->name('cash.destroy');
     Route::get('/caja/historial/{id}', [CashController::class, 'show'])->name('cash.show');
 
-    // --- CONFIGURACIÓN > USUARIOS Y PERMISOS (Primero las rutas específicas) ---
+    // --- CONFIGURACIÓN > USUARIOS Y PERMISOS ---
     Route::prefix('configuracion/usuarios')->group(function() {
         Route::get('/', [UserController::class, 'index'])->name('config.users.index');
         Route::post('/', [UserController::class, 'store'])->name('config.users.store');
@@ -115,39 +109,20 @@ Route::put('/perfil/password', [App\Http\Controllers\ProfileController::class, '
         Route::put('/', [PrinterSettingController::class, 'update'])->name('config.tickets.update');
     });
 
-    // --- CONFIGURACIÓN (Rutas genéricas después de las específicas) ---
+    // --- CONFIGURACIÓN (Rutas genéricas) ---
     Route::get('/configuracion', [SettingController::class, 'index'])->name('settings.index');
     Route::post('/configuracion', [SettingController::class, 'store'])->name('settings.store');
     Route::put('/configuracion/{id}', [SettingController::class, 'update'])->name('settings.update');
     Route::delete('/configuracion/{id}', [SettingController::class, 'destroy'])->name('settings.destroy');
 
-
-
-
-    Route::get('/usuarios', function () { 
-        return Inertia::render('Usuarios', ['usuarios' => \App\Models\User::all()]); 
-    });
-
     // --- REPORTES ---
     Route::prefix('reportes')->group(function () {
-        // Dashboard principal de reportes (Gráficos)
         Route::get('/', [ReportController::class, 'index'])->name('reports.index');
-        
-        // Historial de ventas
         Route::get('/ventas-contado', [SaleController::class, 'history'])->name('reports.sales');
-        
-        // ✅ ESTA ERA LA LÍNEA QUE FALTABA:
         Route::get('/baja-existencia', [ReportController::class, 'inventarioBajo'])->name('reports.low_stock');
-        
-        // Inventario general
-        Route::get('/inventario', function() { 
-            return Inertia::render('Inventario', [
-                'productos' => \App\Models\Product::with('category')->get()
-            ]); 
-        })->name('reports.inventory');
     });
 
-    // Fallback 404
+    // --- FALLBACK 404 ---
     Route::fallback(function () {
         return Inertia::render('NotFound');
     });
