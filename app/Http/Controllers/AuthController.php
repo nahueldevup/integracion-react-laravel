@@ -52,9 +52,18 @@ class AuthController extends Controller
     {
         $validated = $request->validate([
             'email' => 'required|string|email',
-            'username' => 'nullable|string',
             'password' => 'required|string',
         ]);
+
+        // Buscar usuario por email
+        $user = User::where('email', $validated['email'])->first();
+
+        // Verificar que el usuario existe y está activo
+        if ($user && !$user->active) {
+            throw ValidationException::withMessages([
+                'email' => 'Tu cuenta ha sido desactivada. Contacta al administrador.',
+            ]);
+        }
 
         // Intentar login con email y password
         $credentials = [
@@ -68,7 +77,7 @@ class AuthController extends Controller
         }
 
         throw ValidationException::withMessages([
-            'email' => 'Las credenciales no coinciden con nuestros registros.',
+            'email' => 'Correo o contraseña incorrectos, intentalo de nuevo.',
         ]);
     }
 

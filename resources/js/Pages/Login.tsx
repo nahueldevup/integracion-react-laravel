@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { router, Head, Link } from "@inertiajs/react";
+import { router, Head, Link, usePage } from "@inertiajs/react";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
-import { Mail, Lock, Eye, EyeOff, Moon, Sun } from "lucide-react";
+import { Mail, Lock, Eye, EyeOff, Moon, Sun, AlertCircle } from "lucide-react";
 import { useTheme } from "@/Hooks/use-theme";
 
 export default function Login() {
@@ -11,6 +11,9 @@ export default function Login() {
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
     const { theme, toggleTheme } = useTheme();
+
+    // Obtener errores de Inertia
+    const { errors } = usePage().props as { errors: Record<string, string> };
 
     const handleLogin = (e: React.FormEvent) => {
         e.preventDefault();
@@ -101,6 +104,16 @@ export default function Login() {
                                 Ingresa tus credenciales para continuar
                             </p>
                         </div>
+
+                        {/* Mensaje de error */}
+                        {errors.email && (
+                            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-lg flex items-center gap-3">
+                                <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+                                <p className="text-sm text-destructive font-medium">
+                                    {errors.email}
+                                </p>
+                            </div>
+                        )}
 
                         <form onSubmit={handleLogin} className="space-y-6">
                             <div className="space-y-2">

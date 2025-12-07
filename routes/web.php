@@ -8,7 +8,6 @@ use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\CashController;
 use App\Http\Controllers\ClientController;
-use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\PrinterSettingController;
@@ -28,8 +27,8 @@ Route::post('/register', [AuthController::class, 'register'])->name('register.po
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-// --- RUTAS PROTEGIDAS (Requieren autenticación) ---
-Route::middleware(['auth'])->group(function () {
+// --- RUTAS PROTEGIDAS (Requieren autenticación, usuario activo y permisos) ---
+Route::middleware(['auth', 'active', 'permission'])->group(function () {
 
     // --- DASHBOARD ---
     Route::get('/', function () {
@@ -108,12 +107,6 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/', [PrinterSettingController::class, 'index'])->name('config.tickets.index');
         Route::put('/', [PrinterSettingController::class, 'update'])->name('config.tickets.update');
     });
-
-    // --- CONFIGURACIÓN (Rutas genéricas) ---
-    Route::get('/configuracion', [SettingController::class, 'index'])->name('settings.index');
-    Route::post('/configuracion', [SettingController::class, 'store'])->name('settings.store');
-    Route::put('/configuracion/{id}', [SettingController::class, 'update'])->name('settings.update');
-    Route::delete('/configuracion/{id}', [SettingController::class, 'destroy'])->name('settings.destroy');
 
     // --- REPORTES ---
     Route::prefix('reportes')->group(function () {

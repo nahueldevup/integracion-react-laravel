@@ -184,7 +184,7 @@ export default function Usuarios({ users }: Props) {
     };
 
     const handleDeleteUser = (userId: number) => {
-        router.delete(`/usuarios/${userId}`, {
+        router.delete(`/configuracion/usuarios/${userId}`, {
             onSuccess: () => toast.success("Usuario eliminado"),
             onError: (errors) =>
                 toast.error(Object.values(errors)[0] as string),
