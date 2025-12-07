@@ -73,14 +73,14 @@ export default function ConfiguracionTickets({ settings }: Props) {
 
     return (
         <MainLayout>
-            <Head title="Configuración - Impresoras y Tickets" />
+            <Head title="Impresoras y Tickets" />
 
             {/* CONTENEDOR PRINCIPAL: Flex vertical y fondo gris suave */}
             <div className="flex-1 flex flex-col h-full bg-background">
                 {/* 1. HEADER ESTÁNDAR */}
                 <Header
                     title="Impresoras y Tickets"
-                    subtitle="Configura la impresora y personaliza el diseño de los tickets"
+                    subtitle="Personaliza tus tickets y configura tu equipo de impresión."
                 />
 
                 {/* 2. CONTENIDO SCROLLEABLE */}

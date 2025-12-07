@@ -105,14 +105,14 @@ export default function ConfiguracionNegocio({ settings }: Props) {
 
     return (
         <MainLayout>
-            <Head title="Configuración del Negocio" />
+            <Head title="Datos del Negocio" />
 
             {/* CONTENEDOR PRINCIPAL: Flex vertical y fondo gris suave */}
             <div className="flex-1 flex flex-col h-full bg-background">
                 {/* 1. HEADER ESTÁNDAR */}
                 <Header
                     title="Datos del Negocio"
-                    subtitle="Personaliza la información que aparece en tus tickets y reportes"
+                    subtitle="Configura tu logo y los datos que verán tus clientes en el ticket."
                 />
 
                 {/* 2. CONTENIDO SCROLLEABLE */}

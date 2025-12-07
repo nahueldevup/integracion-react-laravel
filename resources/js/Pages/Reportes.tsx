@@ -63,9 +63,9 @@ export default function Reportes({
 
     return (
         <MainLayout>
-            <Head title="Reportes y Estadísticas" />
+            <Head title="Resumen del Negocio" />
             <div className="flex-1 flex flex-col bg-background">
-                <Header title="Reportes" subtitle="Análisis de rendimiento" />
+                <Header title="Resumen del Negocio" subtitle="Ventas, ganancias y estado del inventario" />
 
                 <main className="flex-1 p-6 overflow-y-auto">
                     <div className="max-w-7xl mx-auto space-y-8">
@@ -303,7 +303,7 @@ export default function Reportes({
                                 >
                                     <span className="flex items-center gap-2">
                                         <AlertTriangle className="w-4 h-4" />{" "}
-                                        Ver Reporte de Baja Existencia
+                                        Ver Reporte Reabastecimiento
                                     </span>
                                     <span>→</span>
                                 </Button>

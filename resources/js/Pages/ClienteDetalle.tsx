@@ -214,7 +214,7 @@ export default function ClienteDetalle({ cliente }: Props) {
                                                         Total
                                                     </TableHead>
                                                     <TableHead className="font-bold">
-                                                        Acciones
+                                                        Opciones
                                                     </TableHead>
                                                 </TableRow>
                                             </TableHeader>
@@ -260,6 +260,7 @@ export default function ClienteDetalle({ cliente }: Props) {
                                                             <Button
                                                                 size="sm"
                                                                 variant="outline"
+                                                                title="Ver venta"
                                                                 onClick={() =>
                                                                     handleViewSale(
                                                                         venta.id
@@ -268,7 +269,6 @@ export default function ClienteDetalle({ cliente }: Props) {
                                                                 className="flex items-center gap-3 transition-all duration-200 hover:scale-105"
                                                             >
                                                                 <Eye className="w-5 h-5" />
-                                                                Ver Detalles
                                                             </Button>
                                                         </TableCell>
                                                     </TableRow>

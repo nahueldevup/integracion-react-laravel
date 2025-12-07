@@ -11,7 +11,7 @@ import { Toaster as Sonner } from "@/Components/ui/sonner";
 import { SidebarProvider } from "@/Contexts/SidebarContext";
 
 const queryClient = new QueryClient();
-const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+const appName = import.meta.env.VITE_APP_NAME || 'PIPOS';
 
 createInertiaApp({
     title: (title) => `${title} - ${appName}`,

@@ -153,11 +153,11 @@ export default function BajaExistencia({ productos = [] }: Props) {
 
     return (
         <MainLayout>
-            <Head title="Baja Existencia" />
+            <Head title="Reabastecimiento" />
             <div className="flex-1 flex flex-col h-full bg-background">
                 <Header
-                    title="Reporte de Baja Existencia"
-                    subtitle="Productos que requieren reabastecimiento"
+                    title="Reabastecimiento"
+                    subtitle="Productos por comprar y presupuesto de reposición"
                 />
 
                 <main className="flex-1 p-6 overflow-y-auto">
@@ -361,7 +361,7 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                                     Inversión
                                                 </TableHead>
                                                 <TableHead className="text-center">
-                                                    Acciones
+                                                    Opciones
                                                 </TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -445,6 +445,7 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                                                             size="sm"
                                                                             variant="outline"
                                                                             className="h-8 w-8 p-0"
+                                                                            title="Disminuir stock del producto"
                                                                             onClick={() =>
                                                                                 handleUpdateStock(
                                                                                     prod.id,
@@ -458,6 +459,7 @@ export default function BajaExistencia({ productos = [] }: Props) {
                                                                             size="sm"
                                                                             variant="outline"
                                                                             className="h-8 w-8 p-0"
+                                                                            title="Agregar stock al producto"
                                                                             onClick={() =>
                                                                                 handleUpdateStock(
                                                                                     prod.id,

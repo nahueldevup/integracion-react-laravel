@@ -158,7 +158,7 @@ export default function VentasContado({ ventas }: Props) {
             <div className="flex-1 flex flex-col">
                 <Header
                     title="Historial de Ventas"
-                    subtitle="Registro completo de operaciones"
+                    subtitle="Consulta, reimprime o anula tickets anteriores"
                 />
 
                 <main className="flex-1 p-6 bg-background">
@@ -202,7 +202,7 @@ export default function VentasContado({ ventas }: Props) {
                                             Total
                                         </TableHead>
                                         <TableHead className="text-center">
-                                            Acciones
+                                            Opciones
                                         </TableHead>
                                     </TableRow>
                                 </TableHeader>
@@ -251,6 +251,7 @@ export default function VentasContado({ ventas }: Props) {
                                                             size="sm"
                                                             variant="outline"
                                                             className="h-8 w-8 p-0"
+                                                            title="Imprimir ticket"
                                                             onClick={() =>
                                                                 openTicketModal(
                                                                     venta.id
@@ -264,6 +265,7 @@ export default function VentasContado({ ventas }: Props) {
                                                             size="sm"
                                                             variant="outline"
                                                             className="h-8 w-8 p-0"
+                                                            title="Anular venta"
                                                             onClick={() =>
                                                                 handleAnular(
                                                                     venta.id

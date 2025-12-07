@@ -121,6 +121,7 @@ function CartItemRow({ item, onIncrease, onDecrease, onRemove }: any) {
                     variant="outline"
                     size="sm"
                     className="h-7 w-7 p-0 transition-all duration-200"
+                    title="disminuir cantidad"
                     onClick={() => onDecrease(item.id)}
                 >
                     <Minus className="w-3 h-3 text-red-600" />
@@ -132,6 +133,7 @@ function CartItemRow({ item, onIncrease, onDecrease, onRemove }: any) {
                     variant="outline"
                     size="sm"
                     className="h-7 w-7 p-0 transition-all duration-200"
+                    title="aumentar cantidad"
                     onClick={() => onIncrease(item.id)}
                 >
                     <Plus className="w-3 h-3 text-green-600" />
@@ -145,6 +147,7 @@ function CartItemRow({ item, onIncrease, onDecrease, onRemove }: any) {
                     variant="outline"
                     size="sm"
                     className="h-7 w-7 p-0 transition-all duration-200"
+                    title="Eliminar del carrito"
                     onClick={() => onRemove(item.id)}
                 >
                     <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 text-destructive" />
@@ -508,7 +511,7 @@ export default function Vender({ allProducts, clients }: Props) {
 
             <div className="absolute inset-0 flex flex-col bg-background overflow-hidden">
                 {/* Header - Reemplazamos con el Header del MainLayout */}
-                <Header title="Venta" subtitle="Realizar Ventas" />
+                <Header title="Nueva Venta" subtitle="Agrega productos al carrito y procesa el pago" />
 
                 <div className="flex-1 flex overflow-hidden">
                     {/* Panel Izquierdo - Productos */}

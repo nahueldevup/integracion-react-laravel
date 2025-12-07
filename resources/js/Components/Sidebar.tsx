@@ -40,7 +40,7 @@ const menuItems = [
         permissionKey: "vender",
     },
     {
-        title: "Productos",
+        title: "Mis Productos",
         icon: Package,
         path: "/productos",
         permissionKey: "productos",
@@ -72,14 +72,14 @@ const menuItems = [
 
 // Submenú de Reportes
 const reportesSubmenu = [
-    { title: "Dashboard", path: "/reportes", icon: PieChart },
+    { title: "Resumen del Negocio", path: "/reportes", icon: PieChart },
     {
         title: "Historial Ventas",
         path: "/reportes/ventas-contado",
         icon: History,
     },
     {
-        title: "Baja Existencia",
+        title: "Reabastecimiento",
         path: "/reportes/baja-existencia",
         icon: AlertTriangle,
     },
@@ -88,7 +88,7 @@ const reportesSubmenu = [
 // Submenú de Configuración
 const configuracionSubmenu = [
     {
-        title: "Usuarios y Permisos",
+        title: "Empleados y Permisos",
         path: "/configuracion/usuarios",
         icon: Users,
     },

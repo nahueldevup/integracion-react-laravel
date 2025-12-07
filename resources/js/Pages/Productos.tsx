@@ -434,7 +434,7 @@ export default function Productos({ products, categories, filters }: Props) {
         <MainLayout>
             <Head title="Productos" />
             <div className="flex-1 flex flex-col">
-                <Header title="Productos" subtitle="Gestionar Productos" />
+                <Header title="Productos" subtitle="Agrega, organiza y controla todo lo que vendes." />
 
                 <main className="flex-1 p-6 bg-background">
                     <div className="max-w-7xl mx-auto">
@@ -669,6 +669,7 @@ export default function Productos({ products, categories, filters }: Props) {
                                                         size="sm"
                                                         variant="outline"
                                                         className="h-8 w-8 p-0"
+                                                        title="Restar stock"
                                                         onClick={() =>
                                                             handleUpdateStock(
                                                                 product.id,
@@ -682,6 +683,7 @@ export default function Productos({ products, categories, filters }: Props) {
                                                         size="sm"
                                                         variant="outline"
                                                         className="h-8 w-8 p-0"
+                                                        title="Agregar stock"
                                                         onClick={() =>
                                                             handleUpdateStock(
                                                                 product.id,
@@ -695,6 +697,7 @@ export default function Productos({ products, categories, filters }: Props) {
                                                         size="sm"
                                                         variant="outline"
                                                         className="h-8 w-8 p-0"
+                                                        title="Editar producto"
                                                         onClick={() =>
                                                             handleEditClick(
                                                                 product
@@ -707,6 +710,7 @@ export default function Productos({ products, categories, filters }: Props) {
                                                         size="sm"
                                                         variant="outline"
                                                         className="h-8 w-8 p-0"
+                                                        title="Eliminar producto"
                                                         onClick={() =>
                                                             handleDeleteProduct(
                                                                 product.id
@@ -728,6 +732,7 @@ export default function Productos({ products, categories, filters }: Props) {
                 {/* Botón flotante para agregar producto */}
                 <Button
                     className="fixed bottom-8 right-8 rounded-full w-14 h-14 shadow-lg transition-all duration-200 hover:scale-110"
+                    title="Agregar producto"
                     onClick={() => setIsAddDialogOpen(true)}
                 >
                     <Plus className="w-6 h-6" />
@@ -1144,6 +1149,7 @@ export default function Productos({ products, categories, filters }: Props) {
                                     onClick={handleAddCategory}
                                     disabled={!newCategoryName.trim()}
                                     className="bg-success hover:bg-success/90"
+                                    title="Agregar categoría"
                                 >
                                     <Plus className="w-4 h-4" />
                                 </Button>
@@ -1169,6 +1175,7 @@ export default function Productos({ products, categories, filters }: Props) {
                                                 <Button
                                                     size="sm"
                                                     variant="ghost"
+                                                    title="Eliminar categoría"
                                                     onClick={() =>
                                                         handleDeleteCategory(
                                                             c.id

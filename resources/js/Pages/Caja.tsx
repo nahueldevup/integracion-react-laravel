@@ -38,7 +38,7 @@ import { Textarea } from "@/Components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/Components/ui/tabs";
 import { Badge } from "@/Components/ui/badge";
 import MainLayout from "@/Layouts/MainLayout";
-import { router } from "@inertiajs/react";
+import { Head, router } from "@inertiajs/react";
 import { useToast } from "@/Hooks/use-toast";
 import {
     Table,
@@ -278,10 +278,11 @@ export default function Caja({ movements, summary, history }: Props) {
 
     return (
         <MainLayout>
+            <Head title="Caja" />
             <div className="flex-1 flex flex-col h-full bg-background">
                 <Header
                     title="Caja"
-                    subtitle="Control de efectivo y cierres"
+                    subtitle="Gestión de efectivo, gastos y cierres de caja."
                 />
 
                 <main className="flex-1 p-6 overflow-y-auto">
@@ -346,7 +347,7 @@ export default function Caja({ movements, summary, history }: Props) {
                                 className="sm:ml-auto border border-blue-200 dark:border-blue-800 text-blue-700 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-400 active:text-blue-700 dark:active:text-blue-400 bg-transparent hover:bg-blue-50 dark:hover:bg-blue-900/20 shadow-sm px-6 py-6 h-auto text-base flex gap-3 transition-all duration-200 hover:scale-105"
                             >
                                 <Calculator className="w-6 h-6" /> Realizar
-                                Arqueo (Cierre)
+                                Cierre de Caja
                             </Button>
                         </div>
 
@@ -383,7 +384,7 @@ export default function Caja({ movements, summary, history }: Props) {
                                                     Monto
                                                 </TableHead>
                                                 <TableHead className="text-center">
-                                                    Acción
+                                                    Opciones
                                                 </TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -454,6 +455,7 @@ export default function Caja({ movements, summary, history }: Props) {
                                                                 size="sm"
                                                                 variant="outline"
                                                                 className="h-8 w-8 p-0"
+                                                                title="Eliminar movimiento"
                                                                 onClick={() =>
                                                                     handleDelete(
                                                                         mov.id
@@ -493,7 +495,7 @@ export default function Caja({ movements, summary, history }: Props) {
                                                 </TableHead>
                                                 <TableHead>Notas</TableHead>
                                                 <TableHead className="text-center">
-                                                    Ver
+                                                    Opciones
                                                 </TableHead>
                                             </TableRow>
                                         </TableHeader>
@@ -570,6 +572,7 @@ export default function Caja({ movements, summary, history }: Props) {
                                                                 variant="outline"
                                                                 size="sm"
                                                                 className="h-8 w-8 p-0"
+                                                                title="Ver historial de cierre"
                                                                 asChild
                                                             >
                                                                 {/* Usamos asChild para que el botón se comporte como Link de Inertia */}

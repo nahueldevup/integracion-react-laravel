@@ -238,12 +238,12 @@ export default function Usuarios({ users }: Props) {
 
     return (
         <MainLayout>
-            <Head title="Usuarios" />
+            <Head title="Empleados y Permisos" />
 
             <div className="flex-1 flex flex-col h-full bg-background">
                 <Header
-                    title="Gestión de Usuarios"
-                    subtitle="Administra el acceso y roles del personal"
+                    title="Empleados y Permisos"
+                    subtitle="Controla quién accede a tu sistema y qué puede hacer."
                 />
 
                 <main className="flex-1 p-6 overflow-y-auto">
@@ -397,7 +397,7 @@ export default function Usuarios({ users }: Props) {
                                             <TableHead>Rol</TableHead>
                                             <TableHead>Estado</TableHead>
                                             <TableHead className="text-right pr-6">
-                                                Acciones
+                                                Opciones
                                             </TableHead>
                                         </TableRow>
                                     </TableHeader>

@@ -166,7 +166,7 @@ export default function Clientes({ clients }: Props) {
         <MainLayout>
             <Head title="Clientes" />
             <div className="flex-1 flex flex-col">
-                 <Header title="Clientes" subtitle="Gestion de clientes" />
+                 <Header title="Clientes" subtitle="Historial de compras y datos de contacto." />
 
                 <main className="flex-1 p-6 bg-background">
                     <div className="max-w-7xl mx-auto space-y-6">
@@ -304,6 +304,7 @@ export default function Clientes({ clients }: Props) {
                                                             size="sm"
                                                             variant="outline"
                                                             className="h-8 w-8 p-0"
+                                                            title="Ver detalles"
                                                             onClick={() =>
                                                                 handleViewDetails(
                                                                     client.id
@@ -316,6 +317,7 @@ export default function Clientes({ clients }: Props) {
                                                             size="sm"
                                                             variant="outline"
                                                             className="h-8 w-8 p-0"
+                                                            title="Editar cliente"
                                                             onClick={() =>
                                                                 handleEditClick(
                                                                     client
@@ -328,6 +330,7 @@ export default function Clientes({ clients }: Props) {
                                                             size="sm"
                                                             variant="outline"
                                                             className="h-8 w-8 p-0"
+                                                            title="Eliminar cliente"
                                                             onClick={() =>
                                                                 handleDeleteClient(
                                                                     client.id
