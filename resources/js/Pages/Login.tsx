@@ -3,13 +3,30 @@ import { router, Head, Link, usePage } from "@inertiajs/react";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
 import { Label } from "@/Components/ui/label";
-import { Mail, Lock, Eye, EyeOff, Moon, Sun, AlertCircle } from "lucide-react";
+import {
+    Mail,
+    Lock,
+    Eye,
+    EyeOff,
+    Moon,
+    Sun,
+    AlertCircle,
+    Info,
+} from "lucide-react";
 import { useTheme } from "@/Hooks/use-theme";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from "@/Components/ui/dialog";
 
 export default function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
+    const [showForgotModal, setShowForgotModal] = useState(false);
     const { theme, toggleTheme } = useTheme();
 
     // Obtener errores de Inertia
@@ -174,12 +191,13 @@ export default function Login() {
                             </div>
 
                             <div className="flex items-center justify-end">
-                                <Link
-                                    href="/forgot-password"
+                                <button
+                                    type="button"
+                                    onClick={() => setShowForgotModal(true)}
                                     className="text-sm text-primary hover:text-primary/80 hover:underline transition-colors"
                                 >
                                     ¿Olvidaste tu contraseña?
-                                </Link>
+                                </button>
                             </div>
 
                             <Button
@@ -204,6 +222,37 @@ export default function Login() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de contraseña olvidada */}
+            <Dialog open={showForgotModal} onOpenChange={setShowForgotModal}>
+                <DialogContent className="max-w-md">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <Info className="w-5 h-5 text-blue-500" />
+                            Recuperar Contraseña
+                        </DialogTitle>
+                        <DialogDescription className="pt-4 text-base">
+                            Para restablecer tu contraseña, contacta al
+                            administrador del sistema.
+                            <br />
+                            <br />
+                            El administrador puede cambiar tu contraseña desde
+                            la sección <strong>
+                                "Empleados y Permisos"
+                            </strong>{" "}
+                            en Configuración.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="pt-4">
+                        <Button
+                            onClick={() => setShowForgotModal(false)}
+                            className="w-full"
+                        >
+                            Entendido
+                        </Button>
+                    </div>
+                </DialogContent>
+            </Dialog>
         </>
     );
 }
