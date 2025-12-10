@@ -3,6 +3,7 @@ import { Head, router, usePage } from "@inertiajs/react";
 import { Ticket, TicketData } from "@/Components/Ticket";
 import { useReactToPrint } from "react-to-print";
 import axios from "axios";
+import { useScannerWebSocket } from "@/Hooks/useScannerWebSocket";
 import { Switch } from "@/Components/ui/switch";
 import { Label } from "@/Components/ui/label";
 import { Input } from "@/Components/ui/input";
@@ -344,6 +345,19 @@ export default function Vender({ allProducts, clients }: Props) {
         searchInputRef.current?.focus();
         setMobileCartOpen(false);
     };
+    
+        // Callback para cuando el scanner detecta un código
+    const handleBarcodeScan = (barcode: string) => {
+        const product = allProducts.find((p) => p.barcode === barcode);
+        if (product) {
+            addToCart(product);
+            toast({ title: "Producto agregado", description: product.description, duration: 2000,});
+        } else {
+            toast({ title: "Producto no encontrado", description: `Código: ${barcode}`, variant: "destructive", duration: 2000,});
+        }
+    };
+    // 📡 Conexión WebSocket al scanner-app local
+    const { isConnected: scannerConnected } = useScannerWebSocket(handleBarcodeScan);
 
     const updateQuantity = (itemId: number, delta: number) => {
         setCartItems(

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { Header } from "@/Components/Header";
 import { Button } from "@/Components/ui/button";
 import { Input } from "@/Components/ui/input";
+import { useScannerWebSocket } from "@/Hooks/useScannerWebSocket";
 import {
     Search,
     Plus,
@@ -107,6 +108,42 @@ export default function Productos({ products, categories, filters }: Props) {
         null
     );
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+        // Callback para cuando el scanner detecta un código
+    const handleBarcodeScan = (barcode: string) => {
+        const existingProduct = products.data.find((p) => p.barcode === barcode);
+        
+        if (existingProduct) {
+            // Producto existe → abrir modal de edición
+            setEditingProduct({
+                id: existingProduct.id,
+                barcode: existingProduct.barcode || "",
+                description: existingProduct.description,
+                category_id: existingProduct.category_id?.toString() || "",
+                purchasePrice: existingProduct.purchase_price.toString(),
+                salePrice: existingProduct.sale_price.toString(),
+                existence: existingProduct.stock.toString(),
+                minStock: existingProduct.min_stock.toString(),
+            });
+            setIsEditDialogOpen(true);
+            toast({ title: " Editando producto", description: existingProduct.description, duration: 2000,});
+        } else {
+            // Producto NO existe → abrir modal de registro
+            setNewProduct({
+                barcode: barcode,
+                description: "",
+                category_id: "",
+                purchasePrice: "",
+                salePrice: "",
+                existence: "0",
+                minStock: "5",
+            });
+            setIsAddDialogOpen(true);
+            toast({ title: "Nuevo producto", description: `Código: ${barcode}` , duration: 2000,});
+        }
+    };
+    // 📡 Conexión WebSocket al scanner-app local
+    const { isConnected: scannerConnected } = useScannerWebSocket(handleBarcodeScan);
 
     // Estado para margen de ganancia automático
     const [profitMargin, setProfitMargin] = useState<number>(() => {
